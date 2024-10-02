@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
 
-// Create a static mapping of state names to their audio files
 const defaultAudioFiles: { [key: string]: any } = {
   active: require('../assets/audio/Active/active.mp3'),
   spotted: require('../assets/audio/Spotted/spotted.mp3'),
@@ -11,28 +10,26 @@ const defaultAudioFiles: { [key: string]: any } = {
 };
 
 const usePlaySound = (stateName: string, intervalDuration: number) => {
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
     const playSound = async () => {
       let soundFile;
 
-      // Path to custom audio file
       const customAudioPath = `${RNFS.DocumentDirectoryPath}/${stateName.toLowerCase()}.mp3`;
 
-      // Check if custom audio file exists
       const fileExists = await RNFS.exists(customAudioPath);
 
       if (fileExists) {
         console.log(`Playing custom audio file from: ${customAudioPath}`);
-        soundFile = customAudioPath;  // Removed 'file://' prefix
+        soundFile = customAudioPath;
       } else {
         // Fallback to bundled audio file from the static mapping
         soundFile = defaultAudioFiles[stateName.toLowerCase()];
         console.log(`Using default audio file for state: ${stateName}`);
       }
 
-      const sound = new Sound(soundFile, Sound.MAIN_BUNDLE, (error) => {
+      const sound = new Sound(soundFile, '', (error) => {
         if (error) {
           console.log('Failed to load sound', error);
           return;
@@ -49,14 +46,21 @@ const usePlaySound = (stateName: string, intervalDuration: number) => {
     // Play sound immediately
     playSound();
 
+    // Clear previous interval if any
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+    }
+
     // Set interval to play sound
-    intervalId = setInterval(() => {
+    intervalIdRef.current = setInterval(() => {
       playSound();
     }, intervalDuration);
 
-    // Cleanup on unmount
+    // Cleanup on unmount or when intervalDuration changes
     return () => {
-      clearInterval(intervalId);
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+      }
     };
   }, [stateName, intervalDuration]);
 };

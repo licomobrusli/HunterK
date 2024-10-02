@@ -1,17 +1,21 @@
+// src/screens/modals/RecordAudioModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   Button,
   Platform,
   PermissionsAndroid,
+  Alert,
+  StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import RNFS from 'react-native-fs'; // Import file system
+import RNFS from 'react-native-fs';
+import IntervalInputModal from './IntervalInputModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RecordAudioModalProps = {
   visible: boolean;
@@ -28,14 +32,19 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
+  const [showIntervalModal, setShowIntervalModal] = useState(false);
+  const [intervals, setIntervals] = useState<{ [key: string]: number }>({
+    active: 5000,
+    spotted: 6000,
+    proximity: 7000,
+    trigger: 8000,
+  });
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
   );
 
   useEffect(() => {
-    const audioRecorderPlayer = audioRecorderPlayerRef.current;
-
     const requestPermissions = async () => {
       try {
         const granted = await PermissionsAndroid.requestMultiple([
@@ -44,18 +53,28 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
         ]);
         if (
-          granted['android.permission.RECORD_AUDIO'] !== PermissionsAndroid.RESULTS.GRANTED ||
-          granted['android.permission.WRITE_EXTERNAL_STORAGE'] !== PermissionsAndroid.RESULTS.GRANTED ||
-          granted['android.permission.READ_EXTERNAL_STORAGE'] !== PermissionsAndroid.RESULTS.GRANTED
+          granted['android.permission.RECORD_AUDIO'] !==
+            PermissionsAndroid.RESULTS.GRANTED ||
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] !==
+            PermissionsAndroid.RESULTS.GRANTED ||
+          granted['android.permission.READ_EXTERNAL_STORAGE'] !==
+            PermissionsAndroid.RESULTS.GRANTED
         ) {
+          Alert.alert(
+            'Permissions not granted',
+            'Recording and storage permissions are required.'
+          );
         }
       } catch (err) {
+        console.warn('Permission request error:', err);
       }
     };
 
     if (Platform.OS === 'android') {
       requestPermissions();
     }
+
+    const audioRecorderPlayer = audioRecorderPlayerRef.current;
 
     return () => {
       audioRecorderPlayer.stopRecorder().catch(() => {});
@@ -67,7 +86,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 
   const onStartRecord = async () => {
     try {
-      // Use internal app storage instead of 'sdcard'
       const path = `${RNFS.DocumentDirectoryPath}/recordedAudio.mp3`;
       const uri = await audioRecorderPlayerRef.current.startRecorder(path);
       audioRecorderPlayerRef.current.addRecordBackListener((e) => {
@@ -79,6 +97,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log(`Recording started at: ${uri}`);
     } catch (error) {
       console.error('Error starting recording:', error);
+      Alert.alert('Error', 'Failed to start recording.');
     }
   };
 
@@ -91,6 +110,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log(`Recording stopped at: ${result}`);
     } catch (error) {
       console.error('Error stopping recording:', error);
+      Alert.alert('Error', 'Failed to stop recording.');
     }
   };
 
@@ -113,6 +133,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log('Playback started');
     } catch (error) {
       console.error('Error during playback:', error);
+      Alert.alert('Error', 'Failed to play the recording.');
     }
   };
 
@@ -124,24 +145,45 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log('Playback stopped');
     } catch (error) {
       console.error('Error stopping playback:', error);
+      Alert.alert('Error', 'Failed to stop playback.');
     }
   };
 
-  const onSaveRecording = async () => {
+  const onSaveRecording = () => {
     if (!recordedFilePath) {
       console.log('No recording to save');
       return;
     }
+    // Show the interval input modal
+    setShowIntervalModal(true);
+  };
 
+  const handleIntervalSave = async (newInterval: number) => {
     const documentsPath = RNFS.DocumentDirectoryPath;
     const destinationPath = `${documentsPath}/${selectedState.toLowerCase()}.mp3`;
 
     try {
-      await RNFS.copyFile(recordedFilePath, destinationPath);
+      await RNFS.copyFile(recordedFilePath!, destinationPath);
       console.log(`Recording saved to: ${destinationPath}`);
+
+      // Update the interval for the selected state
+      setIntervals((prev) => ({
+        ...prev,
+        [selectedState.toLowerCase()]: newInterval,
+      }));
+
+      // Store the interval in AsyncStorage
+      await AsyncStorage.setItem(
+        `@interval_${selectedState.toLowerCase()}`,
+        newInterval.toString()
+      );
+
+      // Close the interval modal and the main modal
+      setShowIntervalModal(false);
       onClose();
     } catch (error) {
       console.log('Error saving recording:', error);
+      Alert.alert('Error', 'Failed to save the recording.');
     }
   };
 
@@ -192,6 +234,17 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           <Text style={styles.closeButtonText}>Close</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Interval Input Modal */}
+      {showIntervalModal && (
+        <IntervalInputModal
+          visible={showIntervalModal}
+          onClose={() => setShowIntervalModal(false)}
+          onSave={handleIntervalSave}
+          stateName={selectedState}
+          currentInterval={intervals[selectedState.toLowerCase()]}
+        />
+      )}
     </Modal>
   );
 };
@@ -203,7 +256,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 20,
-    backgroundColor: '#08591C',
+    backgroundColor: '#004225',
   },
   title: {
     fontSize: 24,

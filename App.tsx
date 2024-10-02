@@ -1,11 +1,38 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, createContext } from 'react';
 import { Platform, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
 
+export const IntervalContext = createContext<{
+  intervals: { [key: string]: number };
+  setIntervalForState: (stateName: string, interval: number) => void;
+}>({
+  intervals: {
+    active: 5000,
+    spotted: 6000,
+    proximity: 7000,
+    trigger: 8000,
+  },
+  setIntervalForState: () => {},
+});
+
 const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
+
+  const [intervals, setIntervals] = useState({
+    active: 5000,
+    spotted: 6000,
+    proximity: 7000,
+    trigger: 8000,
+  });
+
+  const setIntervalForState = (stateName: string, interval: number) => {
+    setIntervals((prev) => ({
+      ...prev,
+      [stateName.toLowerCase()]: interval,
+    }));
+  };
 
   const requestAudioPermission = useCallback(async () => {
     try {
@@ -49,9 +76,11 @@ const App: React.FC = () => {
   }, [checkPermission]);
 
   return (
-    <NavigationContainer>
-      <StackNavigator />
-    </NavigationContainer>
+    <IntervalContext.Provider value={{ intervals, setIntervalForState }}>
+      <NavigationContainer>
+        <StackNavigator />
+      </NavigationContainer>
+    </IntervalContext.Provider>
   );
 };
 

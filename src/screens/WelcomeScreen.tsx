@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#08591C', // British Racing Green
+    backgroundColor: '#004225', // British Racing Green
   },
   text: {
     fontSize: 48,

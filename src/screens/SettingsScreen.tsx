@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     padding: 20,
     // Adjust paddingTop if header overlaps content
     paddingTop: 20,
-    backgroundColor: '#08591C', // British Racing Green
+    backgroundColor: '#004225', // British Racing Green
   },
   menuItem: {
     paddingVertical: 15,
