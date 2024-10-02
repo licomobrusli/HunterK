@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import usePlaySound from '../config/usePlaySound'; // Adjust path if needed
 
 const SpottedState: React.FC = () => {
-  usePlaySound(require('../assets/audio/Spotted/spotted.mp3'), 5000);
+  usePlaySound('Spotted', 5000);
 
   return (
     <View style={styles.container}>

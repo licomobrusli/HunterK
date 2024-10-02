@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import usePlaySound from '../config/usePlaySound'; // Adjust path if needed
 
 const ActiveState: React.FC = () => {
-  usePlaySound(require('../assets/audio/Active/active.mp3'), 5000);
+  usePlaySound('Active', 5000);
 
   return (
     <View style={styles.container}>

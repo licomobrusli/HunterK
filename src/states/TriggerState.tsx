@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import usePlaySound from '../config/usePlaySound'; // Adjust path if needed
 
 const TriggerState: React.FC = () => {
-  usePlaySound(require('../assets/audio/Trigger/trigger.mp3'), 5000);
+  usePlaySound('Trigger', 5000);
 
   return (
     <View style={styles.container}>

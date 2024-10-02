@@ -1,11 +1,28 @@
 // SettingsScreen.tsx
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
+import RecordAudioModal from './modals/RecordAudioModal';
 
 const SettingsScreen: React.FC = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openRecordAudioModal = () => {
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Settings</Text>
+      <TouchableOpacity onPress={openRecordAudioModal} style={styles.menuItem}>
+        <Text style={styles.menuText}>Record Audios</Text>
+      </TouchableOpacity>
+
+      {/* Other settings menu items can go here */}
+
+      <RecordAudioModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 };
@@ -15,11 +32,14 @@ export default SettingsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+    // Adjust paddingTop if header overlaps content
+    paddingTop: 20,
   },
-  text: {
-    fontSize: 48,
-    fontWeight: 'bold',
+  menuItem: {
+    paddingVertical: 15,
+  },
+  menuText: {
+    fontSize: 18,
   },
 });
