@@ -1,4 +1,3 @@
-// usePlaySound.ts
 import { useEffect } from 'react';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
@@ -25,13 +24,15 @@ const usePlaySound = (stateName: string, intervalDuration: number) => {
       const fileExists = await RNFS.exists(customAudioPath);
 
       if (fileExists) {
-        soundFile = { uri: 'file://' + customAudioPath };
+        console.log(`Playing custom audio file from: ${customAudioPath}`);
+        soundFile = customAudioPath;  // Removed 'file://' prefix
       } else {
         // Fallback to bundled audio file from the static mapping
         soundFile = defaultAudioFiles[stateName.toLowerCase()];
+        console.log(`Using default audio file for state: ${stateName}`);
       }
 
-      const sound = new Sound(soundFile, undefined, (error) => {
+      const sound = new Sound(soundFile, Sound.MAIN_BUNDLE, (error) => {
         if (error) {
           console.log('Failed to load sound', error);
           return;

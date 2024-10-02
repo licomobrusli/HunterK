@@ -43,5 +43,6 @@ export default ActiveScreen;
 const styles = StyleSheet.create({
   touchable: {
     flex: 1,
+    backgroundColor: '#08591C', // British Racing Green
   },
 });

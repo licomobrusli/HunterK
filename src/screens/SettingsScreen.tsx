@@ -1,7 +1,6 @@
 // SettingsScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-
 import RecordAudioModal from './modals/RecordAudioModal';
 
 const SettingsScreen: React.FC = () => {
@@ -35,6 +34,7 @@ const styles = StyleSheet.create({
     padding: 20,
     // Adjust paddingTop if header overlaps content
     paddingTop: 20,
+    backgroundColor: '#08591C', // British Racing Green
   },
   menuItem: {
     paddingVertical: 15,
