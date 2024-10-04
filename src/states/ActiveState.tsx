@@ -26,7 +26,9 @@ const ActiveState: React.FC = () => {
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.text}>Active</Text>
+      <Text style={commonStyles.text}
+      testID="stateText"
+      accessibilityLabel="stateText">Active</Text>
     </View>
   );
 };

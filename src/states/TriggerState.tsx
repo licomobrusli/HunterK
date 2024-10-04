@@ -9,7 +9,9 @@ const TriggerState: React.FC = () => {
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.text}>Trigger</Text>
+      <Text style={commonStyles.text}
+      testID="stateText"
+      accessibilityLabel="stateText">Trigger</Text>
     </View>
   );
 };

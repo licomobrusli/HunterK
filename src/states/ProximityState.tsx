@@ -9,7 +9,9 @@ const ProximityState: React.FC = () => {
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.text}>Proximity</Text>
+      <Text style={commonStyles.text}
+      testID="stateText"
+      accessibilityLabel="stateText">Proximity</Text>
     </View>
   );
 };

@@ -5,17 +5,15 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Button,
   Platform,
   PermissionsAndroid,
-  Alert,
   StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import IntervalInputModal from './IntervalInputModal';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { commonStyles } from '../../styles/commonStyles'; // Import common styles
 
 type RecordAudioModalProps = {
   visible: boolean;
@@ -33,12 +31,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
   const [showIntervalModal, setShowIntervalModal] = useState(false);
-  const [intervals, setIntervals] = useState<{ [key: string]: number }>({
-    active: 5000,
-    spotted: 6000,
-    proximity: 7000,
-    trigger: 8000,
-  });
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
@@ -60,10 +52,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           granted['android.permission.READ_EXTERNAL_STORAGE'] !==
             PermissionsAndroid.RESULTS.GRANTED
         ) {
-          Alert.alert(
-            'Permissions not granted',
-            'Recording and storage permissions are required.'
-          );
         }
       } catch (err) {
         console.warn('Permission request error:', err);
@@ -97,7 +85,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log(`Recording started at: ${uri}`);
     } catch (error) {
       console.error('Error starting recording:', error);
-      Alert.alert('Error', 'Failed to start recording.');
     }
   };
 
@@ -110,7 +97,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log(`Recording stopped at: ${result}`);
     } catch (error) {
       console.error('Error stopping recording:', error);
-      Alert.alert('Error', 'Failed to stop recording.');
     }
   };
 
@@ -133,7 +119,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log('Playback started');
     } catch (error) {
       console.error('Error during playback:', error);
-      Alert.alert('Error', 'Failed to play the recording.');
     }
   };
 
@@ -145,7 +130,6 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       console.log('Playback stopped');
     } catch (error) {
       console.error('Error stopping playback:', error);
-      Alert.alert('Error', 'Failed to stop playback.');
     }
   };
 
@@ -158,7 +142,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
     setShowIntervalModal(true);
   };
 
-  const handleIntervalSave = async (newInterval: number) => {
+  const handleIntervalSave = async (_newInterval: number) => {
     const documentsPath = RNFS.DocumentDirectoryPath;
     const destinationPath = `${documentsPath}/${selectedState.toLowerCase()}.mp3`;
 
@@ -166,24 +150,10 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       await RNFS.copyFile(recordedFilePath!, destinationPath);
       console.log(`Recording saved to: ${destinationPath}`);
 
-      // Update the interval for the selected state
-      setIntervals((prev) => ({
-        ...prev,
-        [selectedState.toLowerCase()]: newInterval,
-      }));
-
-      // Store the interval in AsyncStorage
-      await AsyncStorage.setItem(
-        `@interval_${selectedState.toLowerCase()}`,
-        newInterval.toString()
-      );
-
-      // Close the interval modal and the main modal
       setShowIntervalModal(false);
       onClose();
     } catch (error) {
       console.log('Error saving recording:', error);
-      Alert.alert('Error', 'Failed to save the recording.');
     }
   };
 
@@ -203,46 +173,59 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
         </Picker>
 
         <View style={styles.buttonContainer}>
-          {!isRecording ? (
-            <Button title="Start Recording" onPress={onStartRecord} />
-          ) : (
-            <Button title="Stop Recording" onPress={onStopRecord} />
-          )}
+          <TouchableOpacity
+            onPress={!isRecording ? onStartRecord : onStopRecord}
+            style={[
+              commonStyles.button,
+              isRecording && commonStyles.disabledButton,
+            ]}
+          >
+            <Text style={commonStyles.buttonText}>
+              {!isRecording ? 'Start Recording' : 'Stop Recording'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.buttonContainer}>
-          {!isPlayingBack ? (
-            <Button
-              title="Play Recording"
-              onPress={onPlay}
-              disabled={!recordedFilePath}
-            />
-          ) : (
-            <Button title="Stop Playback" onPress={onStopPlay} />
-          )}
+          <TouchableOpacity
+            onPress={!isPlayingBack ? onPlay : onStopPlay}
+            style={[
+              commonStyles.button,
+              (!recordedFilePath || isPlayingBack) && commonStyles.disabledButton,
+            ]}
+            disabled={!recordedFilePath || isPlayingBack}
+          >
+            <Text style={commonStyles.buttonText}>
+              {!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button
-            title="Save Recording"
+          <TouchableOpacity
             onPress={onSaveRecording}
+            style={[
+              commonStyles.button,
+              !recordedFilePath && commonStyles.disabledButton,
+            ]}
             disabled={!recordedFilePath}
-          />
+          >
+            <Text style={commonStyles.buttonText}>Save Recording</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Close</Text>
+          <Text style={commonStyles.buttonText}>Close</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Interval Input Modal */}
       {showIntervalModal && (
         <IntervalInputModal
           visible={showIntervalModal}
           onClose={() => setShowIntervalModal(false)}
           onSave={handleIntervalSave}
           stateName={selectedState}
-          currentInterval={intervals[selectedState.toLowerCase()]}
+          currentInterval={5000} // Example interval value
         />
       )}
     </Modal>
@@ -262,6 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#fff',
   },
   picker: {
     marginBottom: 20,
@@ -274,9 +258,5 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: 20,
     alignSelf: 'center',
-  },
-  closeButtonText: {
-    fontSize: 18,
-    color: 'blue',
   },
 });
