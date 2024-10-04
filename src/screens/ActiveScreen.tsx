@@ -43,7 +43,10 @@ const ActiveScreen: React.FC = () => {
 
       {/* Abort Button */}
       <TouchableOpacity style={styles.abortButton} onPress={handleAbort}>
-        <Text style={styles.abortButtonText}>Abort</Text>
+        <Text style={styles.abortButtonText}
+        testID="abortButton"
+        accessibilityLabel="abortButton"
+        >Abort</Text>
       </TouchableOpacity>
     </View>
   );
