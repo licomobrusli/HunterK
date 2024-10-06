@@ -1,3 +1,4 @@
+// usePlaySound.ts
 import { useEffect, useRef } from 'react';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
@@ -11,9 +12,18 @@ const defaultAudioFiles: { [key: string]: any } = {
 
 const usePlaySound = (stateName: string, intervalDuration: number) => {
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+  const soundRef = useRef<Sound | null>(null);
 
   useEffect(() => {
     const playSound = async () => {
+      // Stop any previous sound before playing a new one
+      if (soundRef.current) {
+        soundRef.current.stop(() => {
+          soundRef.current?.release();
+          soundRef.current = null;
+        });
+      }
+
       let soundFile;
 
       const customAudioPath = `${RNFS.DocumentDirectoryPath}/${stateName.toLowerCase()}.mp3`;
@@ -29,16 +39,17 @@ const usePlaySound = (stateName: string, intervalDuration: number) => {
         console.log(`Using default audio file for state: ${stateName}`);
       }
 
-      const sound = new Sound(soundFile, '', (error) => {
+      soundRef.current = new Sound(soundFile, '', (error) => {
         if (error) {
           console.log('Failed to load sound', error);
           return;
         }
-        sound.play((success) => {
+        soundRef.current?.play((success) => {
           if (!success) {
             console.log('Sound playback failed');
           }
-          sound.release();
+          soundRef.current?.release();
+          soundRef.current = null;
         });
       });
     };
@@ -56,10 +67,19 @@ const usePlaySound = (stateName: string, intervalDuration: number) => {
       playSound();
     }, intervalDuration);
 
-    // Cleanup on unmount or when intervalDuration changes
+    // Cleanup on unmount or when stateName or intervalDuration changes
     return () => {
+      // Clear the interval
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
+      }
+
+      // Stop and release the sound
+      if (soundRef.current) {
+        soundRef.current.stop(() => {
+          soundRef.current?.release();
+          soundRef.current = null;
+        });
       }
     };
   }, [stateName, intervalDuration]);
