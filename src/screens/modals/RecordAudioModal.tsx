@@ -8,6 +8,7 @@ import {
   Platform,
   PermissionsAndroid,
   StyleSheet,
+  TextInput,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -31,6 +32,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
   const [showIntervalModal, setShowIntervalModal] = useState(false);
+  const [recordingName, setRecordingName] = useState<string>(STATES[0].toLowerCase());
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
@@ -71,6 +73,15 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       audioRecorderPlayer.removePlayBackListener();
     };
   }, [visible]);
+
+  useEffect(() => {
+    // Reset recording name when selectedState changes
+    setRecordingName(selectedState.toLowerCase());
+  }, [selectedState]);
+
+  const sanitizeRecordingName = (name: string): string => {
+    return name.trim().replace(/[^a-zA-Z0-9-_ ]/g, '');
+  };
 
   const onStartRecord = async () => {
     try {
@@ -144,11 +155,38 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 
   const handleIntervalSave = async (_newInterval: number) => {
     const documentsPath = RNFS.DocumentDirectoryPath;
-    const destinationPath = `${documentsPath}/${selectedState.toLowerCase()}.mp3`;
+    const stateFolder = `${documentsPath}/${selectedState}`; // Use selectedState as-is
+
+    // Ensure the state folder exists
+    try {
+      await RNFS.mkdir(stateFolder);
+      const dirExists = await RNFS.exists(stateFolder);
+      console.log(`Directory ${stateFolder} exists after creation: ${dirExists}`);
+      if (!dirExists) {
+        throw new Error('Directory creation failed.');
+      }
+    } catch (error) {
+      console.log('Error creating directory:', error);
+      return;
+    }
+
+    // Sanitize recording name
+    const sanitizedRecordingName = sanitizeRecordingName(recordingName);
+
+    // Prevent empty recording names
+    if (sanitizedRecordingName.length === 0) {
+      return;
+    }
+
+    const destinationPath = `${stateFolder}/${sanitizedRecordingName}.mp3`;
 
     try {
       await RNFS.copyFile(recordedFilePath!, destinationPath);
       console.log(`Recording saved to: ${destinationPath}`);
+
+      // Reset states
+      setRecordingName(selectedState.toLowerCase());
+      setRecordedFilePath(null);
 
       setShowIntervalModal(false);
       onClose();
@@ -162,6 +200,8 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       <View style={styles.modalContainer}>
         <Text style={styles.title}>Record Audio</Text>
 
+        {/* State Picker */}
+        <Text style={styles.label}>Select State:</Text>
         <Picker
           selectedValue={selectedState}
           onValueChange={(itemValue) => setSelectedState(itemValue)}
@@ -172,6 +212,19 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           ))}
         </Picker>
 
+        {/* Recording Name Input */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Recording Name:</Text>
+          <TextInput
+            style={styles.textInput}
+            value={recordingName}
+            onChangeText={setRecordingName}
+            placeholder="Enter recording name"
+            placeholderTextColor="#aaa"
+          />
+        </View>
+
+        {/* Recording Controls */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={!isRecording ? onStartRecord : onStopRecord}
@@ -186,6 +239,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Playback Controls */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={!isPlayingBack ? onPlay : onStopPlay}
@@ -201,6 +255,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Save Recording */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={onSaveRecording}
@@ -214,6 +269,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           </TouchableOpacity>
         </View>
 
+        {/* Close Modal */}
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
           <Text style={commonStyles.buttonText}>Close</Text>
         </TouchableOpacity>
@@ -247,10 +303,28 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#fff',
   },
+  label: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 5,
+  },
   picker: {
     marginBottom: 20,
     height: 50,
     width: '100%',
+    color: '#fff',
+    backgroundColor: '#333',
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  textInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    color: '#fff',
+    backgroundColor: '#333',
   },
   buttonContainer: {
     marginBottom: 15,

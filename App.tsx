@@ -1,45 +1,22 @@
-import React, { useEffect, useCallback, useState, createContext } from 'react';
-import { Platform, Alert } from 'react-native';
+// App.tsx
+import React, { useEffect, useCallback, useState } from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { check, request, PERMISSIONS, RESULTS, openSettings } from 'react-native-permissions';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
-
-export const IntervalContext = createContext<{
-  intervals: { [key: string]: number };
-  setIntervalForState: (stateName: string, interval: number) => void;
-}>({
-  intervals: {
-    active: 5000,
-    spotted: 6000,
-    proximity: 7000,
-    trigger: 8000,
-  },
-  setIntervalForState: () => {},
-});
+import SceneProvider from './src/contexts/SceneProvider'; // Adjust the path as necessary
 
 const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
 
-  const [intervals, setIntervals] = useState({
-    active: 5000,
-    spotted: 6000,
-    proximity: 7000,
-    trigger: 8000,
-  });
-
-  const setIntervalForState = (stateName: string, interval: number) => {
-    setIntervals((prev) => ({
-      ...prev,
-      [stateName.toLowerCase()]: interval,
-    }));
-  };
-
+  // Permission handling remains in App.tsx
   const requestAudioPermission = useCallback(async () => {
     try {
       if (Platform.OS === 'android') {
         const audioResult = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
         handlePermissionResult(audioResult);
       }
+      // Add iOS permissions if needed
     } catch (error) {
       console.warn('Permission request failed', error);
     }
@@ -51,16 +28,10 @@ const App: React.FC = () => {
       setAudioPermissionGranted(true);
     } else if (result === RESULTS.DENIED) {
       console.log('Audio recording permission not granted');
-      Alert.alert('Permission Denied', 'Audio recording permission is needed for the app to function properly.');
+      // Handle denied permissions without alerts
     } else if (result === RESULTS.BLOCKED) {
       console.log('Audio recording permission blocked');
-      Alert.alert(
-        'Permission Blocked',
-        'Audio recording permission is blocked. Please enable it from settings.',
-        [
-          { text: 'Open Settings', onPress: () => openSettings().catch(() => console.warn('Cannot open settings')) },
-        ]
-      );
+      // Handle blocked permissions without alerts
     }
   };
 
@@ -68,6 +39,9 @@ const App: React.FC = () => {
     const audioResult = await check(PERMISSIONS.ANDROID.RECORD_AUDIO);
     if (audioResult !== RESULTS.GRANTED) {
       requestAudioPermission();
+    } else {
+      console.log('Audio recording permission already granted');
+      setAudioPermissionGranted(true);
     }
   }, [requestAudioPermission]);
 
@@ -76,11 +50,11 @@ const App: React.FC = () => {
   }, [checkPermission]);
 
   return (
-    <IntervalContext.Provider value={{ intervals, setIntervalForState }}>
+    <SceneProvider>
       <NavigationContainer>
         <StackNavigator />
       </NavigationContainer>
-    </IntervalContext.Provider>
+    </SceneProvider>
   );
 };
 

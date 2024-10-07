@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
 import UpdateIntervalsModal from './modals/UpdateIntervalsModal';
+import RNFS from 'react-native-fs';
 
 const SettingsScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -15,6 +16,36 @@ const SettingsScreen: React.FC = () => {
     setIntervalsModalVisible(true);
   };
 
+  const deleteCustomAudioFiles = async () => {
+    const states = ['Active', 'Spotted', 'Proximity', 'Trigger'];
+    try {
+      for (const state of states) {
+        const filePath = `${RNFS.DocumentDirectoryPath}/${state}/${state.toLowerCase()}.mp3`;
+
+        const fileExists = await RNFS.exists(filePath);
+        if (fileExists) {
+          await RNFS.unlink(filePath);
+          console.log(`Deleted custom audio file: ${filePath}`);
+        }
+      }
+      Alert.alert('Success', 'Custom audio files deleted successfully.');
+    } catch (error) {
+      console.error('Error during audio file cleanup:', error);
+      Alert.alert('Error', 'Failed to delete custom audio files.');
+    }
+  };
+
+  const handleDeleteAudioPress = () => {
+    Alert.alert(
+      'Delete Audio Files',
+      'Are you sure you want to delete all custom audio files?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', onPress: deleteCustomAudioFiles },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={openRecordAudioModal} style={styles.menuItem}>
@@ -23,6 +54,10 @@ const SettingsScreen: React.FC = () => {
 
       <TouchableOpacity onPress={openUpdateIntervalsModal} style={styles.menuItem}>
         <Text style={styles.menuText}>Update Intervals</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleDeleteAudioPress} style={styles.menuItem}>
+        <Text style={styles.menuText}>Delete Custom Audios</Text>
       </TouchableOpacity>
 
       <RecordAudioModal

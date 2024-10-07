@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+// src/screens/modals/UpdateIntervalsModal.tsx
+import React, { useState, useEffect, useContext } from 'react';
+import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles'; // Import common styles
+import { IntervalContext } from '../../contexts/SceneProvider'; // Adjust the path as necessary
 
 type UpdateIntervalsModalProps = {
   visible: boolean;
@@ -18,7 +20,9 @@ const convertMsToMinutesSeconds = (milliseconds: number) => {
 // Utility function to convert "mm:ss" format to milliseconds
 const convertMinutesSecondsToMs = (time: string) => {
   const [minutes, seconds] = time.split(':').map(Number);
-  if (isNaN(minutes) || isNaN(seconds)) {return NaN;}
+  if (isNaN(minutes) || isNaN(seconds)) {
+    return NaN;
+  }
   return minutes * 60000 + seconds * 1000;
 };
 
@@ -28,6 +32,7 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { setIntervalForState } = useContext(IntervalContext);
   const [intervals, setIntervals] = useState<{ [key: string]: string }>({
     active: '00:05',
     spotted: '00:06',
@@ -52,7 +57,9 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
       }
     };
 
-    loadIntervals();
+    if (visible) {
+      loadIntervals();
+    }
   }, [visible]);
 
   const handleSave = async () => {
@@ -60,20 +67,22 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
       for (const state of STATES) {
         const intervalMs = convertMinutesSecondsToMs(intervals[state.toLowerCase()]);
         if (isNaN(intervalMs)) {
-          Alert.alert('Invalid Interval', `Please enter a valid interval for ${state}.`);
+          console.error(`Invalid interval for ${state}: ${intervals[state.toLowerCase()]}`);
           return;
         }
         await AsyncStorage.setItem(`@interval_${state.toLowerCase()}`, intervalMs.toString());
+        setIntervalForState(state, intervalMs); // Update context
       }
       onClose();
     } catch (error) {
       console.error('Error saving intervals:', error);
-      Alert.alert('Error', 'Failed to save the intervals.');
     }
   };
 
   const handleChange = (state: string, value: string) => {
-    if (value.length > 5) {return;}
+    if (value.length > 5) {
+      return;
+    }
     if (value.length === 2 && !value.includes(':')) {
       setIntervals((prev) => ({ ...prev, [state.toLowerCase()]: `${value}:` }));
     } else {
@@ -156,6 +165,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     backgroundColor: '#fff',
     borderRadius: 5,
-    color: '#1b1b1b', // erie black
+    color: '#1b1b1b', // Erie Black
   },
 });

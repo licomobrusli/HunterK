@@ -37,16 +37,21 @@ const ActiveScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.touchable} onPress={handlePress}>
-        {renderStateComponent()}
-      </TouchableOpacity>
+      {/* Render the state component without wrapping it in TouchableOpacity */}
+      {renderStateComponent()}
+
+      {/* Overlay TouchableOpacity for handling presses */}
+      <TouchableOpacity style={styles.overlay} onPress={handlePress} />
 
       {/* Abort Button */}
       <TouchableOpacity style={styles.abortButton} onPress={handleAbort}>
-        <Text style={styles.abortButtonText}
-        testID="abortButton"
-        accessibilityLabel="abortButton"
-        >Abort</Text>
+        <Text
+          style={styles.abortButtonText}
+          testID="abortButton"
+          accessibilityLabel="abortButton"
+        >
+          Abort
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -58,9 +63,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  touchable: {
-    flex: 1,
-    backgroundColor: '#004225', // British Racing Green
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   abortButton: {
     position: 'absolute',
