@@ -1,31 +1,43 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
-import UpdateIntervalsModal from './modals/UpdateIntervalsModal';
+import SceneBuilderModal from './modals/SceneBuilderModal';
+import AudioManagerModal from './modals/AudioManagerModal';
 import RNFS from 'react-native-fs';
 
 const SettingsScreen: React.FC = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [intervalsModalVisible, setIntervalsModalVisible] = useState(false);
+  const [recordModalVisible, setRecordModalVisible] = useState(false);
+  const [sceneBuilderModalVisible, setSceneBuilderModalVisible] = useState(false);
+  const [audioManagerVisible, setAudioModalVisible] = useState(false);
 
   const openRecordAudioModal = () => {
-    setModalVisible(true);
+    setRecordModalVisible(true);
   };
 
-  const openUpdateIntervalsModal = () => {
-    setIntervalsModalVisible(true);
+  const openSceneBuilderModal = () => {
+    setSceneBuilderModalVisible(true);
+  };
+
+  const openAudioManager = () => {
+    setAudioModalVisible(true);
   };
 
   const deleteCustomAudioFiles = async () => {
     const states = ['Active', 'Spotted', 'Proximity', 'Trigger'];
     try {
       for (const state of states) {
-        const filePath = `${RNFS.DocumentDirectoryPath}/${state}/${state.toLowerCase()}.mp3`;
+        const stateDir = `${RNFS.DocumentDirectoryPath}/${state}`;
+        const dirExists = await RNFS.exists(stateDir);
 
-        const fileExists = await RNFS.exists(filePath);
-        if (fileExists) {
-          await RNFS.unlink(filePath);
-          console.log(`Deleted custom audio file: ${filePath}`);
+        if (dirExists) {
+          const files = await RNFS.readDir(stateDir);
+          for (const file of files) {
+            if (file.isFile() && file.name.endsWith('.mp3')) {
+              const filePath = file.path;
+              await RNFS.unlink(filePath);
+              console.log(`Deleted custom audio file: ${filePath}`);
+            }
+          }
         }
       }
       Alert.alert('Success', 'Custom audio files deleted successfully.');
@@ -52,23 +64,33 @@ const SettingsScreen: React.FC = () => {
         <Text style={styles.menuText}>Record Audios</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={openUpdateIntervalsModal} style={styles.menuItem}>
-        <Text style={styles.menuText}>Update Intervals</Text>
+      <TouchableOpacity onPress={openSceneBuilderModal} style={styles.menuItem}>
+        <Text style={styles.menuText}>Scene Builder</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={handleDeleteAudioPress} style={styles.menuItem}>
         <Text style={styles.menuText}>Delete Custom Audios</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity onPress={openAudioManager} style={styles.menuItem}>
+        <Text style={styles.menuText}>Manage Audio Files</Text>
+      </TouchableOpacity>
+
       <RecordAudioModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        visible={recordModalVisible}
+        onClose={() => setRecordModalVisible(false)}
       />
 
-      <UpdateIntervalsModal
-        visible={intervalsModalVisible}
-        onClose={() => setIntervalsModalVisible(false)}
+      <SceneBuilderModal
+        visible={sceneBuilderModalVisible}
+        onClose={() => setSceneBuilderModalVisible(false)}
       />
+
+      <AudioManagerModal
+        visible={audioManagerVisible}
+        onClose={() => setAudioModalVisible(false)}
+      />
+
     </View>
   );
 };

@@ -1,23 +1,29 @@
-// src/screens/modals/UpdateIntervalsModal.tsx
+// src/screens/modals/SceneBuilderModal.tsx
 import React, { useState, useEffect, useContext } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { commonStyles } from '../../styles/commonStyles'; // Import common styles
-import { IntervalContext } from '../../contexts/SceneProvider'; // Adjust the path as necessary
+import { commonStyles } from '../../styles/commonStyles';
+import { IntervalContext } from '../../contexts/SceneProvider';
+import AssignAudiosModal from './AssignAudiosModal';
 
-type UpdateIntervalsModalProps = {
+type SceneBuilderModalProps = {
   visible: boolean;
   onClose: () => void;
 };
 
-// Utility function to convert milliseconds to "mm:ss" format
 const convertMsToMinutesSeconds = (milliseconds: number) => {
   const minutes = Math.floor(milliseconds / 60000);
   const seconds = Math.floor((milliseconds % 60000) / 1000);
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-// Utility function to convert "mm:ss" format to milliseconds
 const convertMinutesSecondsToMs = (time: string) => {
   const [minutes, seconds] = time.split(':').map(Number);
   if (isNaN(minutes) || isNaN(seconds)) {
@@ -28,17 +34,18 @@ const convertMinutesSecondsToMs = (time: string) => {
 
 const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
 
-const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
+const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
   visible,
   onClose,
 }) => {
-  const { setIntervalForState } = useContext(IntervalContext);
-  const [intervals, setIntervals] = useState<{ [key: string]: string }>({
-    active: '00:05',
-    spotted: '00:06',
-    proximity: '00:07',
-    trigger: '00:08',
-  });
+  const { intervals, setIntervalForState } = useContext(IntervalContext);
+  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>(
+    {}
+  );
+
+  // State for controlling the visibility of the Assign Audios sub-modal
+  const [assignAudiosModalVisible, setAssignAudiosModalVisible] = useState(false);
+  const [selectedState, setSelectedState] = useState<string | null>(null);
 
   useEffect(() => {
     // Load saved intervals from AsyncStorage
@@ -46,12 +53,21 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
       try {
         const loadedIntervals: { [key: string]: string } = {};
         for (const state of STATES) {
-          const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
+          const storedInterval = await AsyncStorage.getItem(
+            `@interval_${state.toLowerCase()}`
+          );
           if (storedInterval !== null) {
-            loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(parseInt(storedInterval, 10));
+            loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(
+              parseInt(storedInterval, 10)
+            );
+          } else {
+            // Use the interval from context if not in AsyncStorage
+            loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(
+              intervals[state.toLowerCase()]
+            );
           }
         }
-        setIntervals(loadedIntervals);
+        setLocalIntervals(loadedIntervals);
       } catch (error) {
         console.error('Failed to load intervals', error);
       }
@@ -60,17 +76,24 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
     if (visible) {
       loadIntervals();
     }
-  }, [visible]);
+  }, [visible, intervals]);
 
   const handleSave = async () => {
     try {
       for (const state of STATES) {
-        const intervalMs = convertMinutesSecondsToMs(intervals[state.toLowerCase()]);
+        const intervalMs = convertMinutesSecondsToMs(
+          localIntervals[state.toLowerCase()]
+        );
         if (isNaN(intervalMs)) {
-          console.error(`Invalid interval for ${state}: ${intervals[state.toLowerCase()]}`);
+          console.error(
+            `Invalid interval for ${state}: ${localIntervals[state.toLowerCase()]}`
+          );
           return;
         }
-        await AsyncStorage.setItem(`@interval_${state.toLowerCase()}`, intervalMs.toString());
+        await AsyncStorage.setItem(
+          `@interval_${state.toLowerCase()}`,
+          intervalMs.toString()
+        );
         setIntervalForState(state, intervalMs); // Update context
       }
       onClose();
@@ -84,23 +107,39 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
       return;
     }
     if (value.length === 2 && !value.includes(':')) {
-      setIntervals((prev) => ({ ...prev, [state.toLowerCase()]: `${value}:` }));
+      setLocalIntervals((prev) => ({
+        ...prev,
+        [state.toLowerCase()]: `${value}:`,
+      }));
     } else {
-      setIntervals((prev) => ({ ...prev, [state.toLowerCase()]: value }));
+      setLocalIntervals((prev) => ({ ...prev, [state.toLowerCase()]: value }));
     }
+  };
+
+  const handleStatePress = (state: string) => {
+    // Open the Assign Audios sub-modal for the selected state
+    setSelectedState(state);
+    setAssignAudiosModalVisible(true);
+  };
+
+  const closeAssignAudiosModal = () => {
+    setAssignAudiosModalVisible(false);
+    setSelectedState(null);
   };
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.title}>Update Intervals</Text>
+          <Text style={styles.title}>Scene Builder</Text>
           {STATES.map((state) => (
             <View key={state} style={styles.inputContainer}>
-              <Text style={styles.label}>{state}</Text>
+              <TouchableOpacity onPress={() => handleStatePress(state)}>
+                <Text style={styles.label}>{state}</Text>
+              </TouchableOpacity>
               <TextInput
                 style={styles.input}
-                value={intervals[state.toLowerCase()]}
+                value={localIntervals[state.toLowerCase()] || ''}
                 onChangeText={(value) => handleChange(state, value)}
                 keyboardType="numeric"
                 maxLength={5}
@@ -119,26 +158,56 @@ const UpdateIntervalsModal: React.FC<UpdateIntervalsModalProps> = ({
             <Text style={commonStyles.buttonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Assign Audios Sub-Modal */}
+        {assignAudiosModalVisible && (
+  <AssignAudiosModal
+    visible={assignAudiosModalVisible}
+    onClose={closeAssignAudiosModal}
+    stateName={selectedState || ''}
+  />
+)}
       </View>
     </Modal>
   );
 };
 
-export default UpdateIntervalsModal;
+export default SceneBuilderModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    marginTop: 22,
+    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
   },
   modalContent: {
     width: 300,
     padding: 20,
-    backgroundColor: '#004225', // British Racing Green background
+    backgroundColor: '#004225',
     borderRadius: 10,
     alignItems: 'center',
+  },
+  subModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  subModalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -156,6 +225,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#fff',
+    textDecorationLine: 'underline', // Indicate it's clickable
   },
   input: {
     width: 100,
@@ -165,6 +235,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     backgroundColor: '#fff',
     borderRadius: 5,
-    color: '#1b1b1b', // Erie Black
+    color: '#1b1b1b',
   },
 });

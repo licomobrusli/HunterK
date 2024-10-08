@@ -4,7 +4,8 @@ import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
-import SceneProvider from './src/contexts/SceneProvider'; // Adjust the path as necessary
+import SceneProvider from './src/contexts/SceneProvider';
+import FlashMessage from 'react-native-flash-message';
 
 const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
@@ -54,6 +55,7 @@ const App: React.FC = () => {
       <NavigationContainer>
         <StackNavigator />
       </NavigationContainer>
+      <FlashMessage position="top" />
     </SceneProvider>
   );
 };

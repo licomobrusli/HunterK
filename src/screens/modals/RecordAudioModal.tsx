@@ -1,5 +1,5 @@
 // src/screens/modals/RecordAudioModal.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   Modal,
   View,
@@ -13,8 +13,11 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import IntervalInputModal from './IntervalInputModal';
-import { commonStyles } from '../../styles/commonStyles'; // Import common styles
+import { commonStyles } from '../../styles/commonStyles';
+import { IntervalContext } from '../../contexts/SceneProvider';
+import ModalMessage from '../../config/ModalMessage'; // Import the custom message component
 
 type RecordAudioModalProps = {
   visible: boolean;
@@ -27,12 +30,16 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { intervals, setIntervalForState } = useContext(IntervalContext);
   const [selectedState, setSelectedState] = useState(STATES[0]);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
   const [showIntervalModal, setShowIntervalModal] = useState(false);
-  const [recordingName, setRecordingName] = useState<string>(STATES[0].toLowerCase());
+  const [recordingName, setRecordingName] = useState<string>(
+    STATES[0].toLowerCase()
+  );
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
@@ -54,6 +61,8 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
           granted['android.permission.READ_EXTERNAL_STORAGE'] !==
             PermissionsAndroid.RESULTS.GRANTED
         ) {
+          console.log('Required permissions not granted');
+          // Handle lack of permissions if necessary
         }
       } catch (err) {
         console.warn('Permission request error:', err);
@@ -153,17 +162,15 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
     setShowIntervalModal(true);
   };
 
-  const handleIntervalSave = async (_newInterval: number) => {
+  const handleIntervalSave = async (newInterval: number) => {
     const documentsPath = RNFS.DocumentDirectoryPath;
-    const stateFolder = `${documentsPath}/${selectedState}`; // Use selectedState as-is
+    const stateFolder = `${documentsPath}/${selectedState}`;
 
     // Ensure the state folder exists
     try {
-      await RNFS.mkdir(stateFolder);
       const dirExists = await RNFS.exists(stateFolder);
-      console.log(`Directory ${stateFolder} exists after creation: ${dirExists}`);
       if (!dirExists) {
-        throw new Error('Directory creation failed.');
+        await RNFS.mkdir(stateFolder);
       }
     } catch (error) {
       console.log('Error creating directory:', error);
@@ -175,116 +182,143 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 
     // Prevent empty recording names
     if (sanitizedRecordingName.length === 0) {
+      console.log('Recording name is empty after sanitization');
       return;
     }
 
     const destinationPath = `${stateFolder}/${sanitizedRecordingName}.mp3`;
 
     try {
-      await RNFS.copyFile(recordedFilePath!, destinationPath);
+      if (recordedFilePath) {
+        await RNFS.copyFile(recordedFilePath, destinationPath);
+      } else {
+        throw new Error('Recorded file path is null');
+      }
       console.log(`Recording saved to: ${destinationPath}`);
+
+      // Update the interval in context
+      setIntervalForState(selectedState, newInterval);
+
+      // Save the interval to AsyncStorage
+      await AsyncStorage.setItem(
+        `@interval_${selectedState.toLowerCase()}`,
+        newInterval.toString()
+      );
 
       // Reset states
       setRecordingName(selectedState.toLowerCase());
       setRecordedFilePath(null);
 
       setShowIntervalModal(false);
-      onClose();
+
+      // Show a message within the modal
+      setMessage({ text: 'Recording saved successfully!', type: 'success' });
+
+      // Hide the message after a delay
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
     } catch (error) {
-      console.log('Error saving recording:', error);
+      console.error('Error saving recording:', error);
+      setMessage({ text: 'Failed to save the recording.', type: 'error' });
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
     }
   };
 
   return (
-    <Modal visible={visible} animationType="slide">
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>Record Audio</Text>
+    <>
+      <Modal visible={visible} animationType="slide">
+        <View style={styles.modalContainer}>
+          {/* Display the message if it exists */}
+          {message && <ModalMessage message={message.text} type={message.type} />}
 
-        {/* State Picker */}
-        <Text style={styles.label}>Select State:</Text>
-        <Picker
-          selectedValue={selectedState}
-          onValueChange={(itemValue) => setSelectedState(itemValue)}
-          style={styles.picker}
-        >
-          {STATES.map((state) => (
-            <Picker.Item label={state} value={state} key={state} />
-          ))}
-        </Picker>
+          <Text style={styles.title}>Record Audio</Text>
 
-        {/* Recording Name Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Recording Name:</Text>
-          <TextInput
-            style={styles.textInput}
-            value={recordingName}
-            onChangeText={setRecordingName}
-            placeholder="Enter recording name"
-            placeholderTextColor="#aaa"
+          <Text style={styles.label}>Select State:</Text>
+          <Picker
+            selectedValue={selectedState}
+            onValueChange={(itemValue) => setSelectedState(itemValue)}
+            style={styles.picker}
+            dropdownIconColor="#fff"
+          >
+            {STATES.map((state) => (
+              <Picker.Item label={state} value={state} key={state} />
+            ))}
+          </Picker>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Recording Name:</Text>
+            <TextInput
+              style={styles.textInput}
+              value={recordingName}
+              onChangeText={setRecordingName}
+              placeholder="Enter recording name"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={!isRecording ? onStartRecord : onStopRecord}
+              style={[
+                commonStyles.button,
+                isRecording && commonStyles.disabledButton,
+              ]}
+              disabled={isRecording && !recordedFilePath}
+            >
+              <Text style={commonStyles.buttonText}>
+                {!isRecording ? 'Start Recording' : 'Stop Recording'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={!isPlayingBack ? onPlay : onStopPlay}
+              style={[
+                commonStyles.button,
+                (!recordedFilePath || isPlayingBack) &&
+                  commonStyles.disabledButton,
+              ]}
+              disabled={!recordedFilePath || isPlayingBack}
+            >
+              <Text style={commonStyles.buttonText}>
+                {!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={onSaveRecording}
+              style={[
+                commonStyles.button,
+                !recordedFilePath && commonStyles.disabledButton,
+              ]}
+              disabled={!recordedFilePath}
+            >
+              <Text style={commonStyles.buttonText}>Save Recording</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={commonStyles.buttonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+
+        {showIntervalModal && (
+          <IntervalInputModal
+            visible={showIntervalModal}
+            onClose={() => setShowIntervalModal(false)}
+            onSave={handleIntervalSave}
+            stateName={selectedState}
+            currentInterval={intervals[selectedState.toLowerCase()]}
           />
-        </View>
-
-        {/* Recording Controls */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={!isRecording ? onStartRecord : onStopRecord}
-            style={[
-              commonStyles.button,
-              isRecording && commonStyles.disabledButton,
-            ]}
-          >
-            <Text style={commonStyles.buttonText}>
-              {!isRecording ? 'Start Recording' : 'Stop Recording'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Playback Controls */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={!isPlayingBack ? onPlay : onStopPlay}
-            style={[
-              commonStyles.button,
-              (!recordedFilePath || isPlayingBack) && commonStyles.disabledButton,
-            ]}
-            disabled={!recordedFilePath || isPlayingBack}
-          >
-            <Text style={commonStyles.buttonText}>
-              {!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Save Recording */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            onPress={onSaveRecording}
-            style={[
-              commonStyles.button,
-              !recordedFilePath && commonStyles.disabledButton,
-            ]}
-            disabled={!recordedFilePath}
-          >
-            <Text style={commonStyles.buttonText}>Save Recording</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Close Modal */}
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={commonStyles.buttonText}>Close</Text>
-        </TouchableOpacity>
-      </View>
-
-      {showIntervalModal && (
-        <IntervalInputModal
-          visible={showIntervalModal}
-          onClose={() => setShowIntervalModal(false)}
-          onSave={handleIntervalSave}
-          stateName={selectedState}
-          currentInterval={5000} // Example interval value
-        />
-      )}
-    </Modal>
+        )}
+      </Modal>
+    </>
   );
 };
 
@@ -294,7 +328,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     padding: 20,
-    paddingTop: 20,
+    paddingTop: 40,
     backgroundColor: '#004225',
   },
   title: {
@@ -302,6 +336,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#fff',
+    alignSelf: 'center',
   },
   label: {
     color: '#fff',
