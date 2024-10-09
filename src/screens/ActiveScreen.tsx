@@ -1,11 +1,7 @@
-// ActiveScreen.tsx
+// src/screens/ActiveScreen.tsx
 import React, { useState } from 'react';
 import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
-
-import ActiveState from '../states/ActiveState';
-import SpottedState from '../states/SpottedState';
-import ProximityState from '../states/ProximityState';
-import TriggerState from '../states/TriggerState';
+import StateComponent from '../config/StateComponent'; // Import the generic StateComponent
 
 const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
 
@@ -20,25 +16,12 @@ const ActiveScreen: React.FC = () => {
     setCurrentStateIndex(0); // Reset to the "Active" state (index 0)
   };
 
-  const renderStateComponent = () => {
-    switch (STATES[currentStateIndex]) {
-      case 'Active':
-        return <ActiveState />;
-      case 'Spotted':
-        return <SpottedState />;
-      case 'Proximity':
-        return <ProximityState />;
-      case 'Trigger':
-        return <TriggerState />;
-      default:
-        return null;
-    }
-  };
+  const currentStateName = STATES[currentStateIndex];
 
   return (
     <View style={styles.container}>
-      {/* Render the state component without wrapping it in TouchableOpacity */}
-      {renderStateComponent()}
+      {/* Render the StateComponent directly */}
+      <StateComponent stateName={currentStateName} />
 
       {/* Overlay TouchableOpacity for handling presses */}
       <TouchableOpacity style={styles.overlay} onPress={handlePress} />
