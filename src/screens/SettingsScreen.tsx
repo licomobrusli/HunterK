@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
 import SceneBuilderModal from './modals/SceneBuilderModal';
 import AudioManagerModal from './modals/AudioManagerModal';
+import SceneManagerModal from './modals/SceneManagerModal';
 import RNFS from 'react-native-fs';
 
 const SettingsScreen: React.FC = () => {
   const [recordModalVisible, setRecordModalVisible] = useState(false);
   const [sceneBuilderModalVisible, setSceneBuilderModalVisible] = useState(false);
   const [audioManagerVisible, setAudioModalVisible] = useState(false);
+  const [sceneManagerVisible, setSceneManagerVisible] = useState(false);
 
   const openRecordAudioModal = () => {
     setRecordModalVisible(true);
@@ -20,6 +22,10 @@ const SettingsScreen: React.FC = () => {
 
   const openAudioManager = () => {
     setAudioModalVisible(true);
+  };
+
+  const openSceneManager = () => {
+    setSceneManagerVisible(true);
   };
 
   const deleteCustomAudioFiles = async () => {
@@ -76,6 +82,10 @@ const SettingsScreen: React.FC = () => {
         <Text style={styles.menuText}>Manage Audio Files</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity onPress={openSceneManager} style={styles.menuItem}>
+        <Text style={styles.menuText}>Scene Management</Text>
+      </TouchableOpacity>
+
       <RecordAudioModal
         visible={recordModalVisible}
         onClose={() => setRecordModalVisible(false)}
@@ -89,6 +99,11 @@ const SettingsScreen: React.FC = () => {
       <AudioManagerModal
         visible={audioManagerVisible}
         onClose={() => setAudioModalVisible(false)}
+      />
+
+      <SceneManagerModal
+        visible={sceneManagerVisible}
+        onClose={() => setSceneManagerVisible(false)}
       />
 
     </View>

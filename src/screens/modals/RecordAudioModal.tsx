@@ -18,6 +18,7 @@ import IntervalInputModal from './IntervalInputModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import ModalMessage from '../../config/ModalMessage'; // Import the custom message component
+import { sanitizeFileName } from '../../config/sanitizer';
 
 type RecordAudioModalProps = {
   visible: boolean;
@@ -88,9 +89,8 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
     setRecordingName(selectedState.toLowerCase());
   }, [selectedState]);
 
-  const sanitizeRecordingName = (name: string): string => {
-    return name.trim().replace(/[^a-zA-Z0-9-_ ]/g, '');
-  };
+  // Sanitize recording name
+  const sanitizedRecordingName = sanitizeFileName(recordingName);
 
   const onStartRecord = async () => {
     try {
@@ -177,12 +177,13 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
       return;
     }
 
-    // Sanitize recording name
-    const sanitizedRecordingName = sanitizeRecordingName(recordingName);
-
     // Prevent empty recording names
     if (sanitizedRecordingName.length === 0) {
       console.log('Recording name is empty after sanitization');
+      setMessage({ text: 'Recording name is invalid.', type: 'error' });
+      setTimeout(() => {
+        setMessage(null);
+      }, 3000);
       return;
     }
 

@@ -161,12 +161,12 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
 
         {/* Assign Audios Sub-Modal */}
         {assignAudiosModalVisible && (
-  <AssignAudiosModal
-    visible={assignAudiosModalVisible}
-    onClose={closeAssignAudiosModal}
-    stateName={selectedState || ''}
-  />
-)}
+          <AssignAudiosModal
+            visible={assignAudiosModalVisible}
+            onClose={closeAssignAudiosModal}
+            stateName={selectedState || ''}
+          />
+        )}
       </View>
     </Modal>
   );
