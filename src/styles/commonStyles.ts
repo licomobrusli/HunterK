@@ -292,5 +292,42 @@ export const commonStyles = StyleSheet.create({
     marginRight: 10,
   },
 
+  stateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '100%',
+  },
+
+  addStateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+
+  positionInput: {
+    width: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 5,
+    textAlign: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    color: '#1b1b1b',
+    marginRight: 10,
+  },
+
+  newStateInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    color: '#1b1b1b',
+    marginRight: 10,
+  },
+
 });
 

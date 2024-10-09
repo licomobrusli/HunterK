@@ -1,6 +1,3 @@
-// src/screens/modals/SceneBuilderModal.tsx
-import { commonStyles } from '../../styles/commonStyles';
-
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
@@ -8,8 +5,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/Feather';
+import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import AssignAudiosModal from './AssignAudiosModal';
 
@@ -36,7 +36,15 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
   visible,
   onClose,
 }) => {
-  const { intervals, setIntervalForState, states} = useContext(IntervalContext);
+  const {
+    intervals,
+    setIntervalForState,
+    states,
+    setStates,
+    setIntervals,
+    setSelectedAudios,
+  } = useContext(IntervalContext);
+
   const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>(
     {}
   );
@@ -44,6 +52,10 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
   // State for controlling the visibility of the Assign Audios sub-modal
   const [assignAudiosModalVisible, setAssignAudiosModalVisible] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  // New state inputs
+  const [newStateName, setNewStateName] = useState('');
+  const [newStatePosition, setNewStatePosition] = useState('');
 
   useEffect(() => {
     // Load saved intervals from AsyncStorage
@@ -125,16 +137,130 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
     setSelectedState(null);
   };
 
+  const handlePositionChange = (index: number, value: string) => {
+    const newPosition = parseInt(value, 10);
+    if (isNaN(newPosition) || newPosition < 1) {
+      return;
+    }
+
+    updateStatePosition(index, newPosition - 1);
+  };
+
+  const updateStatePosition = (currentIndex: number, newIndex: number) => {
+    if (newIndex < 0 || newIndex >= states.length) {
+      return;
+    }
+
+    const updatedStates = [...states];
+    const [movedState] = updatedStates.splice(currentIndex, 1);
+    updatedStates.splice(newIndex, 0, movedState);
+
+    setStates(updatedStates);
+  };
+
+  const handleDeleteState = (index: number) => {
+    const stateToDelete = states[index];
+    Alert.alert(
+      'Delete State',
+      `Are you sure you want to delete the state "${stateToDelete}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteState(index);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const deleteState = (index: number) => {
+    const updatedStates = [...states];
+    const [deletedState] = updatedStates.splice(index, 1);
+    setStates(updatedStates);
+
+    // Remove associated data
+    const lowerState = deletedState.toLowerCase();
+    setIntervals((prev) => {
+      const updated = { ...prev };
+      delete updated[lowerState];
+      return updated;
+    });
+    setSelectedAudios((prev) => {
+      const updated = { ...prev };
+      delete updated[lowerState];
+      return updated;
+    });
+
+
+    // Remove from AsyncStorage
+    AsyncStorage.removeItem(`@interval_${lowerState}`);
+    AsyncStorage.removeItem(`@selectedAudios_${lowerState}`);
+  };
+
+  const handleAddState = () => {
+    if (!newStateName.trim()) {
+      Alert.alert('Invalid Input', 'State name cannot be empty.');
+      return;
+    }
+
+    if (states.includes(newStateName)) {
+      Alert.alert('Duplicate State', 'A state with this name already exists.');
+      return;
+    }
+
+    const position = parseInt(newStatePosition, 10);
+    const insertIndex =
+      isNaN(position) || position < 1 || position > states.length + 1
+        ? states.length
+        : position - 1;
+
+    const updatedStates = [...states];
+    updatedStates.splice(insertIndex, 0, newStateName);
+
+    setStates(updatedStates);
+
+    // Initialize default interval and selected audios
+    const lowerState = newStateName.toLowerCase();
+    setIntervals((prev: any) => ({
+      ...prev,
+      [lowerState]: 5000, // or your default interval
+    }));
+    setSelectedAudios((prev: any) => ({
+      ...prev,
+      [lowerState]: { audios: [], mode: 'Selected' },
+    }));
+
+    // Reset new state inputs
+    setNewStateName('');
+    setNewStatePosition('');
+  };
+
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
       <View style={commonStyles.modalContainer}>
         <View style={commonStyles.modalContent}>
           <Text style={commonStyles.title}>Scene Builder</Text>
-          {states.map((state) => (
-            <View key={state} style={commonStyles.inputContainer}>
+          {states.map((state, index) => (
+            <View key={state} style={commonStyles.stateRow}>
+              {/* Position Number Input */}
+              <TextInput
+                style={commonStyles.positionInput}
+                value={(index + 1).toString()}
+                onChangeText={(value) => handlePositionChange(index, value)}
+                keyboardType="numeric"
+                maxLength={2}
+              />
+
+              {/* State Name */}
               <TouchableOpacity onPress={() => handleStatePress(state)}>
                 <Text style={commonStyles.label}>{state}</Text>
               </TouchableOpacity>
+
+              {/* Interval Input */}
               <TextInput
                 style={commonStyles.input}
                 value={localIntervals[state.toLowerCase()] || ''}
@@ -143,12 +269,44 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
                 maxLength={5}
                 placeholder="mm:ss"
               />
+
+              {/* Delete Icon */}
+              <TouchableOpacity onPress={() => handleDeleteState(index)}>
+                <Icon name="trash-2" size={24} color="#fff" />
+              </TouchableOpacity>
             </View>
           ))}
 
+          {/* Add New State Row */}
+          <View style={commonStyles.addStateRow}>
+            {/* Position Number Input */}
+            <TextInput
+              style={commonStyles.positionInput}
+              value={newStatePosition}
+              onChangeText={(value) => setNewStatePosition(value)}
+              keyboardType="numeric"
+              maxLength={2}
+              placeholder="Pos"
+            />
+
+            {/* State Name Input */}
+            <TextInput
+              style={commonStyles.newStateInput}
+              value={newStateName}
+              onChangeText={(value) => setNewStateName(value)}
+              placeholder="New State Name"
+              maxLength={20}
+            />
+
+            {/* Save Icon */}
+            <TouchableOpacity onPress={handleAddState}>
+              <Icon name="save" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
           {/* Save Intervals Button */}
-          <TouchableOpacity onPress={handleSave} style={commonStyles.button}>
-            <Text style={commonStyles.buttonText}>Save Intervals</Text>
+          <TouchableOpacity onPress={handleSave} style={commonStyles.saveButton}>
+            <Text style={commonStyles.saveButtonText}>Save Intervals</Text>
           </TouchableOpacity>
 
           {/* Cancel Button */}

@@ -5,40 +5,51 @@ import { Scene } from '../types/Scene';
 import { PlaybackMode } from '../types/PlaybackMode';
 
 type IntervalContextType = {
-  intervals: { [key: string]: number };
-  setIntervalForState: (stateName: string, interval: number) => void;
-  selectedAudios: {
-    [key: string]: {
-      audios: string[];
-      mode: PlaybackMode;
+    intervals: { [key: string]: number };
+    setIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
+    setIntervalForState: (stateName: string, interval: number) => void;
+    selectedAudios: {
+      [key: string]: {
+        audios: string[];
+        mode: PlaybackMode;
+      };
     };
+    setSelectedAudios: React.Dispatch<
+      React.SetStateAction<{
+        [key: string]: { audios: string[]; mode: PlaybackMode };
+      }>
+    >;
+    setSelectedAudiosForState: (
+      stateName: string,
+      data: { audios: string[]; mode: PlaybackMode }
+    ) => void;
+    loadSceneData: (scene: Scene) => void;
+    states: string[];
+    setStates: React.Dispatch<React.SetStateAction<string[]>>;
   };
-  setSelectedAudiosForState: (
-    stateName: string,
-    data: { audios: string[]; mode: PlaybackMode }
-  ) => void;
-  loadSceneData: (scene: Scene) => void;
-  states: string[]; // Add states to context type
-};
 
-export const IntervalContext = createContext<IntervalContextType>({
-  intervals: {
-    active: 5000,
-    spotted: 6000,
-    proximity: 7000,
-    trigger: 8000,
-  },
-  setIntervalForState: () => {},
-  selectedAudios: {
-    active: { audios: [], mode: 'Selected' },
-    spotted: { audios: [], mode: 'Selected' },
-    proximity: { audios: [], mode: 'Selected' },
-    trigger: { audios: [], mode: 'Selected' },
-  },
-  setSelectedAudiosForState: () => {},
-  loadSceneData: () => {},
-  states: ['Active', 'Spotted', 'Proximity', 'Trigger'], // Provide default states
-});
+
+  export const IntervalContext = createContext<IntervalContextType>({
+    intervals: {
+      active: 5000,
+      spotted: 6000,
+      proximity: 7000,
+      trigger: 8000,
+    },
+    setIntervals: () => {},
+    setIntervalForState: () => {},
+    selectedAudios: {
+      active: { audios: [], mode: 'Selected' },
+      spotted: { audios: [], mode: 'Selected' },
+      proximity: { audios: [], mode: 'Selected' },
+      trigger: { audios: [], mode: 'Selected' },
+    },
+    setSelectedAudios: () => {},
+    setSelectedAudiosForState: () => {},
+    loadSceneData: () => {},
+    states: ['Active', 'Spotted', 'Proximity', 'Trigger'],
+    setStates: () => {},
+  });
 
 type SceneProviderProps = {
   children: ReactNode;
@@ -115,6 +126,10 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     });
   };
 
+  useEffect(() => {
+    AsyncStorage.setItem('@states', JSON.stringify(states));
+  }, [states]);
+
   // Load intervals and selected audios from AsyncStorage on mount
   useEffect(() => {
     const loadData = async () => {
@@ -167,11 +182,14 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     <IntervalContext.Provider
       value={{
         intervals,
+        setIntervals,
         setIntervalForState,
         selectedAudios,
+        setSelectedAudios,
         setSelectedAudiosForState,
         loadSceneData,
-        states, // Provide states in context
+        states,
+        setStates,
       }}
     >
       {children}
