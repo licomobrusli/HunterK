@@ -1,35 +1,37 @@
 // src/screens/ActiveScreen.tsx
-import React, { useState } from 'react';
-import { TouchableOpacity, StyleSheet, View, Text } from 'react-native';
-import StateComponent from '../config/StateComponent'; // Import the generic StateComponent
+import { commonStyles } from '../styles/commonStyles';
 
-const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
+import React, { useState, useContext } from 'react';
+import { TouchableOpacity, View, Text } from 'react-native';
+import StateComponent from '../config/StateComponent'; // Import the generic StateComponent
+import { IntervalContext } from '../contexts/SceneProvider';
 
 const ActiveScreen: React.FC = () => {
+  const { states } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
 
   const handlePress = () => {
-    setCurrentStateIndex((prevIndex) => (prevIndex + 1) % STATES.length);
+    setCurrentStateIndex((prevIndex) => (prevIndex + 1) % states.length);
   };
 
   const handleAbort = () => {
     setCurrentStateIndex(0); // Reset to the "Active" state (index 0)
   };
 
-  const currentStateName = STATES[currentStateIndex];
+  const currentStateName = states[currentStateIndex];
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       {/* Render the StateComponent directly */}
       <StateComponent stateName={currentStateName} />
 
       {/* Overlay TouchableOpacity for handling presses */}
-      <TouchableOpacity style={styles.overlay} onPress={handlePress} />
+      <TouchableOpacity style={commonStyles.overlay} onPress={handlePress} />
 
       {/* Abort Button */}
-      <TouchableOpacity style={styles.abortButton} onPress={handleAbort}>
+      <TouchableOpacity style={commonStyles.abortButton} onPress={handleAbort}>
         <Text
-          style={styles.abortButtonText}
+          style={commonStyles.abortButtonText}
           testID="abortButton"
           accessibilityLabel="abortButton"
         >
@@ -41,27 +43,3 @@ const ActiveScreen: React.FC = () => {
 };
 
 export default ActiveScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  abortButton: {
-    position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-    backgroundColor: 'red',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  abortButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});

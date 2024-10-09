@@ -1,6 +1,8 @@
 // src/screens/modals/IntervalInputModal.tsx
+import { commonStyles } from '../../styles/commonStyles';
+
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { Modal, View, Text, TextInput, Button, Alert } from 'react-native';
 
 type IntervalInputModalProps = {
   visible: boolean;
@@ -67,11 +69,11 @@ const IntervalInputModal: React.FC<IntervalInputModalProps> = ({
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
-      <View style={styles.subModalContainer}>
-        <View style={styles.subModalContent}>
-          <Text style={styles.modalTitle}>Set Interval for {stateName}</Text>
+      <View style={commonStyles.subModalContainer}>
+        <View style={commonStyles.subModalContent}>
+          <Text style={commonStyles.modalTitle}>Set Interval for {stateName}</Text>
           <TextInput
-            style={styles.input}
+            style={commonStyles.input}
             value={inputInterval}
             onChangeText={handleChange}
             placeholder="mm:ss"
@@ -87,32 +89,3 @@ const IntervalInputModal: React.FC<IntervalInputModalProps> = ({
 };
 
 export default IntervalInputModal;
-
-const styles = StyleSheet.create({
-  subModalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  subModalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 10,
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 10,
-    textAlign: 'center',
-    backgroundColor: '#08591C',
-  },
-});

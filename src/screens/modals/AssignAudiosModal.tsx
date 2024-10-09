@@ -1,4 +1,6 @@
 // src/screens/modals/AssignAudiosModal.tsx
+import { commonStyles } from '../../styles/commonStyles';
+
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
@@ -6,7 +8,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import RNFS from 'react-native-fs';
@@ -89,10 +90,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
     return (
       <TouchableOpacity
-        style={[styles.item, isSelected && styles.selectedItem]}
+        style={[commonStyles.item, isSelected && commonStyles.selectedItem]}
         onPress={() => handleSelectAudio(item.path)}
       >
-        <Text style={styles.itemText}>
+        <Text style={commonStyles.itemText}>
           {item.name} {isSelected ? `(${index + 1})` : ''}
         </Text>
       </TouchableOpacity>
@@ -101,17 +102,17 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
   return (
     <Modal visible={visible} transparent={true} animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.title}>Assign Audios for {stateName}</Text>
+      <View style={commonStyles.modalContainer}>
+        <View style={commonStyles.modalContent}>
+          <Text style={commonStyles.title}>Assign Audios for {stateName}</Text>
 
           {/* Playback Mode Picker */}
-          <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>Playback Mode:</Text>
+          <View style={commonStyles.pickerContainer}>
+            <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
             <Picker
               selectedValue={playbackMode}
               onValueChange={(itemValue) => setPlaybackMode(itemValue as PlaybackMode)}
-              style={styles.picker}
+              style={commonStyles.picker}
             >
               <Picker.Item label="Selected" value="Selected" />
               <Picker.Item label="A-Z" value="A-Z" />
@@ -125,12 +126,12 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
             renderItem={renderItem}
           />
 
-          <TouchableOpacity onPress={handleSaveSelection} style={styles.saveButton}>
-            <Text style={styles.saveButtonText}>Save Selection</Text>
+          <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
+            <Text style={commonStyles.saveButtonText}>Save Selection</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Close</Text>
+          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
+            <Text style={commonStyles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -139,73 +140,3 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 };
 
 export default AssignAudiosModal;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '80%',
-    maxHeight: '80%',
-    backgroundColor: '#004225',
-    borderRadius: 10,
-    padding: 20,
-  },
-  title: {
-    fontSize: 22,
-    color: '#FFFFFF',
-    marginBottom: 15,
-    alignSelf: 'center',
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  pickerLabel: {
-    color: '#FFFFFF',
-    marginRight: 10,
-  },
-  picker: {
-    flex: 1,
-    color: '#FFFFFF',
-    backgroundColor: '#005F2E',
-  },
-  item: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#CCCCCC',
-  },
-  selectedItem: {
-    backgroundColor: '#005F2E',
-  },
-  itemText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  saveButton: {
-    marginTop: 15,
-    padding: 10,
-    backgroundColor: '#007F4E',
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#005F2E',
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-});

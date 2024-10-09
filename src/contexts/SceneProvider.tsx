@@ -1,8 +1,8 @@
 // src/contexts/SceneProvider.tsx
 import React, { useState, useEffect, createContext, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Scene } from '../types/Scene'; // Import Scene type
-import { PlaybackMode } from '../types/PlaybackMode'; // Import PlaybackMode type
+import { Scene } from '../types/Scene';
+import { PlaybackMode } from '../types/PlaybackMode';
 
 type IntervalContextType = {
   intervals: { [key: string]: number };
@@ -17,7 +17,8 @@ type IntervalContextType = {
     stateName: string,
     data: { audios: string[]; mode: PlaybackMode }
   ) => void;
-  loadSceneData: (scene: Scene) => void; // Include loadSceneData
+  loadSceneData: (scene: Scene) => void;
+  states: string[]; // Add states to context type
 };
 
 export const IntervalContext = createContext<IntervalContextType>({
@@ -35,30 +36,41 @@ export const IntervalContext = createContext<IntervalContextType>({
     trigger: { audios: [], mode: 'Selected' },
   },
   setSelectedAudiosForState: () => {},
-  loadSceneData: () => {}, // Provide a default implementation
+  loadSceneData: () => {},
+  states: ['Active', 'Spotted', 'Proximity', 'Trigger'], // Provide default states
 });
 
 type SceneProviderProps = {
   children: ReactNode;
 };
 
-const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
-
 const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
-  const [intervals, setIntervals] = useState<{ [key: string]: number }>({
-    active: 5000,
-    spotted: 6000,
-    proximity: 7000,
-    trigger: 8000,
+  // Replace fixed STATES array with state variable
+  const [states, setStates] = useState<string[]>([
+    'Active',
+    'Spotted',
+    'Proximity',
+    'Trigger',
+  ]);
+
+  const [intervals, setIntervals] = useState<{ [key: string]: number }>(() => {
+    const initialIntervals: { [key: string]: number } = {};
+    states.forEach((state) => {
+      initialIntervals[state.toLowerCase()] = 5000; // Use default intervals or your initial values
+    });
+    return initialIntervals;
   });
 
   const [selectedAudios, setSelectedAudios] = useState<{
     [key: string]: { audios: string[]; mode: PlaybackMode };
-  }>({
-    active: { audios: [], mode: 'Selected' },
-    spotted: { audios: [], mode: 'Selected' },
-    proximity: { audios: [], mode: 'Selected' },
-    trigger: { audios: [], mode: 'Selected' },
+  }>(() => {
+    const initialSelectedAudios: {
+      [key: string]: { audios: string[]; mode: PlaybackMode };
+    } = {};
+    states.forEach((state) => {
+      initialSelectedAudios[state.toLowerCase()] = { audios: [], mode: 'Selected' };
+    });
+    return initialSelectedAudios;
   });
 
   const setIntervalForState = (stateName: string, interval: number) => {
@@ -87,7 +99,7 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     setIntervals(scene.intervals);
     setSelectedAudios(scene.selectedAudios);
     // Update AsyncStorage
-    STATES.forEach((state) => {
+    states.forEach((state) => {
       const lowerState = state.toLowerCase();
       const interval = scene.intervals[lowerState];
       if (interval !== undefined) {
@@ -107,12 +119,17 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        const storedStates = await AsyncStorage.getItem('@states');
+        if (storedStates) {
+          setStates(JSON.parse(storedStates));
+        }
+
         const loadedIntervals: { [key: string]: number } = {};
         const loadedSelectedAudios: {
           [key: string]: { audios: string[]; mode: PlaybackMode };
         } = {};
 
-        for (const state of STATES) {
+        for (const state of states) {
           const lowerState = state.toLowerCase();
 
           const storedInterval = await AsyncStorage.getItem(
@@ -144,7 +161,7 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     };
 
     loadData();
-  }, []);
+  }, [states]);
 
   return (
     <IntervalContext.Provider
@@ -153,7 +170,8 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
         setIntervalForState,
         selectedAudios,
         setSelectedAudiosForState,
-        loadSceneData, // Include loadSceneData in context
+        loadSceneData,
+        states, // Provide states in context
       }}
     >
       {children}

@@ -1,7 +1,9 @@
 // StackNavigator.tsx
+import { commonStyles } from '../styles/commonStyles';
+
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -21,7 +23,7 @@ const StackNavigator: React.FC = () => {
   const renderSettingsIcon = (navigation: NativeStackNavigationProp<RootStackParamList>) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('Settings')}
-      style={styles.headerIcon}
+      style={commonStyles.headerIcon}
     >
       <Icon name="settings" size={24} color="#000" />
     </TouchableOpacity>
@@ -59,9 +61,3 @@ const StackNavigator: React.FC = () => {
 };
 
 export default StackNavigator;
-
-const styles = StyleSheet.create({
-  headerIcon: {
-    paddingRight: 15, // Optional: Add padding or other styles if needed
-  },
-});

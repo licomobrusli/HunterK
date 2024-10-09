@@ -1,6 +1,8 @@
 // src/config/StateComponent.tsx
+import { commonStyles } from '../styles/commonStyles';
+
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { IntervalContext } from '../contexts/SceneProvider';
 import usePlaySound from '../config/usePlaySound';
 
@@ -16,24 +18,11 @@ const StateComponent: React.FC<StateComponentProps> = ({ stateName }) => {
   usePlaySound(stateName, interval);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{stateName} State</Text>
+    <View style={commonStyles.container}>
+      <Text style={commonStyles.text}>{stateName} State</Text>
       {/* Additional UI or logic specific to the state can be added here */}
     </View>
   );
 };
 
 export default StateComponent;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#004225',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    color: '#FFFFFF',
-  },
-});

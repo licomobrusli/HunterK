@@ -1,4 +1,6 @@
 // src/screens/modals/SceneManagerModal.tsx
+import { commonStyles } from '../../styles/commonStyles';
+
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
@@ -7,12 +9,10 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { saveScene, loadScene, getSceneList, deleteScene } from '../../config/SceneStorage';
-import { commonStyles } from '../../styles/commonStyles';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
 
@@ -129,31 +129,31 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   };
 
   const renderSceneItem = ({ item }: { item: string }) => (
-    <View style={styles.sceneItemContainer}>
+    <View style={commonStyles.sceneItemContainer}>
       <TouchableOpacity
         onPress={() => handleLoadScene(item)}
-        style={styles.sceneItem}
+        style={commonStyles.sceneItem}
       >
-        <Text style={styles.sceneItemText}>{item}</Text>
+        <Text style={commonStyles.itemText}>{item}</Text>
       </TouchableOpacity>
       <TouchableOpacity
         onPress={() => handleDeleteScene(item)}
-        style={styles.deleteButton}
+        style={commonStyles.deleteButton}
       >
-        <Text style={styles.deleteButtonText}>Delete</Text>
+        <Text style={commonStyles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={styles.modalContainer}>
-        <Text style={styles.title}>Scene Management</Text>
+      <View style={commonStyles.modalContainer}>
+        <Text style={commonStyles.title}>Scene Management</Text>
 
         {/* Save Scene Section */}
-        <View style={styles.saveSection}>
+        <View style={commonStyles.section}>
           <TextInput
-            style={styles.input}
+            style={commonStyles.input}
             placeholder="Enter scene name"
             value={sceneName}
             onChangeText={setSceneName}
@@ -165,8 +165,8 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
         </View>
 
         {/* Load Scene Section */}
-        <View style={styles.loadSection}>
-          <Text style={styles.subtitle}>Saved Scenes:</Text>
+        <View style={commonStyles.section}>
+          <Text style={commonStyles.modalTitle}>Saved Scenes:</Text>
           <FlatList
             data={sceneList}
             keyExtractor={(item) => item}
@@ -175,7 +175,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
         </View>
 
         {/* Close Button */}
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
           <Text style={commonStyles.buttonText}>Close</Text>
         </TouchableOpacity>
       </View>
@@ -184,66 +184,3 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
 };
 
 export default SceneManagerModal;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#004225',
-  },
-  title: {
-    fontSize: 24,
-    color: '#FFFFFF',
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  saveSection: {
-    marginBottom: 30,
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-    color: '#000',
-  },
-  loadSection: {
-    flex: 1,
-  },
-  subtitle: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    marginBottom: 10,
-  },
-  sceneItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 5,
-  },
-  sceneItem: {
-    flex: 1,
-    padding: 10,
-  },
-  sceneItemText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  deleteButton: {
-    padding: 5,
-    backgroundColor: 'red',
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-  },
-  closeButton: {
-    padding: 10,
-    backgroundColor: '#007F4E',
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-});

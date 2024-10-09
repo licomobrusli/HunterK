@@ -1,4 +1,6 @@
 // src/screens/modals/SceneBuilderModal.tsx
+import { commonStyles } from '../../styles/commonStyles';
+
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Modal,
@@ -6,10 +8,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import AssignAudiosModal from './AssignAudiosModal';
 
@@ -32,13 +32,11 @@ const convertMinutesSecondsToMs = (time: string) => {
   return minutes * 60000 + seconds * 1000;
 };
 
-const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
-
 const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
   visible,
   onClose,
 }) => {
-  const { intervals, setIntervalForState } = useContext(IntervalContext);
+  const { intervals, setIntervalForState, states} = useContext(IntervalContext);
   const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>(
     {}
   );
@@ -52,7 +50,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
     const loadIntervals = async () => {
       try {
         const loadedIntervals: { [key: string]: string } = {};
-        for (const state of STATES) {
+        for (const state of states) {
           const storedInterval = await AsyncStorage.getItem(
             `@interval_${state.toLowerCase()}`
           );
@@ -76,11 +74,11 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
     if (visible) {
       loadIntervals();
     }
-  }, [visible, intervals]);
+  }, [visible, intervals, states]);
 
   const handleSave = async () => {
     try {
-      for (const state of STATES) {
+      for (const state of states) {
         const intervalMs = convertMinutesSecondsToMs(
           localIntervals[state.toLowerCase()]
         );
@@ -129,16 +127,16 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.title}>Scene Builder</Text>
-          {STATES.map((state) => (
-            <View key={state} style={styles.inputContainer}>
+      <View style={commonStyles.modalContainer}>
+        <View style={commonStyles.modalContent}>
+          <Text style={commonStyles.title}>Scene Builder</Text>
+          {states.map((state) => (
+            <View key={state} style={commonStyles.inputContainer}>
               <TouchableOpacity onPress={() => handleStatePress(state)}>
-                <Text style={styles.label}>{state}</Text>
+                <Text style={commonStyles.label}>{state}</Text>
               </TouchableOpacity>
               <TextInput
-                style={styles.input}
+                style={commonStyles.input}
                 value={localIntervals[state.toLowerCase()] || ''}
                 onChangeText={(value) => handleChange(state, value)}
                 keyboardType="numeric"
@@ -173,68 +171,3 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({
 };
 
 export default SceneBuilderModal;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: '#004225',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  subModalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subModalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 10,
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
-  },
-  inputContainer: {
-    marginBottom: 15,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 18,
-    color: '#fff',
-    textDecorationLine: 'underline', // Indicate it's clickable
-  },
-  input: {
-    width: 100,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#1b1b1b',
-  },
-});

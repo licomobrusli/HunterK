@@ -1,4 +1,6 @@
 // src/screens/modals/RecordAudioModal.tsx
+import { commonStyles } from '../../styles/commonStyles';
+
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   Modal,
@@ -7,7 +9,6 @@ import {
   TouchableOpacity,
   Platform,
   PermissionsAndroid,
-  StyleSheet,
   TextInput,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -15,7 +16,6 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IntervalInputModal from './IntervalInputModal';
-import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import ModalMessage from '../../config/ModalMessage'; // Import the custom message component
 import { sanitizeFileName } from '../../config/sanitizer';
@@ -25,20 +25,19 @@ type RecordAudioModalProps = {
   onClose: () => void;
 };
 
-const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
-
 const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { states } = useContext(IntervalContext);
   const { intervals, setIntervalForState } = useContext(IntervalContext);
-  const [selectedState, setSelectedState] = useState(STATES[0]);
+  const [selectedState, setSelectedState] = useState(states[0]);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
   const [showIntervalModal, setShowIntervalModal] = useState(false);
   const [recordingName, setRecordingName] = useState<string>(
-    STATES[0].toLowerCase()
+    states[0].toLowerCase()
   );
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -231,28 +230,28 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   return (
     <>
       <Modal visible={visible} animationType="slide">
-        <View style={styles.modalContainer}>
+        <View style={commonStyles.modalContainer}>
           {/* Display the message if it exists */}
           {message && <ModalMessage message={message.text} type={message.type} />}
 
-          <Text style={styles.title}>Record Audio</Text>
+          <Text style={commonStyles.title}>Record Audio</Text>
 
-          <Text style={styles.label}>Select State:</Text>
+          <Text style={commonStyles.label}>Select State:</Text>
           <Picker
             selectedValue={selectedState}
             onValueChange={(itemValue) => setSelectedState(itemValue)}
-            style={styles.picker}
+            style={commonStyles.picker}
             dropdownIconColor="#fff"
           >
-            {STATES.map((state) => (
+            {states.map((state) => (
               <Picker.Item label={state} value={state} key={state} />
             ))}
           </Picker>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Recording Name:</Text>
+          <View style={commonStyles.inputContainer}>
+            <Text style={commonStyles.label}>Recording Name:</Text>
             <TextInput
-              style={styles.textInput}
+              style={commonStyles.textInput}
               value={recordingName}
               onChangeText={setRecordingName}
               placeholder="Enter recording name"
@@ -260,7 +259,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
             />
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={commonStyles.buttonContainer}>
             <TouchableOpacity
               onPress={!isRecording ? onStartRecord : onStopRecord}
               style={[
@@ -275,7 +274,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={commonStyles.buttonContainer}>
             <TouchableOpacity
               onPress={!isPlayingBack ? onPlay : onStopPlay}
               style={[
@@ -291,7 +290,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <View style={styles.buttonContainer}>
+          <View style={commonStyles.buttonContainer}>
             <TouchableOpacity
               onPress={onSaveRecording}
               style={[
@@ -304,7 +303,7 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
             <Text style={commonStyles.buttonText}>Close</Text>
           </TouchableOpacity>
         </View>
@@ -324,49 +323,3 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 };
 
 export default RecordAudioModal;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#004225',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#fff',
-    alignSelf: 'center',
-  },
-  label: {
-    color: '#fff',
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  picker: {
-    marginBottom: 20,
-    height: 50,
-    width: '100%',
-    color: '#fff',
-    backgroundColor: '#333',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  textInput: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    color: '#fff',
-    backgroundColor: '#333',
-  },
-  buttonContainer: {
-    marginBottom: 15,
-  },
-  closeButton: {
-    marginTop: 20,
-    alignSelf: 'center',
-  },
-});

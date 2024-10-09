@@ -1,30 +1,56 @@
 // src/screens/modals/AudioManagerModal.tsx
-import React, { useState, useEffect } from 'react';
+import { commonStyles } from '../../styles/commonStyles';
+
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   Modal,
   View,
   Text,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import RNFS from 'react-native-fs';
+import { IntervalContext } from '../../contexts/SceneProvider';
 
 type AudioManagerModalProps = {
   visible: boolean;
   onClose: () => void;
 };
 
-const STATES = ['Active', 'Spotted', 'Proximity', 'Trigger'];
-
 const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
   visible,
   onClose,
 }) => {
+  const { states } = useContext(IntervalContext);
   const [currentPath, setCurrentPath] = useState<string>(RNFS.DocumentDirectoryPath);
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
   const [pathHistory, setPathHistory] = useState<string[]>([]);
+
+  const loadDirectory = useCallback(
+    async (path: string) => {
+      try {
+        const exists = await RNFS.exists(path);
+        if (!exists) {
+          console.log('Path does not exist:', path);
+          setItems([]);
+          return;
+        }
+        const directoryItems = await RNFS.readDir(path);
+        // Filter to only show state folders and audio files
+        const filteredItems = directoryItems.filter(
+          (item) =>
+            (item.isDirectory() && states.includes(item.name)) ||
+            (item.isFile() && item.name.endsWith('.mp3'))
+        );
+        setItems(filteredItems);
+      } catch (error) {
+        console.error('Error reading directory:', error);
+        setItems([]);
+      }
+    },
+    [states] // Dependencies of loadDirectory
+  );
 
   useEffect(() => {
     if (visible) {
@@ -32,35 +58,13 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
       setPathHistory([]);
       loadDirectory(RNFS.DocumentDirectoryPath);
     }
-  }, [visible]);
+  }, [visible, loadDirectory]);
 
   useEffect(() => {
     if (visible) {
       loadDirectory(currentPath);
     }
-  }, [currentPath, visible]);
-
-  const loadDirectory = async (path: string) => {
-    try {
-      const exists = await RNFS.exists(path);
-      if (!exists) {
-        console.log('Path does not exist:', path);
-        setItems([]);
-        return;
-      }
-      const directoryItems = await RNFS.readDir(path);
-      // Filter to only show state folders and audio files
-      const filteredItems = directoryItems.filter(
-        (item) =>
-          (item.isDirectory() && STATES.includes(item.name)) ||
-          (item.isFile() && item.name.endsWith('.mp3'))
-      );
-      setItems(filteredItems);
-    } catch (error) {
-      console.error('Error reading directory:', error);
-      setItems([]);
-    }
-  };
+  }, [currentPath, visible, loadDirectory]);
 
   const handleItemPress = (item: RNFS.ReadDirItem) => {
     if (item.isDirectory()) {
@@ -108,29 +112,27 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
   };
 
   const renderItem = ({ item }: { item: RNFS.ReadDirItem }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => handleItemPress(item)}
-    >
-      <Text style={styles.itemText}>
-        {item.isDirectory() ? '[Folder] ' : ''}{item.name}
+    <TouchableOpacity style={commonStyles.item} onPress={() => handleItemPress(item)}>
+      <Text style={commonStyles.itemText}>
+        {item.isDirectory() ? '[Folder] ' : ''}
+        {item.name}
       </Text>
     </TouchableOpacity>
   );
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={styles.modalContainer}>
+      <View style={commonStyles.modalContainer}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Text style={styles.backButtonText}>{'< Back'}</Text>
+        <View style={commonStyles.header}>
+          <TouchableOpacity onPress={handleBack} style={commonStyles.backButton}>
+            <Text style={commonStyles.backButtonText}>{'< Back'}</Text>
           </TouchableOpacity>
-          <Text style={styles.currentPath}>
+          <Text style={commonStyles.currentPath}>
             {currentPath.replace(RNFS.DocumentDirectoryPath, '') || '/'}
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>{'Close'}</Text>
+          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
+            <Text style={commonStyles.closeButtonText}>{'Close'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -139,7 +141,7 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
           data={items}
           keyExtractor={(item) => item.path}
           renderItem={renderItem}
-          style={styles.list}
+          style={commonStyles.list}
         />
       </View>
     </Modal>
@@ -147,49 +149,3 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
 };
 
 export default AudioManagerModal;
-
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#004225',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingTop: 40,
-    paddingBottom: 10,
-    backgroundColor: '#003015',
-  },
-  backButton: {
-    padding: 10,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  currentPath: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  closeButton: {
-    padding: 10,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  list: {
-    flex: 1,
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  itemText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-});

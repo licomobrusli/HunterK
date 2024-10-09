@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+// src/screens/SettingsScreen.tsx
+import { commonStyles } from '../styles/commonStyles';
+
+import React, { useState, useContext } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
 import SceneBuilderModal from './modals/SceneBuilderModal';
 import AudioManagerModal from './modals/AudioManagerModal';
 import SceneManagerModal from './modals/SceneManagerModal';
+import { IntervalContext } from '../contexts/SceneProvider';
 import RNFS from 'react-native-fs';
 
 const SettingsScreen: React.FC = () => {
@@ -28,8 +32,9 @@ const SettingsScreen: React.FC = () => {
     setSceneManagerVisible(true);
   };
 
+  const { states } = useContext(IntervalContext);
+
   const deleteCustomAudioFiles = async () => {
-    const states = ['Active', 'Spotted', 'Proximity', 'Trigger'];
     try {
       for (const state of states) {
         const stateDir = `${RNFS.DocumentDirectoryPath}/${state}`;
@@ -65,25 +70,25 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={openRecordAudioModal} style={styles.menuItem}>
-        <Text style={styles.menuText}>Record Audios</Text>
+    <View style={commonStyles.container}>
+      <TouchableOpacity onPress={openRecordAudioModal} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Record Audios</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={openSceneBuilderModal} style={styles.menuItem}>
-        <Text style={styles.menuText}>Scene Builder</Text>
+      <TouchableOpacity onPress={openSceneBuilderModal} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Scene Builder</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleDeleteAudioPress} style={styles.menuItem}>
-        <Text style={styles.menuText}>Delete Custom Audios</Text>
+      <TouchableOpacity onPress={handleDeleteAudioPress} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Delete Custom Audios</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={openAudioManager} style={styles.menuItem}>
-        <Text style={styles.menuText}>Manage Audio Files</Text>
+      <TouchableOpacity onPress={openAudioManager} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Manage Audio Files</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={openSceneManager} style={styles.menuItem}>
-        <Text style={styles.menuText}>Scene Management</Text>
+      <TouchableOpacity onPress={openSceneManager} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Scene Management</Text>
       </TouchableOpacity>
 
       <RecordAudioModal
@@ -111,19 +116,3 @@ const SettingsScreen: React.FC = () => {
 };
 
 export default SettingsScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 20,
-    backgroundColor: '#004225', // British Racing Green
-  },
-  menuItem: {
-    paddingVertical: 15,
-  },
-  menuText: {
-    fontSize: 18,
-    color: '#fff', // change to a cream colour off-white
-  },
-});
