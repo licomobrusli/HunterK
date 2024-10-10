@@ -1,5 +1,7 @@
 // src/styles/commonStyles.ts
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export const commonStyles = StyleSheet.create({
   // **Containers**
@@ -8,19 +10,6 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#004225', // British Racing Green
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: '#004225',
-    borderRadius: 10,
-    alignItems: 'center',
   },
   subModalContainer: {
     flex: 1,
@@ -67,11 +56,6 @@ export const commonStyles = StyleSheet.create({
     color: '#FFFFFF',
     alignSelf: 'center',
   },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: '#FFFFFF',
-  },
   backButtonText: {
     color: '#fff',
     fontSize: 16,
@@ -83,11 +67,6 @@ export const commonStyles = StyleSheet.create({
   itemText: {
     color: '#fff',
     fontSize: 16,
-  },
-  buttonText: {
-    color: '#ffffff', // White text color
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   menuText: {
     fontSize: 18,
@@ -145,12 +124,6 @@ export const commonStyles = StyleSheet.create({
   saveButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-  },
-  deleteButton: {
-    padding: 5,
-    backgroundColor: 'red',
-    borderRadius: 5,
-    marginLeft: 10,
   },
   deleteButtonText: {
     color: '#FFFFFF',
@@ -257,10 +230,6 @@ export const commonStyles = StyleSheet.create({
     textDecorationLine: 'underline', // Indicate it's clickable
   },
 
-  buttonContainer: {
-    marginBottom: 15,
-  },
-
   // **Messages**
   success: {
     backgroundColor: '#4CAF50', // Green color for success messages
@@ -327,6 +296,58 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 5,
     color: '#1b1b1b',
     marginRight: 10,
+  },
+
+   // **Modal Styles**
+   modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+  },
+  modalContent: {
+    backgroundColor: '#004225', // British Racing Green
+    padding: 20,
+    borderRadius: 10,
+    width: (7 / 8) * width, // 7/8ths of screen width
+    minHeight: (2 / 3) * height, // Minimum 2/3rds of screen height
+    maxHeight: height * 0.9, // Allow up to 90% of screen height
+    alignItems: 'center',
+    justifyContent: 'flex-start', // Start from the top
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalScrollView: {
+    flexGrow: 1,
+    width: '100%',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#aaa', // Gray color for cancel
+    padding: 10,
+    borderRadius: 5,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 
 });

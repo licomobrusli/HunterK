@@ -1,15 +1,14 @@
 // src/screens/modals/RecordAudioModal.tsx
-import { commonStyles } from '../../styles/commonStyles';
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
   Platform,
   PermissionsAndroid,
   TextInput,
+  StyleSheet, // Import StyleSheet to define local styles
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
@@ -17,8 +16,10 @@ import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import IntervalInputModal from './IntervalInputModal';
 import { IntervalContext } from '../../contexts/SceneProvider';
-import ModalMessage from '../../config/ModalMessage'; // Import the custom message component
+import ModalMessage from '../../config/ModalMessage';
 import { sanitizeFileName } from '../../config/sanitizer';
+import { commonStyles } from '../../styles/commonStyles';
+import Modal from '../../styles/AppModal'; // Update import path
 
 type RecordAudioModalProps = {
   visible: boolean;
@@ -31,15 +32,22 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 }) => {
   const { states } = useContext(IntervalContext);
   const { intervals, setIntervalForState } = useContext(IntervalContext);
-  const [selectedState, setSelectedState] = useState(states[0]);
+
+  const [selectedState, setSelectedState] = useState<string>(
+    states && states.length > 0 ? states[0] : ''
+  );
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
   const [showIntervalModal, setShowIntervalModal] = useState(false);
   const [recordingName, setRecordingName] = useState<string>(
-    states[0].toLowerCase()
+    selectedState ? selectedState.toLowerCase() : ''
   );
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
@@ -85,12 +93,17 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 
   useEffect(() => {
     // Reset recording name when selectedState changes
-    setRecordingName(selectedState.toLowerCase());
+    if (selectedState) {
+      setRecordingName(selectedState.toLowerCase());
+    } else {
+      setRecordingName('');
+    }
   }, [selectedState]);
 
   // Sanitize recording name
   const sanitizedRecordingName = sanitizeFileName(recordingName);
 
+  // Define the missing functions
   const onStartRecord = async () => {
     try {
       const path = `${RNFS.DocumentDirectoryPath}/recordedAudio.mp3`;
@@ -162,6 +175,11 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
   };
 
   const handleIntervalSave = async (newInterval: number) => {
+    if (!selectedState) {
+      console.error('No state selected.');
+      return;
+    }
+
     const documentsPath = RNFS.DocumentDirectoryPath;
     const stateFolder = `${documentsPath}/${selectedState}`;
 
@@ -229,86 +247,97 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
 
   return (
     <>
-      <Modal visible={visible} animationType="slide">
-        <View style={commonStyles.modalContainer}>
+      {/* Updated Modal usage */}
+      <Modal isVisible={visible} onClose={onClose}>
+        <View style={commonStyles.modalContent}>
           {/* Display the message if it exists */}
           {message && <ModalMessage message={message.text} type={message.type} />}
 
-          <Text style={commonStyles.title}>Record Audio</Text>
+          {states && states.length > 0 ? (
+            <>
+              <Text style={commonStyles.title}>Record Audio</Text>
 
-          <Text style={commonStyles.label}>Select State:</Text>
-          <Picker
-            selectedValue={selectedState}
-            onValueChange={(itemValue) => setSelectedState(itemValue)}
-            style={commonStyles.picker}
-            dropdownIconColor="#fff"
-          >
-            {states.map((state) => (
-              <Picker.Item label={state} value={state} key={state} />
-            ))}
-          </Picker>
+              <Text style={commonStyles.label}>Select State:</Text>
+              <Picker
+                selectedValue={selectedState}
+                onValueChange={(itemValue) => setSelectedState(itemValue)}
+                style={commonStyles.picker}
+                dropdownIconColor="#fff"
+              >
+                {states.map((state) => (
+                  <Picker.Item label={state} value={state} key={state} />
+                ))}
+              </Picker>
 
-          <View style={commonStyles.inputContainer}>
-            <Text style={commonStyles.label}>Recording Name:</Text>
-            <TextInput
-              style={commonStyles.textInput}
-              value={recordingName}
-              onChangeText={setRecordingName}
-              placeholder="Enter recording name"
-              placeholderTextColor="#aaa"
-            />
-          </View>
+              {/* Recording Name Input */}
+              <View style={commonStyles.inputContainer}>
+                <Text style={commonStyles.label}>Recording Name:</Text>
+                <TextInput
+                  style={commonStyles.textInput}
+                  value={recordingName}
+                  onChangeText={setRecordingName}
+                  placeholder="Enter recording name"
+                  placeholderTextColor="#aaa"
+                />
+              </View>
 
-          <View style={commonStyles.buttonContainer}>
-            <TouchableOpacity
-              onPress={!isRecording ? onStartRecord : onStopRecord}
-              style={[
-                commonStyles.button,
-                isRecording && commonStyles.disabledButton,
-              ]}
-              disabled={isRecording && !recordedFilePath}
-            >
-              <Text style={commonStyles.buttonText}>
-                {!isRecording ? 'Start Recording' : 'Stop Recording'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              {/* Recording Controls */}
+              <View style={commonStyles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={!isRecording ? onStartRecord : onStopRecord}
+                  style={[
+                    commonStyles.button,
+                    isRecording && localStyles.disabledButton, // Use localStyles
+                  ]}
+                  disabled={isRecording && !recordedFilePath}
+                >
+                  <Text style={commonStyles.buttonText}>
+                    {!isRecording ? 'Start Recording' : 'Stop Recording'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-          <View style={commonStyles.buttonContainer}>
-            <TouchableOpacity
-              onPress={!isPlayingBack ? onPlay : onStopPlay}
-              style={[
-                commonStyles.button,
-                (!recordedFilePath || isPlayingBack) &&
-                  commonStyles.disabledButton,
-              ]}
-              disabled={!recordedFilePath || isPlayingBack}
-            >
-              <Text style={commonStyles.buttonText}>
-                {!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <View style={commonStyles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={!isPlayingBack ? onPlay : onStopPlay}
+                  style={[
+                    commonStyles.button,
+                    (!recordedFilePath || isPlayingBack) &&
+                      localStyles.disabledButton, // Use localStyles
+                  ]}
+                  disabled={!recordedFilePath || isPlayingBack}
+                >
+                  <Text style={commonStyles.buttonText}>
+                    {!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
 
-          <View style={commonStyles.buttonContainer}>
-            <TouchableOpacity
-              onPress={onSaveRecording}
-              style={[
-                commonStyles.button,
-                !recordedFilePath && commonStyles.disabledButton,
-              ]}
-              disabled={!recordedFilePath}
-            >
-              <Text style={commonStyles.buttonText}>Save Recording</Text>
-            </TouchableOpacity>
-          </View>
+              <View style={commonStyles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={onSaveRecording}
+                  style={[
+                    commonStyles.button,
+                    !recordedFilePath && localStyles.disabledButton, // Use localStyles
+                  ]}
+                  disabled={!recordedFilePath}
+                >
+                  <Text style={commonStyles.buttonText}>Save Recording</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <Text style={localStyles.errorText}>
+              No states available. Please check your scene configuration.
+            </Text>
+          )}
 
           <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
             <Text style={commonStyles.buttonText}>Close</Text>
           </TouchableOpacity>
         </View>
 
-        {showIntervalModal && (
+        {showIntervalModal && selectedState && (
           <IntervalInputModal
             visible={showIntervalModal}
             onClose={() => setShowIntervalModal(false)}
@@ -321,5 +350,17 @@ const RecordAudioModal: React.FC<RecordAudioModalProps> = ({
     </>
   );
 };
+
+const localStyles = StyleSheet.create({
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  disabledButton: {
+    backgroundColor: '#888', // Adjust as needed
+  },
+});
 
 export default RecordAudioModal;

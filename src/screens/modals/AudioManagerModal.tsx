@@ -3,7 +3,6 @@ import { commonStyles } from '../../styles/commonStyles';
 
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import { IntervalContext } from '../../contexts/SceneProvider';
+import Modal from '../../styles/AppModal'; // Update import path
 
 type AudioManagerModalProps = {
   visible: boolean;
@@ -121,7 +121,7 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
   );
 
   return (
-    <Modal visible={visible} animationType="slide">
+    <Modal isVisible={visible} onClose={onClose}>
       <View style={commonStyles.modalContainer}>
         {/* Header */}
         <View style={commonStyles.header}>

@@ -1,20 +1,24 @@
 // src/screens/SettingsScreen.tsx
-import { commonStyles } from '../styles/commonStyles';
 
 import React, { useState, useContext } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
 import SceneBuilderModal from './modals/SceneBuilderModal';
 import AudioManagerModal from './modals/AudioManagerModal';
 import SceneManagerModal from './modals/SceneManagerModal';
 import { IntervalContext } from '../contexts/SceneProvider';
 import RNFS from 'react-native-fs';
+import { commonStyles } from '../styles/commonStyles';
+import AppModal from '../styles/AppModal'; // Ensure correct import path
 
 const SettingsScreen: React.FC = () => {
-  const [recordModalVisible, setRecordModalVisible] = useState(false);
-  const [sceneBuilderModalVisible, setSceneBuilderModalVisible] = useState(false);
-  const [audioManagerVisible, setAudioModalVisible] = useState(false);
-  const [sceneManagerVisible, setSceneManagerVisible] = useState(false);
+  const [recordModalVisible, setRecordModalVisible] = useState<boolean>(false);
+  const [sceneBuilderModalVisible, setSceneBuilderModalVisible] = useState<boolean>(false);
+  const [audioManagerVisible, setAudioModalVisible] = useState<boolean>(false);
+  const [sceneManagerVisible, setSceneManagerVisible] = useState<boolean>(false);
+  const [confirmDeleteModalVisible, setConfirmDeleteModalVisible] = useState<boolean>(false);
+
+  const { states } = useContext(IntervalContext);
 
   const openRecordAudioModal = () => {
     setRecordModalVisible(true);
@@ -32,9 +36,12 @@ const SettingsScreen: React.FC = () => {
     setSceneManagerVisible(true);
   };
 
-  const { states } = useContext(IntervalContext);
+  const handleDeleteAudioPress = () => {
+    console.log('Initiating deletion of custom audio files.');
+    setConfirmDeleteModalVisible(true);
+  };
 
-  const deleteCustomAudioFiles = async () => {
+  const confirmDeleteAudioFiles = async () => {
     try {
       for (const state of states) {
         const stateDir = `${RNFS.DocumentDirectoryPath}/${state}`;
@@ -51,22 +58,12 @@ const SettingsScreen: React.FC = () => {
           }
         }
       }
-      Alert.alert('Success', 'Custom audio files deleted successfully.');
+      console.log('Custom audio files deleted successfully.');
     } catch (error) {
       console.error('Error during audio file cleanup:', error);
-      Alert.alert('Error', 'Failed to delete custom audio files.');
+    } finally {
+      setConfirmDeleteModalVisible(false);
     }
-  };
-
-  const handleDeleteAudioPress = () => {
-    Alert.alert(
-      'Delete Audio Files',
-      'Are you sure you want to delete all custom audio files?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: deleteCustomAudioFiles },
-      ]
-    );
   };
 
   return (
@@ -91,6 +88,31 @@ const SettingsScreen: React.FC = () => {
         <Text style={commonStyles.menuText}>Scene Management</Text>
       </TouchableOpacity>
 
+      {/* Confirmation Modal */}
+      <AppModal
+        isVisible={confirmDeleteModalVisible}
+        onClose={() => setConfirmDeleteModalVisible(false)}
+      >
+        <Text style={commonStyles.modalText}>
+          Are you sure you want to delete all custom audios?
+        </Text>
+        <View style={commonStyles.buttonContainer}>
+          <TouchableOpacity
+            onPress={confirmDeleteAudioFiles}
+            style={commonStyles.deleteButton}
+          >
+            <Text style={commonStyles.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setConfirmDeleteModalVisible(false)}
+            style={commonStyles.cancelButton}
+          >
+            <Text style={commonStyles.buttonText}>No</Text>
+          </TouchableOpacity>
+        </View>
+      </AppModal>
+
+      {/* Other Modals */}
       <RecordAudioModal
         visible={recordModalVisible}
         onClose={() => setRecordModalVisible(false)}
@@ -110,7 +132,6 @@ const SettingsScreen: React.FC = () => {
         visible={sceneManagerVisible}
         onClose={() => setSceneManagerVisible(false)}
       />
-
     </View>
   );
 };

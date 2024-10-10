@@ -3,7 +3,6 @@ import { commonStyles } from '../../styles/commonStyles';
 
 import React, { useState, useEffect, useContext } from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker'; // Updated import
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { PlaybackMode } from '../../types/PlaybackMode';
+import AppModal from '../../styles/AppModal';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -101,41 +101,42 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} transparent={true} animationType="slide">
-      <View style={commonStyles.modalContainer}>
-        <View style={commonStyles.modalContent}>
-          <Text style={commonStyles.title}>Assign Audios for {stateName}</Text>
+    <AppModal
+      isVisible={visible}
+      onClose={onClose}
+      animationIn="zoomIn" // Optional: Override animation if needed
+      animationOut="zoomOut"
+    >
+      <Text style={commonStyles.title}>Assign Audios for {stateName}</Text>
 
-          {/* Playback Mode Picker */}
-          <View style={commonStyles.pickerContainer}>
-            <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
-            <Picker
-              selectedValue={playbackMode}
-              onValueChange={(itemValue) => setPlaybackMode(itemValue as PlaybackMode)}
-              style={commonStyles.picker}
-            >
-              <Picker.Item label="Selected" value="Selected" />
-              <Picker.Item label="A-Z" value="A-Z" />
-              <Picker.Item label="Random" value="Random" />
-            </Picker>
-          </View>
-
-          <FlatList
-            data={audioFiles}
-            keyExtractor={(item) => item.path}
-            renderItem={renderItem}
-          />
-
-          <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
-            <Text style={commonStyles.saveButtonText}>Save Selection</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
-            <Text style={commonStyles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Playback Mode Picker */}
+      <View style={commonStyles.pickerContainer}>
+        <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
+        <Picker
+          selectedValue={playbackMode}
+          onValueChange={(itemValue) => setPlaybackMode(itemValue as PlaybackMode)}
+          style={commonStyles.picker}
+        >
+          <Picker.Item label="Selected" value="Selected" />
+          <Picker.Item label="A-Z" value="A-Z" />
+          <Picker.Item label="Random" value="Random" />
+        </Picker>
       </View>
-    </Modal>
+
+      <FlatList
+        data={audioFiles}
+        keyExtractor={(item) => item.path}
+        renderItem={renderItem}
+      />
+
+      <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
+        <Text style={commonStyles.saveButtonText}>Save Selection</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
+        <Text style={commonStyles.closeButtonText}>Close</Text>
+      </TouchableOpacity>
+    </AppModal>
   );
 };
 

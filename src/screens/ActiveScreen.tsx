@@ -15,7 +15,7 @@ const ActiveScreen: React.FC = () => {
   };
 
   const handleAbort = () => {
-    setCurrentStateIndex(0); // Reset to the "Active" state (index 0)
+    setCurrentStateIndex(0); // Reset to the first state
   };
 
   const currentStateName = states[currentStateIndex];
