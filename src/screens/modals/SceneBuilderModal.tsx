@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
-  StyleSheet,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Feather';
@@ -276,14 +275,13 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.modalContainer}>
         <View style={commonStyles.modalContent}>
           <Text style={commonStyles.title}>Scene Builder</Text>
           <FlatList
             data={states}
             keyExtractor={(item) => item}
             renderItem={({ item, index }) => (
-              <View key={item} style={styles.stateRow}>
+              <View key={item} style={commonStyles.stateColumnRow}>
                 {/* Position Number Input */}
                 <TextInput
                   style={commonStyles.positionInput}
@@ -296,7 +294,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
 
                 {/* State Name */}
                 <TouchableOpacity onPress={() => handleStatePress(item)}>
-                  <Text style={commonStyles.label}>{item}</Text>
+                  <Text style={commonStyles.fixedWidthLabel}>{item}</Text>
                 </TouchableOpacity>
 
                 {/* Interval Input */}
@@ -350,11 +348,6 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           <TouchableOpacity onPress={handleSave} style={commonStyles.saveButton}>
             <Text style={commonStyles.saveButtonText}>Save Intervals</Text>
           </TouchableOpacity>
-
-          {/* Close Button */}
-          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
-            <Text style={commonStyles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Assign Audios Sub-Modal */}
@@ -365,17 +358,8 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
             stateName={selectedState}
           />
         )}
-      </View>
     </AppModal>
   );
 };
-
-const styles = StyleSheet.create({
-  stateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
-  },
-});
 
 export default SceneBuilderModal;

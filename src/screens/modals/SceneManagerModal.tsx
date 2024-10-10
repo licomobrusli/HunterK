@@ -142,21 +142,30 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   );
 
   return (
-    <AppModal isVisible={visible} onClose={onClose}>
-      {/* Removed the extra View; content is directly inside AppModal */}
+    <AppModal
+      isVisible={visible}
+      onClose={onClose}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+    >
       <Text style={commonStyles.title}>Scene Management</Text>
 
       {/* Save Scene Section */}
-      <View style={styles.section}>
+      <View style={styles.inputRow}>
         <TextInput
-          style={commonStyles.textInput} // Use commonStyles instead of local styles
+          style={commonStyles.textInput}
           placeholder="Enter scene name"
           value={sceneName}
           onChangeText={setSceneName}
           placeholderTextColor="#aaa"
         />
-        <TouchableOpacity onPress={handleSaveScene} style={commonStyles.button}>
-          <Text style={commonStyles.buttonText}>Save Current Scene</Text>
+        <TouchableOpacity
+          onPress={handleSaveScene}
+          style={styles.saveButton}
+          accessibilityLabel="Save current scene"
+          accessibilityRole="button"
+        >
+          <Icon name="save" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -168,18 +177,30 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
           keyExtractor={(item) => item}
           renderItem={renderSceneItem}
           ListEmptyComponent={<Text style={commonStyles.text}>No saved scenes.</Text>}
+          style={styles.flatList}
         />
       </View>
 
-      {/* Close Button */}
-      <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
-        <Text style={commonStyles.buttonText}>Close</Text>
-      </TouchableOpacity>
+      {/* Removed the Close button since "X" is now in the header */}
     </AppModal>
   );
 };
 
 const styles = StyleSheet.create({
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 10,
+  },
+  saveButton: {
+    marginLeft: 10,
+    padding: 10,
+    backgroundColor: '#008000', // Same as commonStyles.button background color
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   section: {
     marginVertical: 10,
     width: '100%',
@@ -196,6 +217,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ff4d4d',
     padding: 5,
     borderRadius: 5,
+  },
+  flatList: {
+    width: '100%',
   },
 });
 

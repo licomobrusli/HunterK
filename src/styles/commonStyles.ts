@@ -19,7 +19,7 @@ export const commonStyles = StyleSheet.create({
   },
   subModalContent: {
     width: 300,
-    padding: 20,
+    padding: 10,
     backgroundColor: '#fff',
     borderRadius: 10,
     alignItems: 'center',
@@ -29,7 +29,7 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
-    paddingTop: 40,
+    paddingTop: 10,
     paddingBottom: 10,
     backgroundColor: '#003015',
   },
@@ -47,7 +47,7 @@ export const commonStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 20,
+    marginBottom: 10,
     alignSelf: 'center',
   },
   modalTitle: {
@@ -84,7 +84,7 @@ export const commonStyles = StyleSheet.create({
   // **Buttons**
   button: {
     backgroundColor: '#FF6347', // Tomato color for the button background
-    padding: 15,
+    padding: 10,
     borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -105,7 +105,7 @@ export const commonStyles = StyleSheet.create({
     left: 20,
     right: 20,
     backgroundColor: 'red',
-    paddingVertical: 15,
+    paddingVertical: 10,
     borderRadius: 10,
     alignItems: 'center',
   },
@@ -115,7 +115,7 @@ export const commonStyles = StyleSheet.create({
     fontWeight: 'bold',
   },
   saveButton: {
-    marginTop: 15,
+    marginTop: 10,
     padding: 10,
     backgroundColor: '#007F4E',
     borderRadius: 5,
@@ -130,19 +130,19 @@ export const commonStyles = StyleSheet.create({
     fontSize: 14,
   },
   headerIcon: {
-    paddingRight: 15, // Optional: Add padding or other styles if needed
+    paddingRight: 10,
   },
 
   // **Inputs**
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 10,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   input: {
-    width: 100,
+    width: 80,
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
@@ -160,7 +160,7 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: '#333',
   },
   picker: {
-    marginBottom: 20,
+    marginBottom: 10,
     height: 50,
     width: '100%',
     color: '#fff',
@@ -169,14 +169,14 @@ export const commonStyles = StyleSheet.create({
 
   // **List Items**
   item: {
-    padding: 15,
+    padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
 
   // **Menu Items**
   menuItem: {
-    paddingVertical: 15,
+    paddingVertical: 10,
   },
 
   // **Overlay**
@@ -205,7 +205,7 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 5,
+    paddingVertical: 10,
   },
   sceneItem: {
     flex: 1,
@@ -214,13 +214,13 @@ export const commonStyles = StyleSheet.create({
   sceneTitle: {
     fontSize: 22,
     color: '#FFFFFF',
-    marginBottom: 15,
+    marginBottom: 10,
     alignSelf: 'center',
   },
 
   // **Sections**
   section: {
-    marginBottom: 30, // Combined style for saveSection and loadSection
+    marginBottom: 10, // Combined style for saveSection and loadSection
     width: '100%',
   },
 
@@ -252,7 +252,7 @@ export const commonStyles = StyleSheet.create({
   pickerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     width: '100%',
   },
   pickerLabel: {
@@ -271,20 +271,19 @@ export const commonStyles = StyleSheet.create({
   addStateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
     width: '100%',
   },
 
   positionInput: {
     width: 40,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'black',
     padding: 5,
     textAlign: 'center',
     backgroundColor: '#fff',
     borderRadius: 5,
     color: '#1b1b1b',
-    marginRight: 10,
   },
 
   newStateInput: {
@@ -307,7 +306,7 @@ export const commonStyles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#004225', // British Racing Green
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     width: (7 / 8) * width, // 7/8ths of screen width
     minHeight: (2 / 3) * height, // Minimum 2/3rds of screen height
@@ -318,12 +317,8 @@ export const commonStyles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     color: '#FFFFFF',
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
-  },
-  modalScrollView: {
-    flexGrow: 1,
-    width: '100%',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -338,7 +333,6 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#aaa', // Gray color for cancel
     padding: 10,
     borderRadius: 5,
     minWidth: 80,
@@ -349,6 +343,29 @@ export const commonStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
+  iconButton: {
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  stateColumnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+    // **Fixed Width Label**
+    fixedWidthLabel: {
+      width: 100, // Adjust the width as needed
+      fontSize: 16,
+      color: '#FFFFFF',
+      backgroundColor: '#333', // Optional background color
+      textAlign: 'center', // Center the text
+      paddingVertical: 10,
+      borderRadius: 5,
+    },
 });
 

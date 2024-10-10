@@ -1,5 +1,4 @@
 // src/screens/modals/AssignAudiosModal.tsx
-import { commonStyles } from '../../styles/commonStyles';
 
 import React, { useState, useEffect, useContext } from 'react';
 import {
@@ -8,11 +7,13 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  StyleSheet,
 } from 'react-native';
-import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker'; // Updated import
+import RNFS from 'react-native-fs';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { PlaybackMode } from '../../types/PlaybackMode';
+import { commonStyles } from '../../styles/commonStyles';
 import AppModal from '../../styles/AppModal';
 
 type AssignAudiosModalProps = {
@@ -104,8 +105,8 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     <AppModal
       isVisible={visible}
       onClose={onClose}
-      animationIn="zoomIn" // Optional: Override animation if needed
-      animationOut="zoomOut"
+      animationIn="fadeIn"
+      animationOut="fadeOut"
     >
       <Text style={commonStyles.title}>Assign Audios for {stateName}</Text>
 
@@ -127,17 +128,20 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         data={audioFiles}
         keyExtractor={(item) => item.path}
         renderItem={renderItem}
+        style={styles.flatList}
       />
 
       <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
         <Text style={commonStyles.saveButtonText}>Save Selection</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
-        <Text style={commonStyles.closeButtonText}>Close</Text>
-      </TouchableOpacity>
     </AppModal>
   );
 };
+
+const styles = StyleSheet.create({
+  flatList: {
+    width: '100%',
+  },
+});
 
 export default AssignAudiosModal;

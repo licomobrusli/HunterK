@@ -122,7 +122,6 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.modalContainer}>
         {/* Header */}
         <View style={commonStyles.header}>
           <TouchableOpacity onPress={handleBack} style={commonStyles.backButton}>
@@ -131,19 +130,14 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
           <Text style={commonStyles.currentPath}>
             {currentPath.replace(RNFS.DocumentDirectoryPath, '') || '/'}
           </Text>
-          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton}>
-            <Text style={commonStyles.closeButtonText}>{'Close'}</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Content */}
         <FlatList
           data={items}
           keyExtractor={(item) => item.path}
           renderItem={renderItem}
           style={commonStyles.list}
         />
-      </View>
     </Modal>
   );
 };
