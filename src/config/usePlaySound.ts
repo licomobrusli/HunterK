@@ -7,6 +7,7 @@ import { IntervalContext } from '../contexts/SceneProvider';
 const usePlaySound = (stateName: string, interval: number) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
+  const soundRef = useRef<Sound | null>(null);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -55,6 +56,14 @@ const usePlaySound = (stateName: string, interval: number) => {
           return;
         }
 
+        // Stop any previously playing sound
+        if (soundRef.current) {
+          soundRef.current.stop(() => {
+            soundRef.current?.release();
+          });
+          isPlaying = false;
+        }
+
         // Initialize the sound
         const sound = new Sound(currentAudioPath, '', (error) => {
           if (error) {
@@ -63,6 +72,7 @@ const usePlaySound = (stateName: string, interval: number) => {
           }
           // Play the sound
           isPlaying = true;
+          soundRef.current = sound;
           sound.play((success) => {
             if (success) {
               console.log('Sound played successfully');
@@ -71,6 +81,7 @@ const usePlaySound = (stateName: string, interval: number) => {
             }
             isPlaying = false;
             sound.release();
+            soundRef.current = null;
           });
         });
       } catch (error) {
@@ -80,6 +91,14 @@ const usePlaySound = (stateName: string, interval: number) => {
 
     // Reset audio index when dependencies change
     audioIndexRef.current = 0;
+
+    // Stop any previously playing sound when state changes
+    if (soundRef.current) {
+      soundRef.current.stop(() => {
+        soundRef.current?.release();
+      });
+      soundRef.current = null;
+    }
 
     // Play sound immediately upon component mount
     playSound();
@@ -91,9 +110,14 @@ const usePlaySound = (stateName: string, interval: number) => {
       if (intervalId) {
         clearInterval(intervalId);
       }
+      if (soundRef.current) {
+        soundRef.current.stop(() => {
+          soundRef.current?.release();
+        });
+        soundRef.current = null;
+      }
     };
   }, [stateName, interval, selectedAudios]);
-
 };
 
 export default usePlaySound;
