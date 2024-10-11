@@ -7,14 +7,13 @@ import {
   PermissionsAndroid,
   TextInput,
   StyleSheet,
-  Alert,
+  ToastAndroid,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
+import Icon from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import { IntervalContext } from '../../contexts/SceneProvider';
-import ModalMessage from '../../config/ModalMessage';
 import { commonStyles } from '../../styles/commonStyles';
 import Modal from '../../styles/AppModal';
 
@@ -34,10 +33,6 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
   const [recordingName, setRecordingName] = useState<string>(
     selectedState ? selectedState.toLowerCase() : ''
   );
-  const [message] = useState<{
-    text: string;
-    type: 'success' | 'error';
-  } | null>(null);
 
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
@@ -59,7 +54,6 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
           granted['android.permission.READ_EXTERNAL_STORAGE'] !==
             PermissionsAndroid.RESULTS.GRANTED
         ) {
-          // Handle lack of permissions if necessary
         }
       } catch (err) {
         console.warn('Permission request error:', err);
@@ -81,7 +75,6 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
   }, [visible]);
 
   useEffect(() => {
-    // Reset recording name when selectedState changes
     if (selectedState) {
       setRecordingName(selectedState.toLowerCase());
     } else {
@@ -118,10 +111,9 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
     }
   };
 
-  // Playback Functions
   const onPlay = async () => {
     if (!recordedFilePath) {
-      console.log('No recording to play');
+      ToastAndroid.show('No recording to play', ToastAndroid.SHORT);
       return;
     }
     try {
@@ -150,36 +142,40 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
     }
   };
 
-  // Save Recording
-  const onSaveRecording = () => {
+  const onSaveRecording = async () => {
     if (!recordedFilePath) {
-      console.log('No recording to save');
+      ToastAndroid.show('No recording to save', ToastAndroid.SHORT);
       return;
     }
-    Alert.alert(
-      'Save File',
-      `Are you sure you want to save ${recordingName}.mp3?`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Save',
-          onPress: () => {
-            console.log('Recording saved:', recordedFilePath);
-          },
-        },
-      ]
-    );
+
+    const sanitizedRecordingName = recordingName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+    const stateFolder = `${RNFS.DocumentDirectoryPath}/${selectedState}`;
+    const destinationPath = `${stateFolder}/${sanitizedRecordingName}.mp3`;
+
+    if (!sanitizedRecordingName) {
+      ToastAndroid.show('Invalid recording name.', ToastAndroid.SHORT);
+      return;
+    }
+
+    try {
+      const folderExists = await RNFS.exists(stateFolder);
+      if (!folderExists) {
+        await RNFS.mkdir(stateFolder);
+      }
+
+      await RNFS.moveFile(recordedFilePath, destinationPath);
+      setRecordedFilePath(null);
+      ToastAndroid.show('Recording saved successfully!', ToastAndroid.SHORT);
+      console.log(`Recording saved at: ${destinationPath}`);
+    } catch (error) {
+      console.error('Error saving recording:', error);
+      ToastAndroid.show('Failed to save the recording.', ToastAndroid.SHORT);
+    }
   };
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
       <View style={commonStyles.modalContent}>
-        {/* Display the message if it exists */}
-        {message && <ModalMessage message={message.text} type={message.type} />}
-
         {states && states.length > 0 ? (
           <>
             <Text style={commonStyles.title}>Record Audio</Text>
@@ -196,7 +192,6 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               ))}
             </Picker>
 
-            {/* Recording Name Input */}
             <View style={commonStyles.inputContainer}>
               <Text style={commonStyles.label}>Recording Name:</Text>
               <TextInput
@@ -208,60 +203,42 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               />
             </View>
 
-            {/* Recording, Playback, and Save Controls in a Row */}
             <View style={[commonStyles.buttonContainer, localStyles.controlsRow]}>
-              {/* Record Button */}
-              <TouchableOpacity
-                onPress={!isRecording ? onStartRecord : onStopRecord}
-                style={[
-                  commonStyles.iconButton,
-                ]}
-              >
-                <Icon
-                  name="mic"
-                  size={30}
-                  color={isRecording ? 'red' : 'white'}
-                  accessibilityLabel={!isRecording ? 'Start Recording' : 'Stop Recording'}
-                />
+              <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={commonStyles.iconButton}>
+                <Icon name="mic" size={30} color={isRecording ? 'red' : 'white'} />
               </TouchableOpacity>
 
-              {/* Play/Stop Playback Button */}
               <TouchableOpacity
-                onPress={!isPlayingBack ? onPlay : onStopPlay}
-                style={[
-                  commonStyles.iconButton,
-                ]}
-              >
-                <Icon
-                  name={!isPlayingBack ? 'play' : 'stop'}
-                  size={30}
-                  color={isPlayingBack ? 'green' : 'white'}
-                  accessibilityLabel={!isPlayingBack ? 'Play Recording' : 'Stop Playback'}
-                />
-              </TouchableOpacity>
-
-              {/* Save Button */}
-              <TouchableOpacity
-                onPress={onSaveRecording}
-                style={[
-                  commonStyles.iconButton,
-                  !recordedFilePath && localStyles.disabledButton,
-                ]}
+                onPress={() => {
+                  if (recordedFilePath) {
+                    !isPlayingBack ? onPlay() : onStopPlay();
+                  } else {
+                    ToastAndroid.show('No recording to play', ToastAndroid.SHORT);
+                  }
+                }}
+                style={[commonStyles.iconButton, !recordedFilePath && localStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
-                <Icon
-                  name="save"
-                  size={30}
-                  color="white"
-                  accessibilityLabel="Save Recording"
-                />
+                <Icon name={!isPlayingBack ? 'play' : 'stop'} size={30} color={!recordedFilePath ? 'grey' : (isPlayingBack ? 'green' : 'white')} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  if (recordedFilePath) {
+                    onSaveRecording();
+                  } else {
+                    ToastAndroid.show('No recording to save', ToastAndroid.SHORT);
+                  }
+                }}
+                style={[commonStyles.iconButton, !recordedFilePath && localStyles.disabledButton]}
+                disabled={!recordedFilePath}
+              >
+                <Icon name="save" size={30} color={!recordedFilePath ? 'grey' : 'white'} />
               </TouchableOpacity>
             </View>
           </>
         ) : (
-          <Text style={localStyles.errorText}>
-            No states available. Please check your scene configuration.
-          </Text>
+          <Text style={localStyles.errorText}>No states available. Please check your scene configuration.</Text>
         )}
       </View>
     </Modal>
@@ -275,15 +252,15 @@ const localStyles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
   },
-  disabledButton: {
-    backgroundColor: '#888',
-  },
   controlsRow: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
     marginTop: 20,
     width: '100%',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 

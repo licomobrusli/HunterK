@@ -1,31 +1,28 @@
-// src/screens/modals/AudioManagerModal.tsx
-import { commonStyles } from '../../styles/commonStyles';
-
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
-  Alert,
+  StyleSheet,
+  ToastAndroid,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 import RNFS from 'react-native-fs';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import { IntervalContext } from '../../contexts/SceneProvider';
-import Modal from '../../styles/AppModal'; // Update import path
+import Modal from '../../styles/AppModal';
+import { commonStyles } from '../../styles/commonStyles';
 
-type AudioManagerModalProps = {
-  visible: boolean;
-  onClose: () => void;
-};
-
-const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
+const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
   onClose,
 }) => {
-  const { states } = useContext(IntervalContext);
-  const [currentPath, setCurrentPath] = useState<string>(RNFS.DocumentDirectoryPath);
-  const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
-  const [pathHistory, setPathHistory] = useState<string[]>([]);
+  useContext(IntervalContext);
+  const [items, setItems] = useState<{ [key: string]: RNFS.ReadDirItem[] }>({});
+  const [expandedDirs, setExpandedDirs] = useState<{ [key: string]: boolean }>({});
+  const [playingFilePath, setPlayingFilePath] = useState<string | null>(null);
+  const audioRecorderPlayer = new AudioRecorderPlayer();
 
   const loadDirectory = useCallback(
     async (path: string) => {
@@ -33,113 +30,166 @@ const AudioManagerModal: React.FC<AudioManagerModalProps> = ({
         const exists = await RNFS.exists(path);
         if (!exists) {
           console.log('Path does not exist:', path);
-          setItems([]);
           return;
         }
         const directoryItems = await RNFS.readDir(path);
-        // Filter to only show state folders and audio files
         const filteredItems = directoryItems.filter(
           (item) =>
-            (item.isDirectory() && states.includes(item.name)) ||
+            item.isDirectory() ||
             (item.isFile() && item.name.endsWith('.mp3'))
         );
-        setItems(filteredItems);
+        setItems((prevItems) => ({ ...prevItems, [path]: filteredItems }));
       } catch (error) {
         console.error('Error reading directory:', error);
-        setItems([]);
       }
     },
-    [states] // Dependencies of loadDirectory
+    []
   );
 
   useEffect(() => {
     if (visible) {
-      setCurrentPath(RNFS.DocumentDirectoryPath);
-      setPathHistory([]);
       loadDirectory(RNFS.DocumentDirectoryPath);
     }
   }, [visible, loadDirectory]);
 
-  useEffect(() => {
-    if (visible) {
-      loadDirectory(currentPath);
-    }
-  }, [currentPath, visible, loadDirectory]);
+  const toggleDirectory = (path: string) => {
+    setExpandedDirs((prevExpandedDirs) => {
+      const isExpanded = prevExpandedDirs[path];
+      if (!isExpanded) {
+        loadDirectory(path);
+      }
+      return {
+        ...prevExpandedDirs,
+        [path]: !isExpanded,
+      };
+    });
+  };
 
-  const handleItemPress = (item: RNFS.ReadDirItem) => {
-    if (item.isDirectory()) {
-      setPathHistory([...pathHistory, currentPath]);
-      setCurrentPath(item.path);
+  const playOrStopAudio = async (filePath: string) => {
+    if (playingFilePath === filePath) {
+      await audioRecorderPlayer.stopPlayer();
+      setPlayingFilePath(null);
     } else {
-      // Handle file press
-      Alert.alert(
-        'Delete File',
-        `Are you sure you want to delete ${item.name}?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => deleteFile(item.path),
-          },
-        ],
-        { cancelable: true }
-      );
+      try {
+        await audioRecorderPlayer.startPlayer(filePath);
+        audioRecorderPlayer.addPlayBackListener((e) => {
+          if (e.currentPosition >= e.duration) {
+            audioRecorderPlayer.stopPlayer();
+            setPlayingFilePath(null);
+          }
+          return;
+        });
+        setPlayingFilePath(filePath);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        ToastAndroid.show('Failed to play audio.', ToastAndroid.SHORT);
+      }
     }
   };
 
   const deleteFile = async (filePath: string) => {
     try {
       await RNFS.unlink(filePath);
-      // Refresh the directory listing
-      loadDirectory(currentPath);
-      Alert.alert('Success', 'File deleted successfully.');
+      const parentPath = filePath.substring(0, filePath.lastIndexOf('/'));
+      loadDirectory(parentPath);
+      ToastAndroid.show('File deleted successfully.', ToastAndroid.SHORT);
     } catch (error) {
       console.error('Error deleting file:', error);
-      Alert.alert('Error', 'Failed to delete the file.');
+      ToastAndroid.show('Failed to delete the file.', ToastAndroid.SHORT);
     }
   };
 
-  const handleBack = () => {
-    if (pathHistory.length > 0) {
-      const previousPath = pathHistory[pathHistory.length - 1];
-      setPathHistory(pathHistory.slice(0, -1));
-      setCurrentPath(previousPath);
-    } else {
-      // Already at root, maybe close the modal
-      onClose();
-    }
+  const renderItem = ({ item }: { item: RNFS.ReadDirItem; path: string }) => {
+    const isExpanded = expandedDirs[item.path];
+    return (
+      <View>
+        <View style={styles.itemContainer}>
+          <TouchableOpacity
+            style={styles.itemButton}
+            onPress={() => (item.isDirectory() ? toggleDirectory(item.path) : playOrStopAudio(item.path))}
+          >
+            {item.isDirectory() ? (
+              <Icon
+                name={isExpanded ? 'minus-square' : 'plus-square'}
+                size={20}
+                color="white"
+              />
+            ) : (
+              <Icon
+                name={playingFilePath === item.path ? 'pause' : 'play'}
+                size={20}
+                color={playingFilePath === item.path ? 'green' : 'white'}
+              />
+            )}
+            <Text
+              style={
+                playingFilePath === item.path
+                  ? [styles.itemText, styles.playingText]
+                  : styles.itemText
+              }
+            >
+              {item.name}
+            </Text>
+          </TouchableOpacity>
+          {item.isFile() && (
+            <TouchableOpacity onPress={() => deleteFile(item.path)}>
+              <Icon name="trash" size={20} color="red" />
+            </TouchableOpacity>
+          )}
+        </View>
+        {isExpanded && item.isDirectory() && items[item.path] && (
+          <FlatList
+            data={items[item.path]}
+            keyExtractor={(subItem) => subItem.path}
+            renderItem={({ item: subItem }) => renderItem({ item: subItem, path: item.path })}
+            style={styles.subList}
+          />
+        )}
+      </View>
+    );
   };
-
-  const renderItem = ({ item }: { item: RNFS.ReadDirItem }) => (
-    <TouchableOpacity style={commonStyles.item} onPress={() => handleItemPress(item)}>
-      <Text style={commonStyles.itemText}>
-        {item.isDirectory() ? '[Folder] ' : ''}
-        {item.name}
-      </Text>
-    </TouchableOpacity>
-  );
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-        {/* Header */}
-        <View style={commonStyles.header}>
-          <TouchableOpacity onPress={handleBack} style={commonStyles.backButton}>
-            <Text style={commonStyles.backButtonText}>{'< Back'}</Text>
-          </TouchableOpacity>
-          <Text style={commonStyles.currentPath}>
-            {currentPath.replace(RNFS.DocumentDirectoryPath, '') || '/'}
-          </Text>
-        </View>
-
+      <View style={commonStyles.modalContent}>
+        <Text style={commonStyles.title}>Audio Manager</Text>
         <FlatList
-          data={items}
+          data={items[RNFS.DocumentDirectoryPath]}
           keyExtractor={(item) => item.path}
-          renderItem={renderItem}
-          style={commonStyles.list}
+          renderItem={({ item }) => renderItem({ item, path: RNFS.DocumentDirectoryPath })}
+          style={styles.list}
         />
+      </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  itemButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  itemText: {
+    color: 'white',
+    marginLeft: 10,
+  },
+  playingText: {
+    color: 'green',
+  },
+  list: {
+    width: '100%',
+  },
+  subList: {
+    paddingLeft: 20,
+  },
+});
 
 export default AudioManagerModal;
