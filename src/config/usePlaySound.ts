@@ -2,6 +2,7 @@
 import { useEffect, useContext, useRef } from 'react';
 import Sound from 'react-native-sound';
 import RNFS from 'react-native-fs';
+import BackgroundTimer from 'react-native-background-timer';
 import { IntervalContext } from '../contexts/SceneProvider';
 
 const usePlaySound = (stateName: string, interval: number) => {
@@ -10,7 +11,7 @@ const usePlaySound = (stateName: string, interval: number) => {
   const soundRef = useRef<Sound | null>(null);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
+    let intervalId: number | null = null;
     let isPlaying = false;
 
     const playSound = async () => {
@@ -103,12 +104,12 @@ const usePlaySound = (stateName: string, interval: number) => {
     // Play sound immediately upon component mount
     playSound();
 
-    // Set up interval for subsequent plays
-    intervalId = setInterval(playSound, interval);
+    // Set up interval for subsequent plays using BackgroundTimer
+    intervalId = BackgroundTimer.setInterval(playSound, interval);
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (intervalId !== null) {
+        BackgroundTimer.clearInterval(intervalId);
       }
       if (soundRef.current) {
         soundRef.current.stop(() => {

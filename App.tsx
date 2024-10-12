@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useEffect, useCallback, useState } from 'react';
 import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,19 +10,7 @@ const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
 
   // Permission handling remains in App.tsx
-  const requestAudioPermission = useCallback(async () => {
-    try {
-      if (Platform.OS === 'android') {
-        const audioResult = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
-        handlePermissionResult(audioResult);
-      }
-      // Add iOS permissions if needed
-    } catch (error) {
-      console.warn('Permission request failed', error);
-    }
-  }, []);
-
-  const handlePermissionResult = (result: string) => {
+  const handlePermissionResult = useCallback((result: string) => {
     if (result === RESULTS.GRANTED) {
       console.log('Audio recording permission granted');
       setAudioPermissionGranted(true);
@@ -34,21 +21,44 @@ const App: React.FC = () => {
       console.log('Audio recording permission blocked');
       // Handle blocked permissions without alerts
     }
-  };
+  }, []);
 
-  const checkPermission = useCallback(async () => {
-    const audioResult = await check(PERMISSIONS.ANDROID.RECORD_AUDIO);
-    if (audioResult !== RESULTS.GRANTED) {
-      requestAudioPermission();
-    } else {
-      console.log('Audio recording permission already granted');
-      setAudioPermissionGranted(true);
+  const requestAudioPermission = useCallback(async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const audioResult = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
+        handlePermissionResult(audioResult);
+      }
+      // Add iOS permissions if needed
+    } catch (error) {
+      console.warn('Permission request failed', error);
     }
-  }, [requestAudioPermission]);
+  }, [handlePermissionResult]);
+
 
   useEffect(() => {
-    checkPermission();
-  }, [checkPermission]);
+    let isMounted = true;
+
+    const loadData = async () => {
+      if (!isMounted) {return;}
+
+      const audioResult = await check(PERMISSIONS.ANDROID.RECORD_AUDIO);
+      if (audioResult === RESULTS.GRANTED) {
+        console.log('Audio recording permission already granted');
+        if (isMounted) {
+          setAudioPermissionGranted(true);
+        }
+      } else {
+        requestAudioPermission();
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [requestAudioPermission]);
 
   return (
     <SceneProvider>

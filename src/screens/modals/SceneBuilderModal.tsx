@@ -46,6 +46,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   } = useContext(IntervalContext);
 
   const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>({});
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // State for controlling the visibility of the Assign Audios sub-modal
   const [assignAudiosModalVisible, setAssignAudiosModalVisible] = useState(false);
@@ -56,42 +57,47 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   const [newStatePosition, setNewStatePosition] = useState('');
 
   useEffect(() => {
-    // Load saved intervals from AsyncStorage
+    let isMounted = true; // Track if the component is mounted
     const loadIntervals = async () => {
+      if (dataLoaded) {
+        return; // Prevent re-loading if data is already loaded
+      }
+
       try {
         const loadedIntervals: { [key: string]: string } = {};
         for (const state of states) {
-          if (!state || typeof state !== 'string') {
-            console.error('Encountered invalid state:', state);
-            continue;
-          }
+          if (!state || typeof state !== 'string') {continue;}
+
           const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
           if (storedInterval !== null) {
             loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(parseInt(storedInterval, 10));
-            console.log(`Loaded interval for "${state}": ${loadedIntervals[state.toLowerCase()]}`);
           } else {
-            // Use the interval from context if not in AsyncStorage
             const interval = intervals[state.toLowerCase()];
-            if (interval !== undefined) {
-              loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(interval);
-              console.log(`Using context interval for "${state}": ${loadedIntervals[state.toLowerCase()]}`);
-            } else {
-              console.warn(`No interval found for state: "${state}". Setting to "00:00".`);
-              loadedIntervals[state.toLowerCase()] = '00:00'; // Default or handle as needed
-            }
+            loadedIntervals[state.toLowerCase()] = interval !== undefined
+              ? convertMsToMinutesSeconds(interval)
+              : '00:00';
           }
         }
-        setLocalIntervals(loadedIntervals);
-        console.log('Local intervals set to:', loadedIntervals);
+
+        if (isMounted) {
+          setLocalIntervals(loadedIntervals);
+          console.log('Local intervals set to:', loadedIntervals);
+          setDataLoaded(true); // Set dataLoaded to true after loading
+        }
       } catch (error) {
         console.error('Failed to load intervals:', error);
       }
     };
 
-    if (visible) {
+    if (visible && !dataLoaded) {
       loadIntervals();
     }
-  }, [visible, intervals, states]);
+
+    return () => {
+      isMounted = false; // Clean up function
+    };
+  }, [visible, states, intervals, dataLoaded]);
+
 
   const handleSave = async () => {
     try {

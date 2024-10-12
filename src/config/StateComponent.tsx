@@ -18,9 +18,10 @@ const StateComponent: React.FC<StateComponentProps> = ({ stateName }) => {
   usePlaySound(stateName, interval);
 
   return (
-    <View style={commonStyles.container}>
-      <Text style={commonStyles.text}>{stateName} State</Text>
-      {/* Additional UI or logic specific to the state can be added here */}
+    <View style={commonStyles.container}
+      testID="stateText"
+      accessibilityLabel="stateText">
+        <Text style={commonStyles.text}>{stateName} State</Text>
     </View>
   );
 };
