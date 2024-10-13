@@ -36,6 +36,29 @@ const App: React.FC = () => {
   }, [handlePermissionResult]);
 
 
+  const requestBluetoothPermissions = useCallback(async () => {
+    try {
+        if (Platform.OS === 'android') {
+            const bluetoothScanResult = await request(PERMISSIONS.ANDROID.BLUETOOTH_SCAN);
+            const bluetoothConnectResult = await request(PERMISSIONS.ANDROID.BLUETOOTH_CONNECT);
+
+            if (bluetoothScanResult === RESULTS.GRANTED && bluetoothConnectResult === RESULTS.GRANTED) {
+                console.log('Bluetooth permissions granted');
+            } else {
+                console.log('Bluetooth permissions not granted');
+            }
+        }
+    } catch (error) {
+        console.warn('Bluetooth permission request failed', error);
+    }
+}, []);
+
+useEffect(() => {
+    // Call the function to request Bluetooth permissions along with audio permissions
+    requestBluetoothPermissions();
+}, [requestBluetoothPermissions]);
+
+
   useEffect(() => {
     let isMounted = true;
 
