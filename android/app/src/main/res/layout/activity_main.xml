@@ -1,45 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_layout"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <!-- TextView to display S Pen Button State -->
-    <TextView
-        android:id="@+id/button_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button State"
-        android:textSize="18sp"
-        android:padding="8dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="vertical">
 
-    <!-- TextView to display Air Motion X and Y values -->
-    <TextView
-        android:id="@+id/air_motion"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Air Motion"
-        android:textSize="18sp"
-        android:padding="8dp" />
+        <Button
+            android:id="@+id/connect_button"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Connect"/>
 
-    <!-- Button to Connect/Disconnect S Pen -->
-    <Button
-        android:id="@+id/connect_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect"
-        android:padding="8dp"
-        android:layout_marginTop="16dp" />
+        <Button
+            android:id="@+id/motion_button"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="Start - Motion"/>
 
-    <!-- Button to Start/Stop Air Motion Tracking -->
-    <Button
-        android:id="@+id/motion_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start - Motion"
-        android:padding="8dp"
-        android:layout_marginTop="8dp" />
+        <TextView
+            android:id="@+id/button_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="BUTTON"
+            android:gravity="center"
+            android:textSize="20sp"/>
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/air_motion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="AIR MOTION"
+            android:gravity="center"
+            android:textSize="20sp"/>
+
+    </LinearLayout>
+
+</FrameLayout>
