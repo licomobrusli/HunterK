@@ -80,7 +80,7 @@ android {
 
     namespace "com.hunterk"
     defaultConfig {
-        applicationId "com.hunterk"
+        applicationId "com.hunterk.legacyk"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
