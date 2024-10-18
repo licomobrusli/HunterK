@@ -1,3 +1,5 @@
+// LogcatModule.kt
+
 package com.hunterk
 
 import android.util.Log
@@ -8,7 +10,7 @@ import java.io.InputStreamReader
 
 class LogcatModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
-    private var isListening = false
+    private var logcatProcess: Process? = null
 
     override fun getName(): String {
         return "LogcatModule"
@@ -16,54 +18,74 @@ class LogcatModule(reactContext: ReactApplicationContext) : ReactContextBaseJava
 
     @ReactMethod
     fun startListening(promise: Promise) {
-        if (isListening) {
+        Log.d("LogcatModule", "startListening called")
+        if (logcatProcess != null) {
+            Log.d("LogcatModule", "Already listening")
             promise.resolve("Already listening")
             return
         }
 
-        isListening = true
+        try {
+            // Clear the logcat buffer to avoid processing old logs
+            Runtime.getRuntime().exec("logcat -c")
+            Log.d("LogcatModule", "Cleared logcat buffer")
+        } catch (e: Exception) {
+            Log.e("LogcatModule", "Failed to clear logcat buffer", e)
+            promise.reject("ERROR_CLEARING_LOGCAT", e)
+            return
+        }
 
         Thread {
             try {
-                Log.d("LogcatModule", "Starting logcat listener")
-                val process = Runtime.getRuntime().exec("logcat")
-                val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+                Log.d("LogcatModule", "Starting logcat listener thread")
+                logcatProcess = Runtime.getRuntime().exec("logcat -v time")
+                val bufferedReader = BufferedReader(InputStreamReader(logcatProcess!!.inputStream))
 
-                var logLine: String? = null  // Initialize the variable here
+                var logLine: String? = null // Initialized to null
 
-                while (isListening && bufferedReader.readLine().also { logLine = it } != null) {
+                while (logcatProcess != null && bufferedReader.readLine().also { logLine = it } != null) {
                     logLine?.let { log ->
-                        // Filter logs to detect S Pen button actions
-                        if (log.contains("onButtonEvent : button clicked = PRIMARY")) {
-                            sendEventToReactNative("single_press")
-                        } else if (log.contains("onButtonEvent : button long clicked = PRIMARY")) {
-                            sendEventToReactNative("long_press")
-                        } else if (log.contains("onButtonEvent : button double clicked = PRIMARY")) {
-                            sendEventToReactNative("double_press")
+                        // Emit events with timestamps
+                        when {
+                            log.contains("onButtonEvent : button clicked = PRIMARY") -> {
+                                sendEventToReactNative("single_press", System.currentTimeMillis())
+                            }
+                            log.contains("onButtonEvent : button long clicked = PRIMARY") -> {
+                                sendEventToReactNative("long_press", System.currentTimeMillis())
+                            }
+                            log.contains("onButtonEvent : button double clicked = PRIMARY") -> {
+                                sendEventToReactNative("double_press", System.currentTimeMillis())
+                            }
                         }
-                        // Optionally, log all lines for debugging
-                        // Log.d("LogcatModule", log)
                     }
                 }
-                Log.d("LogcatModule", "Logcat listener stopped")
+                Log.d("LogcatModule", "Logcat listener thread exiting")
             } catch (e: Exception) {
                 Log.e("LogcatModule", "Error reading logcat", e)
-                promise.reject("ERROR_READING_LOGS", e)
+            } finally {
+                logcatProcess = null
             }
         }.start()
 
+        Log.d("LogcatModule", "Started logcat listener thread")
         promise.resolve("Listening to Logcat logs")
     }
 
+    // Optionally, remove stopListening or make it a no-op
     @ReactMethod
-    fun stopListening() {
-        isListening = false
+    fun stopListening(promise: Promise) {
+        Log.d("LogcatModule", "stopListening called")
+        promise.resolve("Stop listening is now a no-op")
     }
 
-    private fun sendEventToReactNative(eventName: String) {
+    private fun sendEventToReactNative(eventName: String, timestamp: Long) {
+        val params = Arguments.createMap()
+        params.putString("eventName", eventName)
+        params.putDouble("timestamp", timestamp.toDouble())
         reactApplicationContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-            .emit("LogcatEvent", eventName)
+            .emit("LogcatEvent", params)
+        Log.d("LogcatModule", "Emitted event: $eventName at $timestamp")
     }
 
     // Required for NativeEventEmitter

@@ -1,12 +1,10 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { Platform, NativeEventEmitter, NativeModules } from 'react-native';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
 import SceneProvider from './src/contexts/SceneProvider';
 import FlashMessage from 'react-native-flash-message';
-
-const { LogcatModule } = NativeModules;
 
 const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
@@ -60,33 +58,6 @@ const App: React.FC = () => {
       isMounted = false;
     };
   }, [requestAudioPermission]);
-
-  // Logcat Event Listener for Single and Long Presses
-  useEffect(() => {
-    const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
-
-    const logcatListener = logcatEventEmitter.addListener('LogcatEvent', (event) => {
-      if (event === 'single_press') {
-        console.log('Single press detected');
-        // Handle single press logic here
-      } else if (event === 'long_press') {
-        console.log('Long press detected');
-        // Handle long press logic here
-      } else if (event === 'double_press') {
-        console.log('Double press detected');
-        // Handle double press logic here
-      }
-    });
-
-    // Start listening to logs
-    LogcatModule.startListening()
-      .then((message: string) => console.log(message))
-      .catch((error: any) => console.warn('Error starting logcat listener', error));
-
-    return () => {
-      logcatListener.remove(); // Cleanup listener on component unmount
-    };
-  }, []);
 
   return (
     <SceneProvider>
