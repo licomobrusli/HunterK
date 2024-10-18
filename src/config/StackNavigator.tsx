@@ -1,4 +1,4 @@
-// StackNavigator.tsx
+// src/config/StackNavigator.tsx
 import { commonStyles } from '../styles/commonStyles';
 
 import React from 'react';
