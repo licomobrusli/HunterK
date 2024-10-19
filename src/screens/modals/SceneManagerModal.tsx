@@ -8,14 +8,16 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
 import AppModal from '../../styles/AppModal'; // Correct import path
+import { getSceneList, exportScene, importScene } from '../../config/SceneStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SceneManagerModalProps = {
   visible: boolean;
@@ -23,22 +25,9 @@ type SceneManagerModalProps = {
 };
 
 const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose }) => {
-  const { states, loadSceneData, intervals, selectedAudios } = useContext(IntervalContext);
+  const { states, intervals, selectedAudios, loadSceneData } = useContext(IntervalContext);
   const [sceneName, setSceneName] = useState<string>('');
   const [sceneList, setSceneList] = useState<string[]>([]);
-
-  // Function to get scene list
-  const getSceneList = async (): Promise<string[]> => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const sceneKeys = keys.filter((key) => key.startsWith('@scene_'));
-      const sceneNames = sceneKeys.map((key) => key.replace('@scene_', ''));
-      return sceneNames;
-    } catch (error) {
-      console.error('Error retrieving scene list:', error);
-      return [];
-    }
-  };
 
   // Memoized fetchSceneList function
   const fetchSceneList = useCallback(async () => {
@@ -74,7 +63,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
     // Check if scene already exists
     if (sceneList.includes(sanitizedSceneName)) {
       console.log(`Scene "${sanitizedSceneName}" already exists. Overwriting.`);
-      // Proceed to overwrite
+      // Optionally, prompt the user before overwriting
     } else {
       console.log(`Saving new scene: "${sanitizedSceneName}".`);
     }
@@ -89,16 +78,13 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
     console.log('Scene to save:', sceneToSave);
 
     try {
+      // Save the scene using saveScene function
       await AsyncStorage.setItem(`@scene_${sanitizedSceneName}`, JSON.stringify(sceneToSave));
       console.log(`Scene "${sanitizedSceneName}" saved successfully.`);
       fetchSceneList();
       setSceneName('');
-
-      // Optionally, show a success message within the modal
-      // You can integrate a message component similar to RecordAudioModal
     } catch (error) {
       console.error(`Error saving scene "${sanitizedSceneName}":`, error);
-      // Optionally, show an error message within the modal
     }
   };
 
@@ -121,12 +107,51 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
 
   const handleDeleteScene = async (sceneNameToDelete: string) => {
     try {
-      console.log(`Attempting to delete scene: "${sceneNameToDelete}".`);
-      await AsyncStorage.removeItem(`@scene_${sceneNameToDelete}`);
-      console.log(`Scene "${sceneNameToDelete}" deleted successfully.`);
-      fetchSceneList();
+      Alert.alert(
+        'Delete Scene',
+        `Are you sure you want to delete the scene "${sceneNameToDelete}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              console.log(`Attempting to delete scene: "${sceneNameToDelete}".`);
+              await AsyncStorage.removeItem(`@scene_${sceneNameToDelete}`);
+              console.log(`Scene "${sceneNameToDelete}" deleted successfully.`);
+              fetchSceneList();
+            },
+          },
+        ],
+        { cancelable: true }
+      );
     } catch (error) {
       console.error(`Error deleting scene "${sceneNameToDelete}":`, error);
+    }
+  };
+
+  // Handle export
+  const handleExportScene = async (selectedSceneName: string) => {
+    try {
+      console.log(`Exporting scene: ${selectedSceneName}`);
+      await exportScene(selectedSceneName);
+      console.log(`Scene "${selectedSceneName}" exported successfully.`);
+    } catch (error) {
+      console.error(`Error exporting scene "${selectedSceneName}":`, error);
+      Alert.alert('Export Error', `Failed to export scene "${selectedSceneName}".`);
+    }
+  };
+
+  // Handle import
+  const handleImportScene = async () => {
+    try {
+      console.log('Importing scene...');
+      await importScene();
+      console.log('Scene imported successfully.');
+      fetchSceneList(); // Refresh the scene list
+    } catch (error) {
+      console.error('Error importing scene:', error);
+      Alert.alert('Import Error', 'Failed to import scene.');
     }
   };
 
@@ -135,9 +160,14 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       <TouchableOpacity onPress={() => handleLoadScene(item)} style={commonStyles.sceneItem}>
         <Text style={commonStyles.itemText}>{item}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDeleteScene(item)} style={styles.deleteButton}>
-        <Icon name="trash-2" size={20} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.sceneItemButtons}>
+        <TouchableOpacity onPress={() => handleExportScene(item)} style={styles.exportButton}>
+          <Icon name="upload" size={20} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={styles.deleteButton}>
+          <Icon name="trash-2" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -168,6 +198,12 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
           <Icon name="save" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Import Button */}
+      <TouchableOpacity onPress={handleImportScene} style={styles.importButton}>
+        <Icon name="download" size={24} color="#fff" />
+        <Text style={styles.buttonText}>Import Scene</Text>
+      </TouchableOpacity>
 
       {/* Load Scene Section */}
       <View style={styles.section}>
@@ -213,10 +249,32 @@ const styles = StyleSheet.create({
     width: '100%',
     justifyContent: 'space-between',
   },
+  sceneItemButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  exportButton: {
+    backgroundColor: '#007BFF',
+    padding: 5,
+    borderRadius: 5,
+    marginRight: 5,
+  },
   deleteButton: {
     backgroundColor: '#ff4d4d',
     padding: 5,
     borderRadius: 5,
+  },
+  importButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    marginLeft: 5,
   },
   flatList: {
     width: '100%',

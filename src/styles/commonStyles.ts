@@ -367,5 +367,10 @@ export const commonStyles = StyleSheet.create({
       paddingVertical: 10,
       borderRadius: 5,
     },
+    fullscreenTouchable: {
+      ...StyleSheet.absoluteFillObject, // This makes the TouchableOpacity cover the whole parent View
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 });
 

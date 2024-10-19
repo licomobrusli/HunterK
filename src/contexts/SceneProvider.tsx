@@ -1,3 +1,5 @@
+// src/contexts/SceneProvider.tsx
+
 import React, { useState, useEffect, createContext, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Scene } from '../types/Scene';
@@ -82,15 +84,34 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
   };
 
   const loadSceneData = (scene: Scene) => {
-    // Implement the logic to load scene data
     console.log('Loading scene data:', scene);
+
+    // Update states
+    if (scene.states && scene.states.length > 0) {
+      setStates(scene.states);
+    }
+
+    // Update intervals
+    if (scene.intervals) {
+      setIntervals(scene.intervals);
+    }
+
+    // Update selectedAudios
+    if (scene.selectedAudios) {
+      setSelectedAudios(scene.selectedAudios);
+    }
+
+    // Optionally, persist the loaded scene data to AsyncStorage
+    setDataLoaded(true);
   };
 
   // Load data on mount
   useEffect(() => {
-    if (dataLoaded) { return; }
+    if (dataLoaded) {
+      return;
+    }
 
-    console.log('useEffect running, dataLoaded:', dataLoaded);
+    console.log('SceneProvider useEffect running, dataLoaded:', dataLoaded);
 
     const loadData = async () => {
       try {
@@ -137,8 +158,7 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     };
 
     loadData();
-  }, [dataLoaded]); // Removed 'states' from dependencies
-
+  }, [dataLoaded]);
 
   // Save states when they change, with debounce
   useEffect(() => {

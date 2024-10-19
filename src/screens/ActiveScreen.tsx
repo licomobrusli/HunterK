@@ -1,5 +1,3 @@
-// src/screens/ActiveScreen.tsx
-
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { TouchableOpacity, View, Text, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
@@ -115,15 +113,14 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={commonStyles.container}>
-      {/* Render the StateComponent with the current state */}
-      <StateComponent stateName={currentStateName} />
-
-      {/* Optional: Overlay TouchableOpacity for manual testing or additional interactions */}
-      {/* If you want to handle screen touches separately, you can keep this */}
+      {/* Overlay TouchableOpacity to advance state on touch */}
       <TouchableOpacity
-        style={commonStyles.overlay}
-        onPress={() => { /* Optional manual press handling */ }}
-      />
+        style={commonStyles.fullscreenTouchable}
+        onPress={() => advanceState(1)}
+        activeOpacity={1} // Set activeOpacity to 1 so it doesn't visually change on touch
+      >
+        <StateComponent stateName={currentStateName} />
+      </TouchableOpacity>
 
       {/* Abort Button */}
       <TouchableOpacity style={commonStyles.abortButton} onPress={resetState}>

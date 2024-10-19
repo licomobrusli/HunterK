@@ -1,3 +1,5 @@
+// src/screens/modals/RecordAudioModal.tsx
+
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   View,
@@ -37,42 +39,6 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
   const audioRecorderPlayerRef = useRef<AudioRecorderPlayer>(
     new AudioRecorderPlayer()
   );
-
-  useEffect(() => {
-    const requestPermissions = async () => {
-      try {
-        const granted = await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        ]);
-        if (
-          granted['android.permission.RECORD_AUDIO'] !==
-            PermissionsAndroid.RESULTS.GRANTED ||
-          granted['android.permission.WRITE_EXTERNAL_STORAGE'] !==
-            PermissionsAndroid.RESULTS.GRANTED ||
-          granted['android.permission.READ_EXTERNAL_STORAGE'] !==
-            PermissionsAndroid.RESULTS.GRANTED
-        ) {
-        }
-      } catch (err) {
-        console.warn('Permission request error:', err);
-      }
-    };
-
-    if (Platform.OS === 'android') {
-      requestPermissions();
-    }
-
-    const audioRecorderPlayer = audioRecorderPlayerRef.current;
-
-    return () => {
-      audioRecorderPlayer.stopRecorder().catch(() => {});
-      audioRecorderPlayer.stopPlayer().catch(() => {});
-      audioRecorderPlayer.removeRecordBackListener();
-      audioRecorderPlayer.removePlayBackListener();
-    };
-  }, [visible]);
 
   useEffect(() => {
     if (selectedState) {
@@ -149,7 +115,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
     }
 
     const sanitizedRecordingName = recordingName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-    const stateFolder = `${RNFS.DocumentDirectoryPath}/${selectedState}`;
+    const stateFolder = `${RNFS.DocumentDirectoryPath}/audios/${selectedState.toLowerCase()}`;
     const destinationPath = `${stateFolder}/${sanitizedRecordingName}.mp3`;
 
     if (!sanitizedRecordingName) {
@@ -158,11 +124,20 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
     }
 
     try {
+      // Ensure the 'audios' directory exists
+      const audiosDir = `${RNFS.DocumentDirectoryPath}/audios`;
+      const audiosDirExists = await RNFS.exists(audiosDir);
+      if (!audiosDirExists) {
+        await RNFS.mkdir(audiosDir);
+      }
+
+      // Ensure the state-specific subdirectory exists
       const folderExists = await RNFS.exists(stateFolder);
       if (!folderExists) {
         await RNFS.mkdir(stateFolder);
       }
 
+      // Move the recorded file to the destination path
       await RNFS.moveFile(recordedFilePath, destinationPath);
       setRecordedFilePath(null);
       ToastAndroid.show('Recording saved successfully!', ToastAndroid.SHORT);
@@ -219,7 +194,11 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
                 style={[commonStyles.iconButton, !recordedFilePath && localStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
-                <Icon name={!isPlayingBack ? 'play' : 'stop'} size={30} color={!recordedFilePath ? 'grey' : (isPlayingBack ? 'green' : 'white')} />
+                <Icon
+                  name={!isPlayingBack ? 'play' : 'stop'}
+                  size={30}
+                  color={!recordedFilePath ? 'grey' : isPlayingBack ? 'green' : 'white'}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity

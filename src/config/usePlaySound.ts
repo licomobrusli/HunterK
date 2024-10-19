@@ -10,6 +10,8 @@ const usePlaySound = (stateName: string, interval: number) => {
   const audioIndexRef = useRef(0);
   const soundRef = useRef<Sound | null>(null);
 
+  const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
+
   useEffect(() => {
     let intervalId: number | null = null;
     let isPlaying = false;
@@ -27,28 +29,27 @@ const usePlaySound = (stateName: string, interval: number) => {
 
       const { audios, mode } = stateData;
 
-      let currentAudioPath: string;
+      let currentAudioFileName: string;
 
       if (mode === 'Random') {
         // Randomly select an audio each time
         const randomIndex = Math.floor(Math.random() * audios.length);
-        currentAudioPath = audios[randomIndex];
+        currentAudioFileName = audios[randomIndex];
       } else if (mode === 'A-Z') {
         // Sort audios alphabetically and iterate through them
-        const sortedAudios = [...audios].sort((a, b) => {
-          const nameA = a.substring(a.lastIndexOf('/') + 1).toLowerCase();
-          const nameB = b.substring(b.lastIndexOf('/') + 1).toLowerCase();
-          return nameA.localeCompare(nameB);
-        });
+        const sortedAudios = [...audios].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-        // Get current audio index
-        currentAudioPath = sortedAudios[audioIndexRef.current];
+        // Get current audio file name
+        currentAudioFileName = sortedAudios[audioIndexRef.current];
         audioIndexRef.current = (audioIndexRef.current + 1) % sortedAudios.length;
       } else {
         // 'Selected' mode: play audios in the order they were selected
-        currentAudioPath = audios[audioIndexRef.current];
+        currentAudioFileName = audios[audioIndexRef.current];
         audioIndexRef.current = (audioIndexRef.current + 1) % audios.length;
       }
+
+      // Construct the full path to the audio file
+      const currentAudioPath = `${AUDIOS_FOLDER}/${stateName.toLowerCase()}/${currentAudioFileName}`;
 
       try {
         const fileExists = await RNFS.exists(currentAudioPath);

@@ -1,3 +1,5 @@
+// src/screens/modals/AssignAudiosModal.tsx
+
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
@@ -20,100 +22,65 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
   onClose,
   stateName,
 }) => {
-  const { states, selectedAudios, setSelectedAudiosForState } = useContext(IntervalContext);
+  const { selectedAudios, setSelectedAudiosForState } = useContext(IntervalContext);
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [expandedDirs, setExpandedDirs] = useState<{ [key: string]: boolean }>({});
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>('Selected');
 
-  const loadDirectory = useCallback(
-    async (path: string) => {
-      try {
-        const exists = await RNFS.exists(path);
-        if (!exists) {
-          console.log('Path does not exist:', path);
-          return [];
-        }
-        const directoryItems = await RNFS.readDir(path);
-        return directoryItems.filter(
-          (item) =>
-            (item.isDirectory() && states.includes(item.name)) ||
-            (item.isFile() && item.name.endsWith('.mp3'))
-        );
-      } catch (error) {
-        console.error('Error reading directory:', error);
-        return [];
+  const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
+
+  const loadAudioFiles = useCallback(async () => {
+    try {
+      const exists = await RNFS.exists(baseFolder);
+      if (!exists) {
+        console.log('Audio folder does not exist:', baseFolder);
+        return;
       }
-    },
-    [states]
-  );
+      const directoryItems = await RNFS.readDir(baseFolder);
+      const audioFiles = directoryItems.filter((item) => item.isFile() && item.name.endsWith('.mp3'));
+      setItems(audioFiles);
 
-  useEffect(() => {
-    const loadAudioFiles = async () => {
-      const baseFolder = RNFS.DocumentDirectoryPath;
-      const files = await loadDirectory(baseFolder);
-      setItems(files.filter((item) => item.isDirectory() && states.includes(item.name)));
-
-      const currentSelected = selectedAudios[stateName.toLowerCase()] || { audios: [], mode: 'Selected' };
+      const currentSelected = selectedAudios[stateName.toLowerCase()] || {
+        audios: [],
+        mode: 'Selected',
+      };
       setSelectedFiles(currentSelected.audios);
       setPlaybackMode(currentSelected.mode);
-    };
+    } catch (error) {
+      console.error('Error loading audio files:', error);
+    }
+  }, [baseFolder, selectedAudios, stateName]);
 
+  useEffect(() => {
     if (visible) {
       loadAudioFiles();
     }
-  }, [visible, stateName, selectedAudios, loadDirectory, states]);
+  }, [visible, loadAudioFiles]);
 
-  const toggleDirectory = async (path: string) => {
-    setExpandedDirs((prevExpandedDirs) => ({
-      ...prevExpandedDirs,
-      [path]: !prevExpandedDirs[path],
-    }));
-    if (!expandedDirs[path]) {
-      const subItems = await loadDirectory(path);
-      setItems((prevItems) => {
-        const index = prevItems.findIndex((item) => item.path === path);
-        const newItems = [...prevItems];
-        newItems.splice(index + 1, 0, ...subItems);
-        return newItems;
-      });
-    } else {
-      setItems((prevItems) => prevItems.filter((item) => !item.path.startsWith(path) || item.path === path));
-    }
-  };
-
-  const handleSelectAudio = (filePath: string) => {
+  const handleSelectAudio = (fileName: string) => {
     setSelectedFiles((prevSelectedFiles) => {
-      if (prevSelectedFiles.includes(filePath)) {
-        return prevSelectedFiles.filter((path) => path !== filePath);
+      if (prevSelectedFiles.includes(fileName)) {
+        return prevSelectedFiles.filter((name) => name !== fileName);
       } else {
-        return [...prevSelectedFiles, filePath];
+        return [...prevSelectedFiles, fileName];
       }
     });
   };
 
   const handleSaveSelection = () => {
     setSelectedAudiosForState(stateName, {
-      audios: selectedFiles,
+      audios: selectedFiles, // Now contains file names
       mode: playbackMode,
     });
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
+    onClose();
   };
 
   const renderItem = ({ item }: { item: RNFS.ReadDirItem }) => {
-    const isSelected = selectedFiles.includes(item.path);
-    const isDirectory = item.isDirectory();
-
+    const isSelected = selectedFiles.includes(item.name);
     return (
       <View>
-        <TouchableOpacity onPress={() => (isDirectory ? toggleDirectory(item.path) : handleSelectAudio(item.path))} style={[styles.itemButton, isDirectory && styles.directoryButton]}>
-          {isDirectory && (
-            <Icon
-              name={expandedDirs[item.path] ? 'minus-square' : 'plus-square'}
-              size={20}
-              color="white"
-            />
-          )}
+        <TouchableOpacity onPress={() => handleSelectAudio(item.name)} style={styles.itemButton}>
           <Text style={[styles.itemText, isSelected && styles.selectedText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>
@@ -138,8 +105,8 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
       </View>
 
       <FlatList
-        data={items.filter((item) => item.isDirectory() ? states.includes(item.name) : true)}
-        keyExtractor={(item) => item.path}
+        data={items}
+        keyExtractor={(item) => item.name}
         renderItem={renderItem}
         style={styles.flatList}
       />
@@ -153,17 +120,11 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
 
 const styles = StyleSheet.create({
   itemButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-  directoryButton: {
-    backgroundColor: '#333',
-  },
   itemText: {
     color: 'white',
-    marginLeft: 10,
   },
   selectedText: {
     color: 'green',
