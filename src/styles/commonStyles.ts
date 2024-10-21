@@ -372,5 +372,16 @@ export const commonStyles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
     },
+    inputText: {
+      width: 80,
+      height: 40,
+      borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      justifyContent: 'center',
+      textAlignVertical: 'center', // For vertical alignment on Android
+      color: '#fff', // Text color
+    },
 });
 
