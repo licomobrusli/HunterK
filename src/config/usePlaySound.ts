@@ -1,6 +1,6 @@
 // src/config/usePlaySound.ts
 import { useEffect, useContext, useRef } from 'react';
-import Sound from 'react-native-sound';
+import TrackPlayer, { Capability, State } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
 import BackgroundTimer from 'react-native-background-timer';
 import { IntervalContext } from '../contexts/SceneProvider';
@@ -8,19 +8,24 @@ import { IntervalContext } from '../contexts/SceneProvider';
 const usePlaySound = (stateName: string, interval: number) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
-  const soundRef = useRef<Sound | null>(null);
 
   const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
   useEffect(() => {
     let intervalId: number | null = null;
-    let isPlaying = false;
+
+    const setupTrackPlayer = async () => {
+      await TrackPlayer.setupPlayer();
+
+      // Enable audio focus without pausing on interruptions to allow ducking
+      await TrackPlayer.updateOptions({
+        capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+        compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+        // Removing `alwaysPauseOnInterruption` to allow ducking instead of pausing other audio
+      });
+    };
 
     const playSound = async () => {
-      if (isPlaying) {
-        return;
-      }
-
       const stateData = selectedAudios[stateName.toLowerCase()];
       if (!stateData || stateData.audios.length === 0) {
         console.log(`No audios selected for state: ${stateName}`);
@@ -37,7 +42,9 @@ const usePlaySound = (stateName: string, interval: number) => {
         currentAudioFileName = audios[randomIndex];
       } else if (mode === 'A-Z') {
         // Sort audios alphabetically and iterate through them
-        const sortedAudios = [...audios].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        const sortedAudios = [...audios].sort((a, b) =>
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        );
 
         // Get current audio file name
         currentAudioFileName = sortedAudios[audioIndexRef.current];
@@ -58,34 +65,22 @@ const usePlaySound = (stateName: string, interval: number) => {
           return;
         }
 
-        // Stop any previously playing sound
-        if (soundRef.current) {
-          soundRef.current.stop(() => {
-            soundRef.current?.release();
-          });
-          isPlaying = false;
+        // Stop the current track if any
+        const currentTrackState = await TrackPlayer.getState();
+        if (currentTrackState === State.Playing || currentTrackState === State.Paused) {
+          await TrackPlayer.stop();
+          await TrackPlayer.reset();
         }
 
-        // Initialize the sound
-        const sound = new Sound(currentAudioPath, '', (error) => {
-          if (error) {
-            console.log('Failed to load the sound', error);
-            return;
-          }
-          // Play the sound
-          isPlaying = true;
-          soundRef.current = sound;
-          sound.play((success) => {
-            if (success) {
-              console.log('Sound played successfully');
-            } else {
-              console.log('Playback failed due to audio decoding errors');
-            }
-            isPlaying = false;
-            sound.release();
-            soundRef.current = null;
-          });
+        // Add the track to TrackPlayer and play it
+        await TrackPlayer.add({
+          id: `${audioIndexRef.current}`,
+          url: `file://${currentAudioPath}`,
+          title: `State Audio`,
+          artist: 'Your App',
         });
+
+        await TrackPlayer.play();
       } catch (error) {
         console.error('Error playing audio file:', error);
       }
@@ -94,13 +89,8 @@ const usePlaySound = (stateName: string, interval: number) => {
     // Reset audio index when dependencies change
     audioIndexRef.current = 0;
 
-    // Stop any previously playing sound when state changes
-    if (soundRef.current) {
-      soundRef.current.stop(() => {
-        soundRef.current?.release();
-      });
-      soundRef.current = null;
-    }
+    // Set up TrackPlayer
+    setupTrackPlayer();
 
     // Play sound immediately upon component mount
     playSound();
@@ -112,12 +102,9 @@ const usePlaySound = (stateName: string, interval: number) => {
       if (intervalId !== null) {
         BackgroundTimer.clearInterval(intervalId);
       }
-      if (soundRef.current) {
-        soundRef.current.stop(() => {
-          soundRef.current?.release();
-        });
-        soundRef.current = null;
-      }
+
+      TrackPlayer.stop();
+      TrackPlayer.reset();
     };
   }, [stateName, interval, selectedAudios]);
 };
