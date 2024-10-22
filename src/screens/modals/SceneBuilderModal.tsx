@@ -45,7 +45,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     setIntervals,
   } = useContext(IntervalContext);
 
-  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>({});
+  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string | null }>({});
   const [localPositions, setLocalPositions] = useState<string[]>([]);
   const [editingIntervals, setEditingIntervals] = useState<{ [key: string]: boolean }>({});
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -355,19 +355,18 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
 
     // Optionally, perform validation here
     const intervalStr = localIntervals[state.toLowerCase()];
-    const intervalMs = convertMinutesSecondsToMs(intervalStr);
-    if (isNaN(intervalMs)) {
-      console.log(`Invalid interval format for state "${state}". Expected "mm:ss". Resetting to previous value.`);
-      // Reset to a default value or handle accordingly
-      setLocalIntervals((prev) => ({
-        ...prev,
-        [state.toLowerCase()]: '00:00',
-      }));
+
+    if (intervalStr !== null) {
+      const intervalMs = convertMinutesSecondsToMs(intervalStr);
+      if (!isNaN(intervalMs)) {
+        setIntervalForState(state, intervalMs);
+        console.log(`Interval for "${state}" updated to ${intervalMs} ms.`);
+      } else {
+        console.log(`Invalid interval format for state "${state}". Expected "mm:ss".`);
+      }
     } else {
-      // Update the interval in the context if needed
-      setIntervalForState(state, intervalMs);
-      console.log(`Interval for "${state}" updated to ${intervalMs} ms.`);
-    }
+      console.log(`Interval for "${state}" is null, skipping conversion.`);
+    }    
   };
 
   return (
@@ -379,6 +378,9 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           keyExtractor={(item) => item}
           renderItem={({ item, index }) => {
             const isEditingInterval = editingIntervals[item.toLowerCase()] || false;
+            const intervalValue = localIntervals[item.toLowerCase()];
+            const isGreyedOut = intervalValue === null; // Check if the interval is greyed out
+  
             return (
               <View key={item} style={commonStyles.stateColumnRow}>
                 {/* Position Number Input */}
@@ -391,17 +393,17 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
                   maxLength={2}
                   placeholder="Pos"
                 />
-
+  
                 {/* State Name */}
                 <TouchableOpacity onPress={() => handleStatePress(item)}>
                   <Text style={commonStyles.fixedWidthLabel}>{item}</Text>
                 </TouchableOpacity>
-
+  
                 {/* Interval Field */}
                 {isEditingInterval ? (
                   <TextInput
                     style={commonStyles.input}
-                    value={localIntervals[item.toLowerCase()] || ''}
+                    value={intervalValue || ''} // If null, show empty
                     onChangeText={(value) => handleChange(item, value)}
                     onBlur={() => handleIntervalBlur(item)}
                     keyboardType="numeric"
@@ -410,13 +412,27 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
                     autoFocus
                   />
                 ) : (
-                  <TouchableOpacity onPress={() => handleIntervalPress(item)}>
-                    <Text style={commonStyles.inputText}>
-                      {localIntervals[item.toLowerCase()] || 'mm:ss'}
+                  <TouchableOpacity
+                    onPress={() => handleIntervalPress(item)}
+                    onLongPress={() => {
+                      setLocalIntervals((prev) => ({
+                        ...prev,
+                        [item.toLowerCase()]: null, // Set interval to null on long press
+                      }));
+                      console.log(`Interval for "${item}" set to null (greyed out).`);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        commonStyles.inputText,
+                        isGreyedOut && { color: 'grey' }, // Apply grey-out styling if interval is null
+                      ]}
+                    >
+                      {intervalValue !== null ? intervalValue : 'mm:ss'}
                     </Text>
                   </TouchableOpacity>
                 )}
-
+  
                 {/* Delete Icon */}
                 <TouchableOpacity onPress={() => handleDeleteState(index)}>
                   <Icon name="trash-2" size={24} color="#fff" />
@@ -426,7 +442,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           }}
           ListEmptyComponent={<Text style={commonStyles.text}>No states available.</Text>}
         />
-
+  
         {/* Add New State Row */}
         <View style={commonStyles.addStateRow}>
           {/* Position Number Input */}
@@ -438,7 +454,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
             maxLength={2}
             placeholder="Pos"
           />
-
+  
           {/* State Name Input */}
           <TextInput
             style={commonStyles.newStateInput}
@@ -448,19 +464,19 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
             placeholderTextColor="#aaa"
             maxLength={20}
           />
-
+  
           {/* Save Icon */}
           <TouchableOpacity onPress={handleAddState}>
             <Icon name="save" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-
+  
         {/* Save Intervals Button */}
         <TouchableOpacity onPress={handleSave} style={commonStyles.saveButton}>
           <Text style={commonStyles.saveButtonText}>Save Intervals</Text>
         </TouchableOpacity>
       </View>
-
+  
       {/* Assign Audios Sub-Modal */}
       {assignAudiosModalVisible && selectedState && (
         <AssignAudiosModal

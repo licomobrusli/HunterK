@@ -9,7 +9,6 @@ import {
   StyleSheet,
   ToastAndroid,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
 import { IntervalContext } from '../../contexts/SceneProvider';

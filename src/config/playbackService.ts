@@ -25,8 +25,8 @@ const playbackService = async () => {
     } else {
       if (event.paused) {
         // Temporary loss of audio focus, lower volume (duck)
-        await TrackPlayer.setVolume(0.5); // Lower volume to 50%
-        console.log('Audio focus temporarily lost. Lowering volume to 50%.');
+        await TrackPlayer.setVolume(0.7); // Lower volume to 70%
+        console.log('Audio focus temporarily lost. Lowering volume to 70%.');
       } else {
         // Audio focus regained, restore volume
         await TrackPlayer.setVolume(1.0); // Restore volume to 100%

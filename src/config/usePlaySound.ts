@@ -20,14 +20,15 @@ const usePlaySound = (stateName: string, interval: number) => {
       if (!isTrackPlayerSetup) {
         await TrackPlayer.setupPlayer();
 
-        // Enable audio focus with ducking by allowing other audio to mix
+        // Ensure audio focus is handled properly with ducking
         await TrackPlayer.updateOptions({
           capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
           compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
+          alwaysPauseOnInterruption: false,  // Allows ducking instead of pausing
         });
 
         isTrackPlayerSetup = true;
-        console.log('TrackPlayer has been initialized.');
+        console.log('TrackPlayer has been initialized with ducking enabled.');
       }
     };
 
@@ -84,8 +85,12 @@ const usePlaySound = (stateName: string, interval: number) => {
           return;
         }
 
-        // Remove all tracks to ensure we're starting fresh
-        await TrackPlayer.reset();
+        // Only reset the player if there's something else playing
+        const currentTrackState = await TrackPlayer.getState();
+        if (currentTrackState === State.Playing || currentTrackState === State.Paused) {
+          await TrackPlayer.stop();
+          await TrackPlayer.reset();
+        }
 
         // Add the track to TrackPlayer and play it
         await TrackPlayer.add({
@@ -129,6 +134,8 @@ const usePlaySound = (stateName: string, interval: number) => {
       // Do not reset or stop the player here to avoid uninitialization
     };
   }, [stateName, interval, selectedAudios]);
+
+  // Note: This hook does not return anything. Ensure you call it within a component.
 };
 
 export default usePlaySound;
