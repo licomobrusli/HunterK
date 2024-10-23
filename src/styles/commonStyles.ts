@@ -276,14 +276,13 @@ export const commonStyles = StyleSheet.create({
   },
 
   positionInput: {
-    width: 40,
+    width: 30,
     borderWidth: 1,
-    borderColor: 'black',
-    padding: 5,
+    borderColor: 'white',
+    padding: 1,
     textAlign: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#1b1b1b',
+    borderRadius: 1,
+    color: 'white',
   },
 
   newStateInput: {
@@ -353,19 +352,19 @@ export const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 1,
     width: '100%',
-    paddingHorizontal: 10,
+    paddingHorizontal: 1,
   },
     // **Fixed Width Label**
     fixedWidthLabel: {
       width: 100, // Adjust the width as needed
-      fontSize: 16,
       color: '#FFFFFF',
-      backgroundColor: '#333', // Optional background color
-      textAlign: 'center', // Center the text
-      paddingVertical: 10,
-      borderRadius: 5,
+      textAlign: 'left', // Center the text
+      padding: 5,
+      borderRadius: 1,
+      borderWidth: 1,
+      borderColor: 'white',
     },
     fullscreenTouchable: {
       ...StyleSheet.absoluteFillObject, // This makes the TouchableOpacity cover the whole parent View
@@ -373,15 +372,15 @@ export const commonStyles = StyleSheet.create({
       alignItems: 'center',
     },
     inputText: {
-      width: 80,
-      height: 40,
+      width: 70,
       borderColor: '#ccc',
       borderWidth: 1,
-      borderRadius: 5,
-      paddingHorizontal: 10,
+      borderRadius: 1,
+      padding: 5,
       justifyContent: 'center',
-      textAlignVertical: 'center', // For vertical alignment on Android
-      color: '#fff', // Text color
+      textAlignVertical: 'center',
+      textAlign: 'center',
+      color: '#fff',
     },
 });
 

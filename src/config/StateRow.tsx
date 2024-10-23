@@ -36,39 +36,43 @@ const StateRow: React.FC<StateRowProps> = ({
 }) => {
   return (
     <View style={commonStyles.stateColumnRow}>
-      <TextInput
-        style={commonStyles.positionInput}
-        value={position}
-        onChangeText={onChangePosition}
-        onBlur={onBlurPosition}
-        keyboardType="numeric"
-        maxLength={2}
-        placeholder="Pos"
-      />
-      <TouchableOpacity onPress={onStatePress}>
-        <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
-      </TouchableOpacity>
-      {isEditing ? (
+     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
         <TextInput
-          style={commonStyles.input}
-          value={intervalValue || ''}
-          onChangeText={onChangeInterval}
-          onBlur={onBlurInterval}
-          keyboardType="numeric"
-          maxLength={5}
-          placeholder="mm:ss"
-          autoFocus
+            style={commonStyles.positionInput}
+            value={position}
+            onChangeText={onChangePosition}
+            onBlur={onBlurPosition}
+            keyboardType="numeric"
+            maxLength={2}
+            placeholder="Pos"
         />
-      ) : (
-        <TouchableOpacity onPress={onEditInterval} onLongPress={onLongPressInterval}>
-          <Text style={[commonStyles.inputText, isGreyedOut && { color: 'grey' }]}>
-            {intervalValue !== null ? intervalValue : 'mm:ss'}
-          </Text>
+        <TouchableOpacity onPress={onStatePress}>
+            <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
         </TouchableOpacity>
-      )}
-      <TouchableOpacity onPress={onDeleteState}>
-        <Icon name="trash-2" size={24} color="#fff" />
-      </TouchableOpacity>
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>  
+            {isEditing ? (
+                <TextInput
+                style={commonStyles.input}
+                value={intervalValue || ''}
+                onChangeText={onChangeInterval}
+                onBlur={onBlurInterval}
+                keyboardType="numeric"
+                maxLength={5}
+                placeholder="mm:ss"
+                autoFocus
+                />
+            ) : (
+                <TouchableOpacity onPress={onEditInterval} onLongPress={onLongPressInterval}>
+                <Text style={[commonStyles.inputText, isGreyedOut && { color: 'grey' }]}>
+                    {intervalValue !== null ? intervalValue : 'mm:ss'}
+                </Text>
+                </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={onDeleteState}>
+                <Icon name="trash-2" size={24} color="#fff" />
+            </TouchableOpacity>
+        </View>
     </View>
   );
 };

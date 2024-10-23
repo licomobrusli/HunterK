@@ -41,6 +41,8 @@
     "react-native-screens": "^3.34.0",
     "react-native-share": "^11.0.4",
     "react-native-sound": "^0.11.2",
+    "react-native-svg": "^15.8.0",
+    "react-native-svg-transformer": "^1.5.0",
     "react-native-track-player": "^4.1.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-zip-archive": "^7.0.1",
