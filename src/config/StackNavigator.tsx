@@ -9,11 +9,13 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import WelcomeScreen from '../screens/WelcomeScreen';
 import ActiveScreen from '../screens/ActiveScreen';
+import DebriefScreen from '../screens/DebriefScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
   Welcome: undefined;
   Active: undefined;
+  Debrief: undefined;
   Settings: undefined;
 };
 
@@ -48,6 +50,11 @@ const StackNavigator: React.FC = () => {
           headerTitle: '',
           headerTransparent: true,
         })}
+      />
+      <Stack.Screen 
+        name="Debrief" 
+        component={DebriefScreen} 
+        options={{ title: 'Debrief' }} 
       />
       <Stack.Screen
         name="Settings"

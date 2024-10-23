@@ -9,6 +9,9 @@ import type { RootStackParamList } from '../config/StackNavigator';
 // Import your native module
 const { LogcatModule } = NativeModules;
 
+// Assume you're using an audio player module like react-native-sound or react-native-track-player
+import TrackPlayer from 'react-native-track-player'; // Example for react-native-track-player
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Active'>;
 
 interface LogcatEvent {
@@ -19,17 +22,32 @@ interface LogcatEvent {
 const ActiveScreen: React.FC<Props> = ({ navigation }) => {
   const { states } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
-
-  // Ref to keep track of the latest currentStateIndex
-  const currentStateIndexRef = useRef(currentStateIndex);
+  const [isNavigating, setIsNavigating] = useState(false); // Optional flag to prevent multiple navigations
 
   // Ref to store the listener start time
   const listenerStartTimeRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null); // Ref to store the interval ID
 
-  // Update the ref whenever currentStateIndex changes
-  useEffect(() => {
-    currentStateIndexRef.current = currentStateIndex;
-  }, [currentStateIndex]);
+  // Clean up audio and intervals
+  const stopAudioAndCleanup = async () => {
+    if (intervalRef.current) {
+      console.log('ActiveScreen: Clearing interval');
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    try {
+      console.log('ActiveScreen: Stopping audio playback');
+      await TrackPlayer.stop(); // Adjust this according to your audio library
+    } catch (error) {
+      console.error('ActiveScreen: Error stopping audio', error);
+    }
+
+    // Stop listening to logcat events
+    LogcatModule.stopListening()
+      .then((message: string) => console.log(`ActiveScreen: ${message}`))
+      .catch((error: any) => console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`));
+  };
 
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
@@ -59,55 +77,84 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
     LogcatModule.startListening()
       .then((message: string) => {
         console.log(`ActiveScreen: ${message}`);
-        // Update the listener start time **after** starting to listen
         listenerStartTimeRef.current = Date.now();
       })
       .catch((error: any) => console.warn(`ActiveScreen: Error starting logcat listener - ${error}`));
 
-    // Cleanup the listener on component unmount
+    // Cleanup the listener on component unmount or screen navigation
     return () => {
       logcatListener.remove();
-      LogcatModule.stopListening()
-        .then((message: string) => console.log(`ActiveScreen: ${message}`))
-        .catch((error: any) => console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`));
+      stopAudioAndCleanup();
     };
   }, [states.length]);
 
+  // Ensure audio and interval cleanup when navigating away
+  useEffect(() => {
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      console.log('ActiveScreen: Screen blurred, performing cleanup');
+      stopAudioAndCleanup();
+    });
+
+    return () => {
+      unsubscribeBlur();
+    };
+  }, [navigation]);
+
   /**
    * Advances the current state index by the specified number of steps.
-   * Wraps around if the end of the states array is reached.
+   * Navigates to DebriefScreen if advancing beyond the last state.
    *
    * @param steps Number of states to advance.
    */
   const advanceState = (steps: number) => {
+    if (isNavigating) return;
+
     setCurrentStateIndex((prevIndex) => {
-      const newIndex = (prevIndex + steps) % states.length;
-      console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${newIndex}`);
-      return newIndex;
+      const newIndex = prevIndex + steps;
+
+      if (newIndex >= states.length) {
+        console.log(`ActiveScreen: Reached the end of states. Navigating to DebriefScreen.`);
+        setIsNavigating(true);
+        navigation.navigate('Debrief');
+        return prevIndex; // Optionally, you can reset or keep the current index
+      } else {
+        const wrappedIndex = newIndex % states.length;
+        console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${wrappedIndex}`);
+        return wrappedIndex;
+      }
     });
   };
 
   /**
    * Handles the long press event.
-   * If on the first state, navigates back to the Welcome screen.
-   * Otherwise, resets to the first state.
+   * Triggers the same functionality as pressing the Abort button.
    */
   const handleLongPress = () => {
-    if (currentStateIndexRef.current === 0) {
-      console.log('ActiveScreen: Already on the first state. Navigating back to Welcome screen.');
-      navigation.navigate('Welcome');
-    } else {
-      resetState();
-    }
+    console.log('ActiveScreen: Long press detected. Triggering abort.');
+    navigateToDebrief(); // Call the abort button functionality
   };
 
   /**
-   * Resets the current state index to the first state.
+   * Navigates to the DebriefScreen and removes ActiveScreen from the stack.
    */
-  const resetState = () => {
-    setCurrentStateIndex(0);
-    console.log('ActiveScreen: State reset to first state');
+  const navigateToDebrief = () => {
+    if (isNavigating) return;
+
+    console.log('ActiveScreen: Replacing with DebriefScreen.');
+    setIsNavigating(true);
+    stopAudioAndCleanup(); // Ensure cleanup before navigating away
+    navigation.replace('Debrief'); // Use replace to remove ActiveScreen from the stack
   };
+
+
+  // Reset navigation flag when screen gains focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setIsNavigating(false);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const currentStateName = states[currentStateIndex];
 
@@ -117,13 +164,13 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       <TouchableOpacity
         style={commonStyles.fullscreenTouchable}
         onPress={() => advanceState(1)}
-        activeOpacity={1} // Set activeOpacity to 1 so it doesn't visually change on touch
+        activeOpacity={1}
       >
         <StateComponent stateName={currentStateName} />
       </TouchableOpacity>
 
       {/* Abort Button */}
-      <TouchableOpacity style={commonStyles.abortButton} onPress={resetState}>
+      <TouchableOpacity style={commonStyles.abortButton} onPress={navigateToDebrief}>
         <Text
           style={commonStyles.abortButtonText}
           testID="abortButton"
