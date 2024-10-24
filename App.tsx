@@ -5,6 +5,8 @@ import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
 import SceneProvider from './src/contexts/SceneProvider';
 import FlashMessage from 'react-native-flash-message';
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const App: React.FC = () => {
   const [_audioPermissionGranted, setAudioPermissionGranted] = useState(false);
@@ -38,7 +40,7 @@ const App: React.FC = () => {
     let isMounted = true;
 
     const loadData = async () => {
-      if (!isMounted) return;
+      if (!isMounted) {return;}
 
       const audioResult = await check(PERMISSIONS.ANDROID.RECORD_AUDIO);
       if (audioResult === RESULTS.GRANTED) {
@@ -59,12 +61,14 @@ const App: React.FC = () => {
   }, [requestAudioPermission]);
 
   return (
-    <SceneProvider>
-      <NavigationContainer>
-        <StackNavigator />
-      </NavigationContainer>
-      <FlashMessage position="top" />
-    </SceneProvider>
+    <GestureHandlerRootView>
+      <SceneProvider>
+        <NavigationContainer>
+          <StackNavigator />
+        </NavigationContainer>
+        <FlashMessage position="top" />
+      </SceneProvider>
+    </GestureHandlerRootView>
   );
 };
 

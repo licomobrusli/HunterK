@@ -23,7 +23,7 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
   visible,
   onClose,
 }) => {
-  const { intervals, setIntervalForState, states, setStates, setSelectedAudiosForState, setIntervals } =
+  const { intervals, setIntervalForState, states, setStates } =
     useContext(IntervalContext);
 
   const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string | null }>({});
@@ -38,7 +38,7 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
   useEffect(() => {
     let isMounted = true;
     const loadIntervals = async () => {
-      if (dataLoaded) return;
+      if (dataLoaded) {return;}
       try {
         const loadedIntervals: { [key: string]: string } = {};
         for (const state of states) {
@@ -50,13 +50,13 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
               ? convertMsToMinutesSeconds(intervals[state.toLowerCase()])
               : '00:00';
         }
-        if (isMounted) setLocalIntervals(loadedIntervals);
+        if (isMounted) {setLocalIntervals(loadedIntervals);}
         setDataLoaded(true);
       } catch (error) {
         console.error('Failed to load intervals:', error);
       }
     };
-    if (visible && !dataLoaded) loadIntervals();
+    if (visible && !dataLoaded) {loadIntervals();}
     return () => { isMounted = false; };
   }, [visible, states, intervals, dataLoaded]);
 
@@ -68,9 +68,9 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
     try {
       for (const state of states) {
         const intervalStr = localIntervals[state.toLowerCase()];
-        if (!intervalStr) return;
+        if (!intervalStr) {return;}
         const intervalMs = convertMinutesSecondsToMs(intervalStr);
-        if (!isNaN(intervalMs)) setIntervalForState(state, intervalMs);
+        if (!isNaN(intervalMs)) {setIntervalForState(state, intervalMs);}
       }
       onClose();
     } catch (error) {
@@ -120,7 +120,7 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
               onBlurInterval={() => {
                 setEditingIntervals((prev) => ({ ...prev, [item.toLowerCase()]: false }));
                 const intervalMs = convertMinutesSecondsToMs(localIntervals[item.toLowerCase()] || '');
-                if (!isNaN(intervalMs)) setIntervalForState(item, intervalMs);
+                if (!isNaN(intervalMs)) {setIntervalForState(item, intervalMs);}
               }}
               onEditInterval={() => {
                 setEditingIntervals((prev) => ({ ...prev, [item.toLowerCase()]: true }));
