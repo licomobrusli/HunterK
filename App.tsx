@@ -29,7 +29,6 @@ const App: React.FC = () => {
         const audioResult = await request(PERMISSIONS.ANDROID.RECORD_AUDIO);
         handlePermissionResult(audioResult);
       }
-      // Add iOS permissions if needed
     } catch (error) {
       console.warn('Permission request failed', error);
     }

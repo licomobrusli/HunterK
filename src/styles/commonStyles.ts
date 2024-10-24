@@ -277,6 +277,9 @@ export const commonStyles = StyleSheet.create({
 
   positionInput: {
     width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'white',
     padding: 1,
@@ -355,10 +358,13 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 1,
     width: '100%',
     paddingHorizontal: 1,
+    borderWidth: 1,
+    borderColor: 'white',
   },
     // **Fixed Width Label**
     fixedWidthLabel: {
       width: 100, // Adjust the width as needed
+      height: 30,
       color: '#FFFFFF',
       textAlign: 'left', // Center the text
       padding: 5,
@@ -372,7 +378,7 @@ export const commonStyles = StyleSheet.create({
       alignItems: 'center',
     },
     inputText: {
-      width: 70,
+      width: 50,
       borderColor: '#ccc',
       borderWidth: 1,
       borderRadius: 1,
