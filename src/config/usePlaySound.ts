@@ -1,5 +1,5 @@
 import { useEffect, useContext, useRef } from 'react';
-import TrackPlayer, { Capability, State } from 'react-native-track-player';
+import TrackPlayer, { Capability } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
 import BackgroundTimer from 'react-native-background-timer'; // Use BackgroundTimer for intervals
 import { IntervalContext } from '../contexts/SceneProvider';
@@ -30,7 +30,7 @@ const usePlaySound = (stateName: string, interval: number) => {
     };
 
     const playSound = async () => {
-      if (!isMounted) return;
+      if (!isMounted) {return;}
 
       console.log(`playSound called for state: ${stateName}`);
       const stateData = selectedAudios[stateName.toLowerCase()];
@@ -81,7 +81,7 @@ const usePlaySound = (stateName: string, interval: number) => {
         await TrackPlayer.add({
           id: `${stateName}-${audioIndexRef.current}`,
           url: `file://${currentAudioPath}`,
-          title: `State Audio`,
+          title: 'State Audio',
           artist: 'Your App',
         });
 
@@ -121,7 +121,7 @@ const usePlaySound = (stateName: string, interval: number) => {
         intervalRef.current = null;
       }
     };
-  }, [stateName, interval, selectedAudios]);
+  }, [stateName, interval, selectedAudios, AUDIOS_FOLDER]);
 
   return null; // This hook does not return anything
 };

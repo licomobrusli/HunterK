@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { TouchableOpacity, View, Text, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import StateComponent from '../config/StateComponent'; // Import the generic StateComponent
@@ -49,6 +49,37 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       .catch((error: any) => console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`));
   };
 
+  // Wrap advanceState in useCallback to avoid recreating on every render
+  const advanceState = useCallback((steps: number) => {
+    if (isNavigating) {return;}
+
+    setCurrentStateIndex((prevIndex) => {
+      const newIndex = prevIndex + steps;
+
+      if (newIndex >= states.length) {
+        console.log('ActiveScreen: Reached the end of states. Navigating to DebriefScreen.');
+        setIsNavigating(true);
+        stopAudioAndCleanup(); // Ensure cleanup before navigating away
+        navigation.replace('Debrief'); // Use replace to remove ActiveScreen from the stack
+        return prevIndex; // Optionally, you can reset or keep the current index
+      } else {
+        const wrappedIndex = newIndex % states.length;
+        console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${wrappedIndex}`);
+        return wrappedIndex;
+      }
+    });
+  }, [isNavigating, states.length, navigation]);
+
+  // Wrap handleLongPress in useCallback
+  const handleLongPress = useCallback(() => {
+    console.log('ActiveScreen: Long press detected. Triggering abort.');
+    if (!isNavigating) {
+      setIsNavigating(true);
+      stopAudioAndCleanup();
+      navigation.replace('Debrief');
+    }
+  }, [isNavigating, navigation]);
+
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
 
@@ -86,7 +117,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       logcatListener.remove();
       stopAudioAndCleanup();
     };
-  }, [states.length]);
+  }, [states.length, advanceState, handleLongPress]); // Include advanceState and handleLongPress as dependencies
 
   // Ensure audio and interval cleanup when navigating away
   useEffect(() => {
@@ -99,53 +130,6 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       unsubscribeBlur();
     };
   }, [navigation]);
-
-  /**
-   * Advances the current state index by the specified number of steps.
-   * Navigates to DebriefScreen if advancing beyond the last state.
-   *
-   * @param steps Number of states to advance.
-   */
-  const advanceState = (steps: number) => {
-    if (isNavigating) return;
-
-    setCurrentStateIndex((prevIndex) => {
-      const newIndex = prevIndex + steps;
-
-      if (newIndex >= states.length) {
-        console.log(`ActiveScreen: Reached the end of states. Navigating to DebriefScreen.`);
-        setIsNavigating(true);
-        navigation.navigate('Debrief');
-        return prevIndex; // Optionally, you can reset or keep the current index
-      } else {
-        const wrappedIndex = newIndex % states.length;
-        console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${wrappedIndex}`);
-        return wrappedIndex;
-      }
-    });
-  };
-
-  /**
-   * Handles the long press event.
-   * Triggers the same functionality as pressing the Abort button.
-   */
-  const handleLongPress = () => {
-    console.log('ActiveScreen: Long press detected. Triggering abort.');
-    navigateToDebrief(); // Call the abort button functionality
-  };
-
-  /**
-   * Navigates to the DebriefScreen and removes ActiveScreen from the stack.
-   */
-  const navigateToDebrief = () => {
-    if (isNavigating) return;
-
-    console.log('ActiveScreen: Replacing with DebriefScreen.');
-    setIsNavigating(true);
-    stopAudioAndCleanup(); // Ensure cleanup before navigating away
-    navigation.replace('Debrief'); // Use replace to remove ActiveScreen from the stack
-  };
-
 
   // Reset navigation flag when screen gains focus
   useEffect(() => {
@@ -170,7 +154,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       </TouchableOpacity>
 
       {/* Abort Button */}
-      <TouchableOpacity style={commonStyles.abortButton} onPress={navigateToDebrief}>
+      <TouchableOpacity style={commonStyles.abortButton} onPress={handleLongPress}>
         <Text
           style={commonStyles.abortButtonText}
           testID="abortButton"

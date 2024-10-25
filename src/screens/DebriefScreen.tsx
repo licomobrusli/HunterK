@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, NativeEventEmitter, NativeModules } from 'react-native';
+import { Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import { NavigationProp } from '@react-navigation/native';
 

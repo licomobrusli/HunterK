@@ -12,7 +12,7 @@ const AssignAudiosModalWrapper: React.FC<AssignAudiosModalWrapperProps> = ({
   selectedState,
   onClose,
 }) => {
-  if (!selectedState) return null;
+  if (!selectedState) {return null;}
 
   return (
     <AssignAudiosModal

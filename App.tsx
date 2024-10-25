@@ -59,12 +59,12 @@ const App: React.FC = () => {
   }, [requestAudioPermission]);
 
   return (
-    <SceneProvider>
-      <NavigationContainer>
-        <StackNavigator />
-      </NavigationContainer>
-      <FlashMessage position="top" />
-    </SceneProvider>
+      <SceneProvider>
+        <NavigationContainer>
+          <StackNavigator />
+        </NavigationContainer>
+        <FlashMessage position="top" />
+      </SceneProvider>
   );
 };
 

@@ -5,8 +5,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Platform,
-  PermissionsAndroid,
   TextInput,
   StyleSheet,
   ToastAndroid,

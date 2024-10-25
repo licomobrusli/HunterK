@@ -158,7 +158,7 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     };
 
     loadData();
-  }, [dataLoaded]);
+  }, [dataLoaded, states]);
 
   // Save states when they change, with debounce
   useEffect(() => {

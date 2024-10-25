@@ -51,10 +51,10 @@ const StackNavigator: React.FC = () => {
           headerTransparent: true,
         })}
       />
-      <Stack.Screen 
-        name="Debrief" 
-        component={DebriefScreen} 
-        options={{ title: 'Debrief' }} 
+      <Stack.Screen
+        name="Debrief"
+        component={DebriefScreen}
+        options={{ title: 'Debrief' }}
       />
       <Stack.Screen
         name="Settings"

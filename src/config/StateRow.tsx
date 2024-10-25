@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { commonStyles } from '../styles/commonStyles';
 import Bin from '../assets/icons/bin.svg';   // Import the Bin SVG
 import Queue from '../assets/icons/queue.svg'; // Import the Queue SVG
@@ -38,7 +37,7 @@ const StateRow: React.FC<StateRowProps> = ({
 }) => {
   return (
     <View style={commonStyles.stateColumnRow}>
-     <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
+     <View style={styles.rowStart}>
         <TextInput
             style={commonStyles.positionInput}
             value={position}
@@ -52,7 +51,7 @@ const StateRow: React.FC<StateRowProps> = ({
           <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
         </TouchableOpacity>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
+      <View style={styles.rowEnd}>
         {isEditing ? (
           <TextInput
             style={commonStyles.input}
@@ -66,7 +65,7 @@ const StateRow: React.FC<StateRowProps> = ({
           />
         ) : (
           <TouchableOpacity onPress={onEditInterval} onLongPress={onLongPressInterval}>
-            <Text style={[commonStyles.inputText, isGreyedOut && { color: 'grey' }]}>
+            <Text style={[commonStyles.inputText, isGreyedOut && styles.greyedOutText]}>
               {intervalValue !== null ? intervalValue : 'mm:ss'}
             </Text>
           </TouchableOpacity>
@@ -87,5 +86,23 @@ const StateRow: React.FC<StateRowProps> = ({
     </View>
   );
 };
+
+import { StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  rowStart: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  rowEnd: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  greyedOutText: {
+    color: 'grey',
+  },
+});
 
 export default StateRow;
