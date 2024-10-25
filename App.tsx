@@ -38,7 +38,7 @@ const App: React.FC = () => {
     let isMounted = true;
 
     const loadData = async () => {
-      if (!isMounted) return;
+      if (!isMounted) {return;}
 
       const audioResult = await check(PERMISSIONS.ANDROID.RECORD_AUDIO);
       if (audioResult === RESULTS.GRANTED) {

@@ -1,7 +1,5 @@
-// src/styles/AppModal.tsx
-
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import RNModal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
 import { commonStyles } from '../styles/commonStyles';
@@ -58,14 +56,27 @@ const AppModal: React.FC<AppModalProps> = ({
   return (
     <RNModal
       isVisible={isVisible}
-      onBackdropPress={onClose} // Allow closing by tapping outside
-      onBackButtonPress={onClose} // Allow closing with back button (Android)
+      onBackdropPress={onClose}
+      onBackButtonPress={onClose}
       animationIn={animationIn}
       animationOut={animationOut}
+      animationInTiming={500}
+      animationOutTiming={500}
+      avoidKeyboard
+      coverScreen
       useNativeDriver
       hideModalContentWhileAnimating
       backdropTransitionOutTiming={0}
+      hasBackdrop
+      backdropColor="black"
+      backdropOpacity={0.7}
+      backdropTransitionInTiming={500}
+      supportedOrientations={['portrait', 'landscape']}
       style={styles.modalStyle}
+      customBackdrop={<View />}
+      deviceHeight={Dimensions.get('window').height}
+      deviceWidth={Dimensions.get('window').width}
+      propagateSwipe
     >
       <View style={commonStyles.modalContent}>
         {/* Header with X button */}
