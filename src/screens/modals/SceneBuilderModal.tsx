@@ -1,3 +1,5 @@
+// src/screens/modals/SceneBuilderModal.tsx
+
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,9 +21,27 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
   const [selectedState, setSelectedState] = useState<string | null>(null);
   const [newStateName, setNewStateName] = useState('');
   const [newStatePosition, setNewStatePosition] = useState('');
+  const [intervals, setIntervals] = useState<string[]>([]);
 
   useEffect(() => {
     setLocalPositions(states.map((_, index) => (index + 1).toString()));
+
+    // Load intervals when states change
+    const loadIntervals = async () => {
+      const loadedIntervals: string[] = [];
+      for (const state of states) {
+        const interval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
+        if (interval && /^\d{2}:\d{2}$/.test(interval)) {
+          loadedIntervals.push(interval);
+        } else {
+          // If stored format is incorrect or missing, default to '00:00'
+          loadedIntervals.push('00:00');
+          await AsyncStorage.setItem(`@interval_${state.toLowerCase()}`, '00:00');
+        }
+      }
+      setIntervals(loadedIntervals);
+    };
+    loadIntervals();
   }, [states]);
 
   const handlePositionChange = (index: number, value: string) => {
@@ -51,6 +71,12 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
 
     setStates(updatedStates);
     setLocalPositions(updatedStates.map((_, idx) => (idx + 1).toString()));
+
+    // Reorder intervals to match the new states order
+    const updatedIntervals = [...intervals];
+    const movedInterval = updatedIntervals.splice(index, 1)[0];
+    updatedIntervals.splice(newPosition - 1, 0, movedInterval);
+    setIntervals(updatedIntervals);
   };
 
   const handleAddState = () => {
@@ -63,10 +89,33 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
 
       setStates(updatedStates);
       setLocalPositions(updatedStates.map((_, index) => (index + 1).toString()));
+      setIntervals((prev) => {
+        const newIntervals = [...prev];
+        newIntervals.splice(insertIndex, 0, '00:00'); // default interval value
+        return newIntervals;
+      });
+
+      // Initialize the interval in AsyncStorage
+      AsyncStorage.setItem(`@interval_${newStateName.toLowerCase()}`, '00:00');
 
       setNewStateName('');
       setNewStatePosition('');
     }
+  };
+
+  const handleIntervalChange = (index: number, value: string) => {
+    setIntervals((prevIntervals) => {
+      const newIntervals = [...prevIntervals];
+      newIntervals[index] = value;
+      return newIntervals;
+    });
+  };
+
+  const handleIntervalBlur = async (index: number) => {
+    const stateName = states[index];
+    const intervalValue = intervals[index];
+    // Save the updated interval to AsyncStorage
+    await AsyncStorage.setItem(`@interval_${stateName.toLowerCase()}`, intervalValue);
   };
 
   return (
@@ -80,14 +129,11 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
             <StateRow
               state={item}
               position={localPositions[index]}
+              intervalValue={intervals[index]}
               onChangePosition={(value) => handlePositionChange(index, value)}
               onBlurPosition={() => handlePositionBlur(index)}
-              intervalValue={null} // Placeholder as per `StateRowProps`
-              isEditing={false} // Placeholder as per `StateRowProps`
-              onChangeInterval={() => {}} // Placeholder function
-              onBlurInterval={() => {}} // Placeholder function
-              onEditInterval={() => {}} // Placeholder function
-              onLongPressInterval={() => {}} // Placeholder function
+              onChangeInterval={(value) => handleIntervalChange(index, value)}
+              onBlurInterval={() => handleIntervalBlur(index)}
               onStatePress={() => {
                 setSelectedState(item);
                 setAssignAudiosModalVisible(true);
@@ -98,16 +144,21 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
                   {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: () => {
+                    onPress: async () => {
                       const updatedStates = [...states];
                       updatedStates.splice(index, 1);
                       setStates(updatedStates);
-                      AsyncStorage.removeItem(`@interval_${item.toLowerCase()}`);
+
+                      const updatedIntervals = [...intervals];
+                      updatedIntervals.splice(index, 1);
+                      setIntervals(updatedIntervals);
+
+                      await AsyncStorage.removeItem(`@interval_${item.toLowerCase()}`);
                     },
                   },
                 ]);
               }}
-              isGreyedOut={false} // Placeholder as per `StateRowProps`
+              isGreyedOut={false}
             />
           )}
         />

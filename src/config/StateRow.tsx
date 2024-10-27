@@ -1,91 +1,118 @@
-import React from 'react';
-import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+// src/config/StateRow.tsx
+
+import React, { useState } from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
-import Bin from '../assets/icons/bin.svg';   // Import the Bin SVG
-import Queue from '../assets/icons/queue.svg'; // Import the Queue SVG
+import Bin from '../assets/icons/bin.svg';
+import Queue from '../assets/icons/queue.svg';
 
 type StateRowProps = {
   state: string;
   position: string;
-  intervalValue: string | null;
-  isEditing: boolean;
+  intervalValue: string;
   onChangePosition: (value: string) => void;
   onBlurPosition: () => void;
   onStatePress: () => void;
   onChangeInterval: (value: string) => void;
   onBlurInterval: () => void;
-  onEditInterval: () => void;
-  onLongPressInterval: () => void;
   onDeleteState: () => void;
   isGreyedOut: boolean;
 };
 
-const StateRow: React.FC<StateRowProps> = ({
-  state,
-  position,
-  intervalValue,
-  isEditing,
-  onChangePosition,
-  onBlurPosition,
-  onStatePress,
-  onChangeInterval,
-  onBlurInterval,
-  onEditInterval,
-  onLongPressInterval,
-  onDeleteState,
-  isGreyedOut,
-}) => {
-  return (
-    <View style={commonStyles.stateColumnRow}>
-      <View style={styles.rowStart}>
-        <TextInput
-          style={commonStyles.positionInput}
-          value={position}
-          onChangeText={onChangePosition}
-          onBlur={onBlurPosition}
-          keyboardType="numeric"
-          maxLength={2}
-          placeholder="Pos"
-        />
-        <TouchableOpacity onPress={onStatePress}>
-          <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.rowEnd}>
-        {isEditing ? (
-          <TextInput
-            style={commonStyles.input}
-            value={intervalValue || ''}
-            onChangeText={onChangeInterval}
-            onBlur={onBlurInterval}
-            keyboardType="numeric"
-            maxLength={5}
-            placeholder="mm:ss"
-            autoFocus
-          />
-        ) : (
-          <TouchableOpacity onPress={onEditInterval} onLongPress={onLongPressInterval}>
-            <Text style={[commonStyles.inputText, isGreyedOut && styles.greyedOutText]}>
-              {intervalValue !== null ? intervalValue : 'mm:ss'}
-            </Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity onPress={onDeleteState}>
-          <View style={[commonStyles.positionInput]}>
-            <Bin width={18} height={18} fill="#fff" stroke="#004225" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity delayLongPress={200}>
-          <View style={[commonStyles.positionInput]}>
-            <Queue width={18} height={18} fill="#fff" stroke="#004225" />
-          </View>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
+const StateRow: React.FC<StateRowProps> = React.memo(
+  ({
+    state,
+    position,
+    intervalValue,
+    onChangePosition,
+    onBlurPosition,
+    onStatePress,
+    onChangeInterval,
+    onBlurInterval,
+    onDeleteState,
+    isGreyedOut,
+  }) => {
+    const [localInterval, setLocalInterval] = useState<string>(() => intervalValue || '00:00');
+    const [isEditing, setIsEditing] = useState(false);
 
-import { StyleSheet } from 'react-native';
+    const handleEditChange = (text: string) => {
+      const cleanedText = text.replace(/\D/g, '').substring(0, 4);
+      const formattedText =
+        cleanedText.length <= 2
+          ? `00:${cleanedText.padStart(2, '0')}`
+          : `${cleanedText.slice(0, -2).padStart(2, '0')}:${cleanedText.slice(-2)}`;
+      setLocalInterval(formattedText);
+    };
+
+    const handleEditStart = () => {
+      setIsEditing(true);
+    };
+
+    const handleEditBlur = () => {
+      setIsEditing(false);
+      onChangeInterval(localInterval); // Update parent only after editing is done
+      onBlurInterval();
+    };
+
+    return (
+      <View style={commonStyles.stateColumnRow}>
+        <View style={styles.rowStart}>
+          <TextInput
+            style={commonStyles.positionInput}
+            value={position}
+            onChangeText={onChangePosition}
+            onBlur={onBlurPosition}
+            keyboardType="numeric"
+            maxLength={2}
+            placeholder="Pos"
+          />
+          <TouchableOpacity onPress={onStatePress}>
+            <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.rowEnd}>
+          {isEditing ? (
+            <TextInput
+              style={commonStyles.input}
+              value={localInterval}
+              onChangeText={handleEditChange}
+              onBlur={handleEditBlur}
+              keyboardType="numeric"
+              maxLength={5}
+              placeholder="00:00"
+              autoFocus
+            />
+          ) : (
+            <TouchableOpacity onPress={handleEditStart}>
+              <Text style={[commonStyles.inputText, isGreyedOut && styles.greyedOutText]}>
+                {localInterval}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={onDeleteState}>
+            <View style={commonStyles.positionInput}>
+              <Bin width={18} height={18} fill="#fff" stroke="#004225" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <View style={commonStyles.positionInput}>
+              <Queue width={18} height={18} fill="#fff" stroke="#004225" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Prevent re-render unless necessary
+    return (
+      prevProps.position === nextProps.position &&
+      prevProps.state === nextProps.state &&
+      prevProps.isGreyedOut === nextProps.isGreyedOut
+      // Do not include intervalValue in comparison to prevent re-rendering during editing
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   rowStart: {
