@@ -37,15 +37,15 @@ const StateRow: React.FC<StateRowProps> = ({
 }) => {
   return (
     <View style={commonStyles.stateColumnRow}>
-     <View style={styles.rowStart}>
+      <View style={styles.rowStart}>
         <TextInput
-            style={commonStyles.positionInput}
-            value={position}
-            onChangeText={onChangePosition}
-            onBlur={onBlurPosition}
-            keyboardType="numeric"
-            maxLength={2}
-            placeholder="Pos"
+          style={commonStyles.positionInput}
+          value={position}
+          onChangeText={onChangePosition}
+          onBlur={onBlurPosition}
+          keyboardType="numeric"
+          maxLength={2}
+          placeholder="Pos"
         />
         <TouchableOpacity onPress={onStatePress}>
           <Text style={commonStyles.fixedWidthLabel}>{state}</Text>
@@ -75,9 +75,7 @@ const StateRow: React.FC<StateRowProps> = ({
             <Bin width={18} height={18} fill="#fff" stroke="#004225" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity
-          delayLongPress={200}
-        >
+        <TouchableOpacity delayLongPress={200}>
           <View style={[commonStyles.positionInput]}>
             <Queue width={18} height={18} fill="#fff" stroke="#004225" />
           </View>
