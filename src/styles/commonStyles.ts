@@ -141,21 +141,11 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  input: {
-    width: 80,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    textAlign: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#1b1b1b',
-  },
   textInput: {
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 5,
-    padding: 10,
+    padding: 5,
     color: '#fff',
     backgroundColor: '#333',
   },
@@ -373,12 +363,13 @@ export const commonStyles = StyleSheet.create({
       borderColor: 'white',
     },
     fullscreenTouchable: {
-      ...StyleSheet.absoluteFillObject, // This makes the TouchableOpacity cover the whole parent View
+      ...StyleSheet.absoluteFillObject,
       justifyContent: 'center',
       alignItems: 'center',
     },
     inputText: {
-      width: 50,
+      height: 30,
+      width: 60,
       borderColor: '#ccc',
       borderWidth: 1,
       borderRadius: 1,

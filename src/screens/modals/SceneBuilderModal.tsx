@@ -1,121 +1,239 @@
 // src/screens/modals/SceneBuilderModal.tsx
 
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
-import AppModal from '../../styles/AppModal';
+import AssignAudiosModal from './AssignAudiosModal';
+import AppModal from '../../styles/AppModal'; // Correct import path
 import StateRow from '../../config/StateRow';
 import AddStateRow from '../../config/AddStateRow';
-import AssignAudiosModalWrapper from './AssignAudiosModalWrapper';
 
-const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
-  visible,
-  onClose,
-}) => {
-  const { states, setStates } = useContext(IntervalContext);
+type SceneBuilderModalProps = {
+  visible: boolean;
+  onClose: () => void;
+};
 
-  const [localPositions, setLocalPositions] = useState<string[]>([]);
+// Utility Functions
+const convertMsToMinutesSeconds = (milliseconds: number) => {
+  const minutes = Math.floor(milliseconds / 60000);
+  const seconds = Math.floor((milliseconds % 60000) / 1000);
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+const convertMinutesSecondsToMs = (time: string) => {
+  const [minutes, seconds] = time.split(':').map(Number);
+  if (isNaN(minutes) || isNaN(seconds)) {
+    return NaN;
+  }
+  return minutes * 60000 + seconds * 1000;
+};
+
+const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose }) => {
+  const {
+    intervals,
+    setIntervalForState,
+    states,
+    setStates,
+    setSelectedAudiosForState,
+    setIntervals,
+  } = useContext(IntervalContext);
+
+  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>({});
+  // Removed localPositions since it's unused
+  // const [localPositions, setLocalPositions] = useState<string[]>([]);
+  const [editingIntervals, setEditingIntervals] = useState<{ [key: string]: boolean }>({});
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // State for controlling the visibility of the Assign Audios sub-modal
   const [assignAudiosModalVisible, setAssignAudiosModalVisible] = useState(false);
   const [selectedState, setSelectedState] = useState<string | null>(null);
+
+  // New state inputs
   const [newStateName, setNewStateName] = useState('');
   const [newStatePosition, setNewStatePosition] = useState('');
-  const [intervals, setIntervals] = useState<string[]>([]);
 
+  // Load intervals when the modal becomes visible
+  useEffect(() => {
+    let isMounted = true; // Track if the component is mounted
+    const loadIntervals = async () => {
+      if (dataLoaded) {
+        return; // Prevent re-loading if data is already loaded
+      }
+
+      try {
+        const loadedIntervals: { [key: string]: string } = {};
+        for (const state of states) {
+          if (!state || typeof state !== 'string') { continue; }
+
+          const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
+          if (storedInterval !== null) {
+            loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(parseInt(storedInterval, 10));
+          } else {
+            const interval = intervals[state.toLowerCase()];
+            loadedIntervals[state.toLowerCase()] = interval !== undefined
+              ? convertMsToMinutesSeconds(interval)
+              : '00:00';
+          }
+        }
+
+        if (isMounted) {
+          setLocalIntervals(loadedIntervals);
+          console.log('Local intervals set to:', loadedIntervals);
+          setDataLoaded(true); // Set dataLoaded to true after loading
+        }
+      } catch (error) {
+        console.error('Failed to load intervals:', error);
+      }
+    };
+
+    if (visible && !dataLoaded) {
+      loadIntervals();
+    }
+
+    return () => {
+      isMounted = false; // Clean up function
+    };
+  }, [visible, states, intervals, dataLoaded]);
+
+  // Removed localPositions since it's unused
+  /*
   useEffect(() => {
     setLocalPositions(states.map((_, index) => (index + 1).toString()));
-
-    // Load intervals when states change
-    const loadIntervals = async () => {
-      const loadedIntervals: string[] = [];
-      for (const state of states) {
-        const interval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
-        if (interval && /^\d{2}:\d{2}$/.test(interval)) {
-          loadedIntervals.push(interval);
-        } else {
-          // If stored format is incorrect or missing, default to '00:00'
-          loadedIntervals.push('00:00');
-          await AsyncStorage.setItem(`@interval_${state.toLowerCase()}`, '00:00');
-        }
-      }
-      setIntervals(loadedIntervals);
-    };
-    loadIntervals();
   }, [states]);
+  */
 
-  const handlePositionChange = (index: number, value: string) => {
-    setLocalPositions((prevPositions) => {
-      const newPositions = [...prevPositions];
-      newPositions[index] = value;
-      return newPositions;
-    });
+  // Handle saving intervals
+  const handleSave = async () => {
+    try {
+      for (const state of states) {
+        if (!state || typeof state !== 'string') {
+          console.error('Encountered invalid state during save:', state);
+          continue;
+        }
+        const intervalStr = localIntervals[state.toLowerCase()];
+        if (!intervalStr) {
+          console.log(`Missing interval for state "${state}". Aborting save.`);
+          return;
+        }
+        const intervalMs = convertMinutesSecondsToMs(intervalStr);
+        if (isNaN(intervalMs)) {
+          console.log(`Invalid interval format for state "${state}". Expected "mm:ss".`);
+          return;
+        }
+        setIntervalForState(state, intervalMs); // Update context
+        console.log(`Interval for "${state}" set to ${intervalMs} ms in context.`);
+      }
+      console.log('All intervals have been saved successfully.');
+      onClose();
+    } catch (error) {
+      console.error('Error saving intervals:', error);
+    }
   };
 
-  const handlePositionBlur = (index: number) => {
-    const newPosition = parseInt(localPositions[index], 10);
-    if (isNaN(newPosition) || newPosition < 1) {
-      // Reset to original position if input is invalid
-      setLocalPositions((prev) => {
-        const newPositions = [...prev];
-        newPositions[index] = (index + 1).toString();
-        return newPositions;
-      });
+  // Handle deleting a state
+  const handleDeleteState = (index: number) => {
+    const stateToDelete = states[index];
+    if (!stateToDelete || typeof stateToDelete !== 'string') {
+      console.error('Attempted to delete an invalid state:', stateToDelete);
+      return;
+    }
+    console.log(`Attempting to delete state "${stateToDelete}".`);
+    Alert.alert(
+      'Delete State',
+      `Are you sure you want to delete the state "${stateToDelete}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            deleteState(index);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  // Delete the state and clean up associated data
+  const deleteState = (index: number) => {
+    const updatedStates = [...states];
+    const [deletedState] = updatedStates.splice(index, 1);
+
+    if (!deletedState || typeof deletedState !== 'string') {
+      console.error('Attempted to delete an invalid state:', deletedState);
       return;
     }
 
-    // Adjust positions based on the new position entered
-    const updatedStates = [...states];
-    const movedState = updatedStates.splice(index, 1)[0];
-    updatedStates.splice(newPosition - 1, 0, movedState);
-
     setStates(updatedStates);
-    setLocalPositions(updatedStates.map((_, idx) => (idx + 1).toString()));
+    console.log(`State "${deletedState}" deleted. Updated states:`, updatedStates);
 
-    // Reorder intervals to match the new states order
-    const updatedIntervals = [...intervals];
-    const movedInterval = updatedIntervals.splice(index, 1)[0];
-    updatedIntervals.splice(newPosition - 1, 0, movedInterval);
-    setIntervals(updatedIntervals);
-  };
+    // Remove associated data
+    const lowerState = deletedState.toLowerCase();
+    setSelectedAudiosForState(lowerState, { audios: [], mode: 'Selected' });
+    console.log(`Selected audios for "${lowerState}" reset.`);
 
-  const handleAddState = () => {
-    if (newStateName && !states.includes(newStateName)) {
-      const position = parseInt(newStatePosition, 10);
-      const insertIndex = isNaN(position) || position < 1 ? states.length : position - 1;
+    setIntervals((prev) => {
+      const updated = { ...prev };
+      delete updated[lowerState];
+      console.log(`Interval for "${lowerState}" removed.`);
+      return updated;
+    });
 
-      const updatedStates = [...states];
-      updatedStates.splice(insertIndex, 0, newStateName);
-
-      setStates(updatedStates);
-      setLocalPositions(updatedStates.map((_, index) => (index + 1).toString()));
-      setIntervals((prev) => {
-        const newIntervals = [...prev];
-        newIntervals.splice(insertIndex, 0, '00:00'); // default interval value
-        return newIntervals;
+    // Remove from AsyncStorage
+    AsyncStorage.removeItem(`@interval_${lowerState}`)
+      .then(() => {
+        console.log(`Interval for "${lowerState}" removed from AsyncStorage.`);
+      })
+      .catch((error) => {
+        console.error(`Failed to remove interval for "${lowerState}" from AsyncStorage:`, error);
       });
 
-      // Initialize the interval in AsyncStorage
-      AsyncStorage.setItem(`@interval_${newStateName.toLowerCase()}`, '00:00');
+    AsyncStorage.removeItem(`@selectedAudios_${lowerState}`)
+      .then(() => {
+        console.log(`Selected audios for "${lowerState}" removed from AsyncStorage.`);
+      })
+      .catch((error) => {
+        console.error(`Failed to remove selected audios for "${lowerState}" from AsyncStorage:`, error);
+      });
+  };
 
-      setNewStateName('');
-      setNewStatePosition('');
+  // Handle adding a new state
+  const handleAddState = () => {
+    if (!newStateName.trim()) {
+      console.log('New state name is empty. Aborting add.');
+      return;
     }
-  };
 
-  const handleIntervalChange = (index: number, value: string) => {
-    setIntervals((prevIntervals) => {
-      const newIntervals = [...prevIntervals];
-      newIntervals[index] = value;
-      return newIntervals;
-    });
-  };
+    if (states.includes(newStateName)) {
+      console.log(`State "${newStateName}" already exists. Aborting add.`);
+      return;
+    }
 
-  const handleIntervalBlur = async (index: number) => {
-    const stateName = states[index];
-    const intervalValue = intervals[index];
-    // Save the updated interval to AsyncStorage
-    await AsyncStorage.setItem(`@interval_${stateName.toLowerCase()}`, intervalValue);
+    const position = parseInt(newStatePosition, 10);
+    const insertIndex =
+      isNaN(position) || position < 1 || position > states.length + 1
+        ? states.length
+        : position - 1;
+
+    const updatedStates = [...states];
+    updatedStates.splice(insertIndex, 0, newStateName);
+
+    setStates(updatedStates);
+    console.log(`Added new state "${newStateName}" at position ${insertIndex + 1}.`);
+
+    // Initialize default interval and selected audios using context functions
+    setIntervalForState(newStateName, 5000); // Default interval
+    console.log(`Initialized interval for "${newStateName}" to 5000 ms.`);
+
+    setSelectedAudiosForState(newStateName, { audios: [], mode: 'Selected' });
+    console.log(`Initialized selected audios for "${newStateName}" to default.`);
+
+    // Reset new state inputs
+    setNewStateName('');
+    setNewStatePosition('');
   };
 
   return (
@@ -127,54 +245,72 @@ const SceneBuilderModal: React.FC<{ visible: boolean; onClose: () => void }> = (
           keyExtractor={(item) => item}
           renderItem={({ item, index }) => (
             <StateRow
-              state={item}
-              position={localPositions[index]}
-              intervalValue={intervals[index]}
-              onChangePosition={(value) => handlePositionChange(index, value)}
-              onBlurPosition={() => handlePositionBlur(index)}
-              onChangeInterval={(value) => handleIntervalChange(index, value)}
-              onBlurInterval={() => handleIntervalBlur(index)}
-              onStatePress={() => {
+              key={item}
+              stateName={item}
+              index={index}
+              localInterval={localIntervals[item.toLowerCase()] || ''}
+              setLocalIntervals={setLocalIntervals}
+              editing={editingIntervals[item.toLowerCase()] || false}
+              onAssignAudios={() => {
                 setSelectedState(item);
                 setAssignAudiosModalVisible(true);
               }}
-              onDeleteState={() => {
-                Alert.alert('Delete State', `Are you sure you want to delete the state "${item}"?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                      const updatedStates = [...states];
-                      updatedStates.splice(index, 1);
-                      setStates(updatedStates);
-
-                      const updatedIntervals = [...intervals];
-                      updatedIntervals.splice(index, 1);
-                      setIntervals(updatedIntervals);
-
-                      await AsyncStorage.removeItem(`@interval_${item.toLowerCase()}`);
-                    },
-                  },
-                ]);
+              onDelete={() => handleDeleteState(index)}
+              onEditInterval={() => {
+                setEditingIntervals((prev) => ({
+                  ...prev,
+                  [item.toLowerCase()]: true,
+                }));
               }}
-              isGreyedOut={false}
+              onSaveInterval={() => {
+                setEditingIntervals((prev) => ({
+                  ...prev,
+                  [item.toLowerCase()]: false,
+                }));
+                // Optionally, perform validation and save
+                const intervalStr = localIntervals[item.toLowerCase()];
+                const intervalMs = convertMinutesSecondsToMs(intervalStr);
+                if (isNaN(intervalMs)) {
+                  console.log(`Invalid interval format for state "${item}". Expected "mm:ss". Resetting to previous value.`);
+                  // Reset to a default value or handle accordingly
+                  setLocalIntervals((prev) => ({
+                    ...prev,
+                    [item.toLowerCase()]: '00:00',
+                  }));
+                } else {
+                  setIntervalForState(item, intervalMs);
+                  console.log(`Interval for "${item}" updated to ${intervalMs} ms.`);
+                }
+              }}
             />
           )}
+          ListEmptyComponent={<Text style={commonStyles.text}>No states available.</Text>}
         />
+        {/* Add New State Row */}
         <AddStateRow
-          newStateName={newStateName}
-          newStatePosition={newStatePosition}
-          onChangeStateName={setNewStateName}
-          onChangeStatePosition={setNewStatePosition}
-          onSaveState={handleAddState}
+          position={newStatePosition}
+          setPosition={setNewStatePosition}
+          stateName={newStateName}
+          setStateName={setNewStateName}
+          onAdd={handleAddState}
         />
+
+        {/* Save Intervals Button */}
+        <TouchableOpacity onPress={handleSave} style={commonStyles.saveButton}>
+          <Text style={commonStyles.saveButtonText}>Save Intervals</Text>
+        </TouchableOpacity>
       </View>
-      <AssignAudiosModalWrapper
-        visible={assignAudiosModalVisible}
-        selectedState={selectedState}
-        onClose={() => setAssignAudiosModalVisible(false)}
-      />
+      {/* Assign Audios Sub-Modal */}
+      {assignAudiosModalVisible && selectedState && (
+        <AssignAudiosModal
+          visible={assignAudiosModalVisible}
+          onClose={() => {
+            setAssignAudiosModalVisible(false);
+            setSelectedState(null);
+          }}
+          stateName={selectedState}
+        />
+      )}
     </AppModal>
   );
 };

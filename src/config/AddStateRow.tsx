@@ -1,42 +1,48 @@
+// src/screens/modals/AddStateRow.tsx
+
 import React from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { commonStyles } from '../styles/commonStyles';
 
 type AddStateRowProps = {
-  newStateName: string;
-  newStatePosition: string;
-  onChangeStateName: (value: string) => void;
-  onChangeStatePosition: (value: string) => void;
-  onSaveState: () => void;
+  position: string;
+  setPosition: React.Dispatch<React.SetStateAction<string>>;
+  stateName: string;
+  setStateName: React.Dispatch<React.SetStateAction<string>>;
+  onAdd: () => void;
 };
 
 const AddStateRow: React.FC<AddStateRowProps> = ({
-  newStateName,
-  newStatePosition,
-  onChangeStateName,
-  onChangeStatePosition,
-  onSaveState,
+  position,
+  setPosition,
+  stateName,
+  setStateName,
+  onAdd,
 }) => {
   return (
     <View style={commonStyles.addStateRow}>
+      {/* Position Number Input */}
       <TextInput
         style={commonStyles.positionInput}
-        value={newStatePosition}
-        onChangeText={onChangeStatePosition}
+        value={position}
+        onChangeText={setPosition}
         keyboardType="numeric"
         maxLength={2}
         placeholder="Pos"
       />
+
+      {/* State Name Input */}
       <TextInput
         style={commonStyles.newStateInput}
-        value={newStateName}
-        onChangeText={onChangeStateName}
+        value={stateName}
+        onChangeText={setStateName}
         placeholder="New State Name"
         placeholderTextColor="#aaa"
         maxLength={20}
       />
-      <TouchableOpacity onPress={onSaveState}>
+      {/* Save Icon */}
+      <TouchableOpacity onPress={onAdd}>
         <Icon name="save" size={24} color="#fff" />
       </TouchableOpacity>
     </View>
