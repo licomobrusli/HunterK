@@ -1,27 +1,25 @@
-// src/config/StateComponent.tsx
-import { commonStyles } from '../styles/commonStyles';
-
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
+import { commonStyles } from '../styles/commonStyles';
 import { IntervalContext } from '../contexts/SceneProvider';
 import usePlaySound from '../config/usePlaySound';
 
 type StateComponentProps = {
   stateName: string;
+  interval: number;
+  onComplete: () => void; // Callback to notify when repetitions are completed
 };
 
-const StateComponent: React.FC<StateComponentProps> = ({ stateName }) => {
+const StateComponent: React.FC<StateComponentProps> = ({ stateName, interval, onComplete }) => {
   const { intervals } = useContext(IntervalContext);
-  const interval = intervals[stateName.toLowerCase()] || 5000; // Default interval
+  const currentInterval = intervals[stateName.toLowerCase()] || interval;
 
-  // Use the custom hook to play sound based on state
-  usePlaySound(stateName, interval);
+  // Use the custom hook to play sound, passing onComplete to trigger state transition on repetitions completion
+  usePlaySound(stateName, currentInterval, onComplete);
 
   return (
-    <View style={commonStyles.container}
-      testID="stateText"
-      accessibilityLabel="stateText">
-        <Text style={commonStyles.text}>{stateName} State</Text>
+    <View style={commonStyles.container}>
+      <Text style={commonStyles.text}>{stateName} State</Text>
     </View>
   );
 };

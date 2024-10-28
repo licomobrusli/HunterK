@@ -6,10 +6,10 @@ import { IntervalContext } from '../contexts/SceneProvider';
 
 let isTrackPlayerSetup = false;
 
-const usePlaySound = (stateName: string, interval: number) => {
+const usePlaySound = (stateName: string, interval: number, onComplete: () => void) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
-  const totalPlayCountRef = useRef(0); // Track total play count across intervals
+  const totalPlayCountRef = useRef(0);
   const intervalRef = useRef<number | null>(null);
 
   const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
@@ -23,10 +23,10 @@ const usePlaySound = (stateName: string, interval: number) => {
         await TrackPlayer.updateOptions({
           capabilities: [Capability.Play, Capability.Pause, Capability.Stop],
           compactCapabilities: [Capability.Play, Capability.Pause, Capability.Stop],
-          alwaysPauseOnInterruption: false, // Allows ducking instead of pausing
+          alwaysPauseOnInterruption: false,
         });
         isTrackPlayerSetup = true;
-        console.log('TrackPlayer initialized with background mode enabled.');
+        console.log('TrackPlayer initialized.');
       }
     };
 
@@ -40,11 +40,11 @@ const usePlaySound = (stateName: string, interval: number) => {
       }
 
       const { audios, mode, repetitions } = stateData;
-      const maxRepetitions = repetitions || Infinity; // Use Infinity for continuous play
+      const maxRepetitions = repetitions || Infinity;
 
-      // Stop playback if max repetitions have been reached
       if (totalPlayCountRef.current >= maxRepetitions) {
         console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
+        onComplete(); // Trigger state transition
         return;
       }
 
@@ -64,11 +64,6 @@ const usePlaySound = (stateName: string, interval: number) => {
         return;
       }
 
-      if (!currentAudioFileName) {
-        console.error('currentAudioFileName is undefined.');
-        return;
-      }
-
       const currentAudioPath = `${AUDIOS_FOLDER}/${stateName.toLowerCase()}/${currentAudioFileName}`;
       try {
         const fileExists = await RNFS.exists(currentAudioPath);
@@ -77,7 +72,6 @@ const usePlaySound = (stateName: string, interval: number) => {
           return;
         }
 
-        // Reset TrackPlayer and load the new audio file
         await TrackPlayer.reset();
         await TrackPlayer.add({
           id: `${stateName}-${audioIndexRef.current}-${totalPlayCountRef.current}`,
@@ -100,7 +94,6 @@ const usePlaySound = (stateName: string, interval: number) => {
       await setupTrackPlayer();
       await playSound();
 
-      // Clear any previous interval to avoid overlap
       if (intervalRef.current !== null) {
         BackgroundTimer.clearInterval(intervalRef.current);
       }
@@ -113,8 +106,8 @@ const usePlaySound = (stateName: string, interval: number) => {
       console.log(`Interval set for state: ${stateName} with interval ${interval}ms`);
     };
 
-    audioIndexRef.current = 0; // Reset index for new state
-    totalPlayCountRef.current = 0; // Reset total play count
+    audioIndexRef.current = 0;
+    totalPlayCountRef.current = 0;
     initializePlayerAndPlay();
 
     return () => {
@@ -124,9 +117,9 @@ const usePlaySound = (stateName: string, interval: number) => {
         intervalRef.current = null;
       }
     };
-  }, [stateName, interval, selectedAudios, AUDIOS_FOLDER]);
+  }, [stateName, interval, selectedAudios, AUDIOS_FOLDER, onComplete]);
 
-  return null; // This hook does not return anything
+  return null;
 };
 
 export default usePlaySound;
