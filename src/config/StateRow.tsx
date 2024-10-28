@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
-import Bin from '../assets/icons/bin.svg';   // Import the Bin SVG
-import Queue from '../assets/icons/queue.svg'; // Import the Queue SVG
+import Bin from '../assets/icons/bin.svg';
+import Queue from '../assets/icons/queue.svg';
 
 type StateRowProps = {
   stateName: string;
@@ -14,6 +14,7 @@ type StateRowProps = {
   onDelete: () => void;
   onEditInterval: () => void;
   onSaveInterval: () => void;
+  onRenameState: (newName: string) => void;
 };
 
 const StateRow: React.FC<StateRowProps> = ({
@@ -26,20 +27,21 @@ const StateRow: React.FC<StateRowProps> = ({
   onDelete,
   onEditInterval,
   onSaveInterval,
+  onRenameState,
 }) => {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [tempStateName, setTempStateName] = useState(stateName);
+
   const handleChange = (value: string) => {
-    if (value.length > 5) {
-      return;
-    }
+    if (value.length > 5) {return;}
+
     if (value.length === 2 && !value.includes(':')) {
       setLocalIntervals((prev) => ({
         ...prev,
         [stateName.toLowerCase()]: `${value}:`,
       }));
-      console.log(`Updated interval for "${stateName}" to "${value}:"`);
     } else {
       setLocalIntervals((prev) => ({ ...prev, [stateName.toLowerCase()]: value }));
-      console.log(`Updated interval for "${stateName}" to "${value}"`);
     }
   };
 
@@ -48,8 +50,16 @@ const StateRow: React.FC<StateRowProps> = ({
   };
 
   const handleLongPress = () => {
+    setIsRenaming(true);
+  };
+
+  const handleRenameBlur = () => {
+    setIsRenaming(false);
+    onRenameState(tempStateName);
+  };
+
+  const handleIntervalLongPress = () => {
     setLocalIntervals((prev) => ({ ...prev, [stateName.toLowerCase()]: null }));
-    console.log(`Interval for "${stateName}" has been set to null.`);
   };
 
   return (
@@ -58,22 +68,32 @@ const StateRow: React.FC<StateRowProps> = ({
       <TextInput
         style={commonStyles.positionInput}
         value={(index + 1).toString()}
-        editable={false} // Position is handled in SceneBuilderModal
+        editable={false}
         keyboardType="numeric"
         maxLength={2}
         placeholder="Pos"
       />
 
-      {/* State Name */}
-      <TouchableOpacity onPress={onAssignAudios}>
-        <Text style={commonStyles.fixedWidthLabel}>{stateName}</Text>
-      </TouchableOpacity>
+      {/* Editable State Name */}
+      {isRenaming ? (
+        <TextInput
+          style={commonStyles.fixedWidthLabel}
+          value={tempStateName}
+          onChangeText={setTempStateName}
+          onBlur={handleRenameBlur}
+          autoFocus
+        />
+      ) : (
+        <TouchableOpacity onPress={onAssignAudios} onLongPress={handleLongPress}>
+          <Text style={commonStyles.fixedWidthLabel}>{stateName}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Interval Field */}
       {editing ? (
         <TextInput
           style={commonStyles.inputText}
-          value={localInterval}
+          value={localInterval ?? 'mm:ss'}
           onChangeText={handleChange}
           onBlur={handleBlur}
           keyboardType="numeric"
@@ -82,10 +102,8 @@ const StateRow: React.FC<StateRowProps> = ({
           autoFocus
         />
       ) : (
-        <TouchableOpacity onPress={onEditInterval} onLongPress={handleLongPress}>
-          <Text style={commonStyles.inputText}>
-            {localInterval || 'mm:ss'}
-          </Text>
+        <TouchableOpacity onPress={onEditInterval} onLongPress={handleIntervalLongPress}>
+          <Text style={commonStyles.inputText}>{localInterval || 'mm:ss'}</Text>
         </TouchableOpacity>
       )}
 

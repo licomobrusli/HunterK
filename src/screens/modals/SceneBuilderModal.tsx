@@ -255,14 +255,14 @@ const handleSave = async () => {
               onAssignAudios={() => {
                 setSelectedState(item);
                 setAssignAudiosModalVisible(true);
-              }}
+              } }
               onDelete={() => handleDeleteState(index)}
               onEditInterval={() => {
                 setEditingIntervals((prev) => ({
                   ...prev,
                   [item.toLowerCase()]: true,
                 }));
-              }}
+              } }
               onSaveInterval={() => {
                 setEditingIntervals((prev) => ({
                   ...prev,
@@ -281,8 +281,9 @@ const handleSave = async () => {
                   setIntervalForState(item, intervalMs);
                   console.log(`Interval for "${item}" updated to ${intervalMs} ms.`);
                 }
-              }}
-            />
+              } } onRenameState={function (_newName: string): void {
+                throw new Error('Function not implemented.');
+              } }            />
           )}
           ListEmptyComponent={<Text style={commonStyles.text}>No states available.</Text>}
         />

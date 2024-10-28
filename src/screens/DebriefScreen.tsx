@@ -1,97 +1,72 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, NativeEventEmitter, NativeModules } from 'react-native';
+// src/screens/DebriefScreen.tsx
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
-import { NavigationProp } from '@react-navigation/native';
+import DebriefComponent from '../config/DebriefComponent'; // Ensure the correct import path
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../config/StackNavigator';
 
-// Import your native module (as in WelcomeScreen)
-const { LogcatModule } = NativeModules;
-
-interface DebriefScreenProps {
-  navigation: NavigationProp<any>;
-}
+type DebriefScreenProps = NativeStackScreenProps<RootStackParamList, 'Debrief'>;
 
 const DebriefScreen: React.FC<DebriefScreenProps> = ({ navigation }) => {
-  const [debriefText, setDebriefText] = useState('');
+  const [currentDebriefType, setCurrentDebriefType] = useState<string>('General');
 
-  // Ref to store the listener start time
-  const listenerStartTimeRef = useRef<number>(0);
-
-  // Add useEffect for LogcatModule similar to WelcomeScreen
-  useEffect(() => {
-    const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
-
-    const logcatListener = logcatEventEmitter.addListener('LogcatEvent', (event) => {
-      const { eventName, timestamp } = event;
-
-      // Only process events that occurred after the listener started
-      if (timestamp < listenerStartTimeRef.current) {
-        console.log(`DebriefScreen Ignoring old event: ${eventName} at ${timestamp}`);
-        return;
-      }
-
-      // Handle logcat events if needed, e.g., navigate to another screen or perform actions
-      if (eventName === 'long_press') {
-        console.log('DebriefScreen: Long press detected, navigating to Welcome screen');
-        navigation.navigate('Welcome');
-      }
-    });
-
-    // Start listening to logs
-    LogcatModule.startListening()
-      .then((message: string) => {
-        console.log(`DebriefScreen: ${message}`);
-        // Update the listener start time **after** starting to listen
-        listenerStartTimeRef.current = Date.now();
-      })
-      .catch((error: any) => console.warn(`DebriefScreen: Error starting logcat listener - ${error}`));
-
-    // Cleanup the listener on component unmount
-    return () => {
-      logcatListener.remove();
-      LogcatModule.stopListening()
-        .then((message: string) => console.log(`DebriefScreen: ${message}`))
-        .catch((error: any) => console.warn(`DebriefScreen: Error stopping logcat listener - ${error}`));
-    };
+  const handleDebriefComplete = useCallback(() => {
+    console.log('DebriefScreen: Debriefing complete');
+    // Navigate to another screen or perform other actions
+    // Replace 'Summary' with a valid screen name in your RootStackParamList
+    navigation.replace('Welcome'); // Example navigation
   }, [navigation]);
 
   return (
-    <KeyboardAvoidingView
-      style={commonStyles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <Text style={commonStyles.title}>Debrief Screen</Text>
-      <TextInput
-        style={[commonStyles.textInput, styles.debriefInput]}
-        multiline
-        placeholder="Type your debrief here..."
-        placeholderTextColor="#aaa"
-        value={debriefText}
-        onChangeText={setDebriefText}
-        textAlignVertical="top" // Ensures text starts at the top-left
-        scrollEnabled
-      />
-    </KeyboardAvoidingView>
+    <View style={commonStyles.container}>
+      {/* Allow the user to select the type of debriefing */}
+      <View style={styles.debriefTypeSelector}>
+        <TouchableOpacity
+          style={[
+            styles.debriefTypeButton,
+            currentDebriefType === 'General' && styles.selectedDebriefTypeButton,
+          ]}
+          onPress={() => setCurrentDebriefType('General')}
+        >
+          <Text style={styles.debriefTypeButtonText}>General</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.debriefTypeButton,
+            currentDebriefType === 'Session' && styles.selectedDebriefTypeButton,
+          ]}
+          onPress={() => setCurrentDebriefType('Session')}
+        >
+          <Text style={styles.debriefTypeButtonText}>Session</Text>
+        </TouchableOpacity>
+        {/* Add more debrief types as needed */}
+      </View>
+
+      {/* Render the DebriefComponent based on the selected type */}
+      <DebriefComponent debriefType={currentDebriefType} onComplete={handleDebriefComplete} />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  debriefInput: {
-    flex: 1,
-    width: '90%', // Adjust as needed
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
+  debriefTypeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  debriefTypeButton: {
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#ddd',
+    borderRadius: 5,
+  },
+  selectedDebriefTypeButton: {
+    backgroundColor: '#4CAF50',
+  },
+  debriefTypeButtonText: {
     color: '#000',
-    // Optional: Add shadow for better visibility
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // For Android shadow
-    // Optional: Add a border to distinguish the input area
-    borderWidth: 1,
-    borderColor: '#ccc',
+    fontWeight: 'bold',
   },
 });
 
