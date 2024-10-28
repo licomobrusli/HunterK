@@ -1,7 +1,7 @@
 import { useEffect, useContext, useRef } from 'react';
 import TrackPlayer, { Capability } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
-import BackgroundTimer from 'react-native-background-timer'; // Use BackgroundTimer for intervals
+import BackgroundTimer from 'react-native-background-timer';
 import { IntervalContext } from '../contexts/SceneProvider';
 
 let isTrackPlayerSetup = false;
@@ -9,7 +9,8 @@ let isTrackPlayerSetup = false;
 const usePlaySound = (stateName: string, interval: number) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
-  const intervalRef = useRef<number | null>(null); // Use background timer's interval reference
+  const totalPlayCountRef = useRef(0); // Track total play count across intervals
+  const intervalRef = useRef<number | null>(null);
 
   const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
@@ -32,18 +33,22 @@ const usePlaySound = (stateName: string, interval: number) => {
     const playSound = async () => {
       if (!isMounted) {return;}
 
-      console.log(`playSound called for state: ${stateName}`);
       const stateData = selectedAudios[stateName.toLowerCase()];
-      console.log(`stateData for state ${stateName}:`, stateData);
-
       if (!stateData || stateData.audios.length === 0) {
         console.log(`No audios selected for state: ${stateName}`);
         return;
       }
 
-      const { audios, mode } = stateData;
-      let currentAudioFileName: string | undefined;
+      const { audios, mode, repetitions } = stateData;
+      const maxRepetitions = repetitions || Infinity; // Use Infinity for continuous play
 
+      // Stop playback if max repetitions have been reached
+      if (totalPlayCountRef.current >= maxRepetitions) {
+        console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
+        return;
+      }
+
+      let currentAudioFileName: string | undefined;
       if (mode === 'Random') {
         const randomIndex = Math.floor(Math.random() * audios.length);
         currentAudioFileName = audios[randomIndex];
@@ -65,28 +70,27 @@ const usePlaySound = (stateName: string, interval: number) => {
       }
 
       const currentAudioPath = `${AUDIOS_FOLDER}/${stateName.toLowerCase()}/${currentAudioFileName}`;
-      console.log(`Current audio path for state ${stateName}: ${currentAudioPath}`);
-
       try {
         const fileExists = await RNFS.exists(currentAudioPath);
-        console.log(`File exists at ${currentAudioPath}: ${fileExists}`);
         if (!fileExists) {
           console.log(`Audio file does not exist: ${currentAudioPath}`);
           return;
         }
 
-        console.log('Resetting TrackPlayer before playing...');
+        // Reset TrackPlayer and load the new audio file
         await TrackPlayer.reset();
-
         await TrackPlayer.add({
-          id: `${stateName}-${audioIndexRef.current}`,
+          id: `${stateName}-${audioIndexRef.current}-${totalPlayCountRef.current}`,
           url: `file://${currentAudioPath}`,
           title: 'State Audio',
           artist: 'Your App',
         });
-
         await TrackPlayer.play();
         console.log(`Playing audio for state: ${stateName}`);
+
+        // Increment total play count
+        totalPlayCountRef.current += 1;
+        console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
       } catch (error) {
         console.error('Error playing audio file:', error);
       }
@@ -99,7 +103,6 @@ const usePlaySound = (stateName: string, interval: number) => {
       // Clear any previous interval to avoid overlap
       if (intervalRef.current !== null) {
         BackgroundTimer.clearInterval(intervalRef.current);
-        console.log('Previous interval cleared.');
       }
 
       intervalRef.current = BackgroundTimer.setInterval(() => {
@@ -111,10 +114,10 @@ const usePlaySound = (stateName: string, interval: number) => {
     };
 
     audioIndexRef.current = 0; // Reset index for new state
+    totalPlayCountRef.current = 0; // Reset total play count
     initializePlayerAndPlay();
 
     return () => {
-      console.log(`Cleaning up usePlaySound for state: ${stateName}`);
       isMounted = false;
       if (intervalRef.current !== null) {
         BackgroundTimer.clearInterval(intervalRef.current);
