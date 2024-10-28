@@ -40,7 +40,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     setIntervals,
   } = useContext(IntervalContext);
 
-  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string }>({});
+  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string | null }>({});
   // Removed localPositions since it's unused
   // const [localPositions, setLocalPositions] = useState<string[]>([]);
   const [editingIntervals, setEditingIntervals] = useState<{ [key: string]: boolean }>({});
@@ -55,82 +55,83 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   const [newStatePosition, setNewStatePosition] = useState('');
 
   // Load intervals when the modal becomes visible
-  useEffect(() => {
-    let isMounted = true; // Track if the component is mounted
-    const loadIntervals = async () => {
-      if (dataLoaded) {
-        return; // Prevent re-loading if data is already loaded
-      }
-
-      try {
-        const loadedIntervals: { [key: string]: string } = {};
-        for (const state of states) {
-          if (!state || typeof state !== 'string') { continue; }
-
-          const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
-          if (storedInterval !== null) {
-            loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(parseInt(storedInterval, 10));
-          } else {
-            const interval = intervals[state.toLowerCase()];
-            loadedIntervals[state.toLowerCase()] = interval !== undefined
-              ? convertMsToMinutesSeconds(interval)
-              : '00:00';
-          }
-        }
-
-        if (isMounted) {
-          setLocalIntervals(loadedIntervals);
-          console.log('Local intervals set to:', loadedIntervals);
-          setDataLoaded(true); // Set dataLoaded to true after loading
-        }
-      } catch (error) {
-        console.error('Failed to load intervals:', error);
-      }
-    };
-
-    if (visible && !dataLoaded) {
-      loadIntervals();
+useEffect(() => {
+  let isMounted = true; // Track if the component is mounted
+  const loadIntervals = async () => {
+    if (dataLoaded) {
+      return; // Prevent re-loading if data is already loaded
     }
 
-    return () => {
-      isMounted = false; // Clean up function
-    };
-  }, [visible, states, intervals, dataLoaded]);
-
-  // Removed localPositions since it's unused
-  /*
-  useEffect(() => {
-    setLocalPositions(states.map((_, index) => (index + 1).toString()));
-  }, [states]);
-  */
-
-  // Handle saving intervals
-  const handleSave = async () => {
     try {
+      const loadedIntervals: { [key: string]: string | null } = {};
       for (const state of states) {
-        if (!state || typeof state !== 'string') {
-          console.error('Encountered invalid state during save:', state);
-          continue;
+        if (!state || typeof state !== 'string') { continue; }
+
+        const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
+        if (storedInterval === 'null' || intervals[state.toLowerCase()] === null) {
+          loadedIntervals[state.toLowerCase()] = 'mm:ss'; // Default display for null
+        } else if (storedInterval !== null) {
+          loadedIntervals[state.toLowerCase()] = convertMsToMinutesSeconds(parseInt(storedInterval, 10));
+        } else {
+          const interval = intervals[state.toLowerCase()];
+          loadedIntervals[state.toLowerCase()] = interval !== undefined
+            ? convertMsToMinutesSeconds(interval ?? 0)
+            : 'mm:ss';
         }
-        const intervalStr = localIntervals[state.toLowerCase()];
-        if (!intervalStr) {
-          console.log(`Missing interval for state "${state}". Aborting save.`);
-          return;
-        }
-        const intervalMs = convertMinutesSecondsToMs(intervalStr);
-        if (isNaN(intervalMs)) {
-          console.log(`Invalid interval format for state "${state}". Expected "mm:ss".`);
-          return;
-        }
-        setIntervalForState(state, intervalMs); // Update context
-        console.log(`Interval for "${state}" set to ${intervalMs} ms in context.`);
       }
-      console.log('All intervals have been saved successfully.');
-      onClose();
+
+      if (isMounted) {
+        setLocalIntervals(loadedIntervals);
+        console.log('Local intervals set to:', loadedIntervals);
+        setDataLoaded(true); // Set dataLoaded to true after loading
+      }
     } catch (error) {
-      console.error('Error saving intervals:', error);
+      console.error('Failed to load intervals:', error);
     }
   };
+
+  if (visible && !dataLoaded) {
+    loadIntervals();
+  }
+
+  return () => {
+    isMounted = false; // Clean up function
+  };
+}, [visible, states, intervals, dataLoaded]);
+
+// Handle saving intervals
+const handleSave = async () => {
+  try {
+    for (const state of states) {
+      if (!state || typeof state !== 'string') {
+        console.error('Encountered invalid state during save:', state);
+        continue;
+      }
+      const intervalStr = localIntervals[state.toLowerCase()];
+
+      // Allow saving null intervals
+      if (intervalStr === null) {
+        setIntervalForState(state, null); // Set interval to null in context
+        console.log(`Interval for "${state}" set to null in context.`);
+        continue;
+      }
+
+      const intervalMs = convertMinutesSecondsToMs(intervalStr);
+      if (isNaN(intervalMs)) {
+        console.log(`Invalid interval format for state "${state}". Expected "mm:ss".`);
+        return;
+      }
+
+      setIntervalForState(state, intervalMs); // Update context with converted interval
+      console.log(`Interval for "${state}" set to ${intervalMs} ms in context.`);
+    }
+    console.log('All intervals have been saved successfully.');
+    onClose();
+  } catch (error) {
+    console.error('Error saving intervals:', error);
+  }
+};
+
 
   // Handle deleting a state
   const handleDeleteState = (index: number) => {
@@ -248,7 +249,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
               key={item}
               stateName={item}
               index={index}
-              localInterval={localIntervals[item.toLowerCase()] || ''}
+              localInterval={localIntervals[item.toLowerCase()] || 'mm:ss'}
               setLocalIntervals={setLocalIntervals}
               editing={editingIntervals[item.toLowerCase()] || false}
               onAssignAudios={() => {
@@ -267,15 +268,14 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
                   ...prev,
                   [item.toLowerCase()]: false,
                 }));
-                // Optionally, perform validation and save
+                // Perform validation and save interval
                 const intervalStr = localIntervals[item.toLowerCase()];
-                const intervalMs = convertMinutesSecondsToMs(intervalStr);
+                const intervalMs = convertMinutesSecondsToMs(intervalStr || '');
                 if (isNaN(intervalMs)) {
-                  console.log(`Invalid interval format for state "${item}". Expected "mm:ss". Resetting to previous value.`);
-                  // Reset to a default value or handle accordingly
+                  console.log(`Invalid interval format for state "${item}". Expected "mm:ss". Resetting to default.`);
                   setLocalIntervals((prev) => ({
                     ...prev,
-                    [item.toLowerCase()]: '00:00',
+                    [item.toLowerCase()]: 'mm:ss',
                   }));
                 } else {
                   setIntervalForState(item, intervalMs);

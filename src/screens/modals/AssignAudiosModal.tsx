@@ -1,5 +1,3 @@
-// src/screens/modals/AssignAudiosModal.tsx
-
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
@@ -8,6 +6,7 @@ import {
   FlatList,
   StyleSheet,
   ToastAndroid,
+  TextInput,
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
@@ -25,6 +24,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [playbackMode, setPlaybackMode] = useState<PlaybackMode>('Selected');
+  const [repetitions, setRepetitions] = useState<string>('1'); // Default to 1, or empty for infinite
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
@@ -42,9 +42,11 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
       const currentSelected = selectedAudios[stateName.toLowerCase()] || {
         audios: [],
         mode: 'Selected',
+        repetitions: '1',
       };
       setSelectedFiles(currentSelected.audios);
       setPlaybackMode(currentSelected.mode);
+      setRepetitions(currentSelected.repetitions?.toString() || '');
     } catch (error) {
       console.error('Error loading audio files:', error);
     }
@@ -67,9 +69,11 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
   };
 
   const handleSaveSelection = () => {
+    const parsedRepetitions = repetitions ? parseInt(repetitions, 10) : null;
     setSelectedAudiosForState(stateName, {
-      audios: selectedFiles, // Now contains file names
+      audios: selectedFiles,
       mode: playbackMode,
+      repetitions: parsedRepetitions, // Save parsed repetitions as number or null
     });
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
     onClose();
@@ -103,6 +107,21 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         </Picker>
       </View>
 
+      <View style={styles.repetitionsContainer}>
+        <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
+        <TextInput
+          style={styles.repetitionsInput}
+          value={repetitions}
+          onChangeText={(text) => {
+            if (/^\d{0,2}$/.test(text)) {
+              setRepetitions(text);
+            }
+          }}
+          placeholder="Infinite if empty"
+          keyboardType="numeric"
+        />
+      </View>
+
       <FlatList
         data={items}
         keyExtractor={(item) => item.name}
@@ -130,6 +149,20 @@ const styles = StyleSheet.create({
   },
   flatList: {
     width: '100%',
+  },
+  repetitionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  repetitionsInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    width: 60,
+    textAlign: 'center',
+    color: 'white',
   },
 });
 

@@ -5,11 +5,12 @@ import { PlaybackMode } from './PlaybackMode';
 export interface Scene {
   name: string;
   states: string[];
-  intervals: { [key: string]: number };
+  intervals: { [key: string]: number | null };
   selectedAudios: {
     [key: string]: {
       audios: string[];
       mode: PlaybackMode;
+      repetitions?: number | null;
     };
   };
   // Add any other properties your Scene might have

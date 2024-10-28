@@ -1,5 +1,3 @@
-// src/screens/modals/StateRow.tsx
-
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
@@ -10,15 +8,13 @@ type StateRowProps = {
   stateName: string;
   index: number;
   localInterval: string;
-  setLocalIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>;
+  setLocalIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
   editing: boolean;
   onAssignAudios: () => void;
   onDelete: () => void;
   onEditInterval: () => void;
   onSaveInterval: () => void;
 };
-
-// Removed the unused convertMinutesSecondsToMs function
 
 const StateRow: React.FC<StateRowProps> = ({
   stateName,
@@ -51,6 +47,11 @@ const StateRow: React.FC<StateRowProps> = ({
     onSaveInterval();
   };
 
+  const handleLongPress = () => {
+    setLocalIntervals((prev) => ({ ...prev, [stateName.toLowerCase()]: null }));
+    console.log(`Interval for "${stateName}" has been set to null.`);
+  };
+
   return (
     <View style={commonStyles.stateColumnRow}>
       {/* Position Number Input */}
@@ -81,7 +82,7 @@ const StateRow: React.FC<StateRowProps> = ({
           autoFocus
         />
       ) : (
-        <TouchableOpacity onPress={onEditInterval}>
+        <TouchableOpacity onPress={onEditInterval} onLongPress={handleLongPress}>
           <Text style={commonStyles.inputText}>
             {localInterval || 'mm:ss'}
           </Text>

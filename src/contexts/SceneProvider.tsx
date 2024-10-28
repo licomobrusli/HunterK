@@ -6,23 +6,24 @@ import { Scene } from '../types/Scene';
 import { PlaybackMode } from '../types/PlaybackMode';
 
 type IntervalContextType = {
-  intervals: { [key: string]: number };
-  setIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: number }>>;
-  setIntervalForState: (stateName: string, interval: number) => void;
+  intervals: { [key: string]: number | null };
+  setIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: number | null }>>;
+  setIntervalForState: (stateName: string, interval: number | null) => void;
   selectedAudios: {
     [key: string]: {
       audios: string[];
       mode: PlaybackMode;
+      repetitions?: number | null; // Include repetitions here
     };
   };
   setSelectedAudios: React.Dispatch<
     React.SetStateAction<{
-      [key: string]: { audios: string[]; mode: PlaybackMode };
+      [key: string]: { audios: string[]; mode: PlaybackMode; repetitions?: number | null };
     }>
   >;
   setSelectedAudiosForState: (
     stateName: string,
-    data: { audios: string[]; mode: PlaybackMode }
+    data: { audios: string[]; mode: PlaybackMode; repetitions?: number | null }
   ) => void;
   loadSceneData: (scene: Scene) => void;
   states: string[];
@@ -53,18 +54,18 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     'Trigger',
   ]);
 
-  const [intervals, setIntervals] = useState<{ [key: string]: number }>({});
+  const [intervals, setIntervals] = useState<{ [key: string]: number | null }>({});
   const [selectedAudios, setSelectedAudios] = useState<{
     [key: string]: { audios: string[]; mode: PlaybackMode };
   }>({});
 
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
 
-  const setIntervalForState = (stateName: string, interval: number) => {
+  const setIntervalForState = (stateName: string, interval: number | null) => {
     setIntervals((prev) => {
       const newIntervals = { ...prev, [stateName.toLowerCase()]: interval };
       if (prev[stateName.toLowerCase()] !== interval) {
-        console.log(`Set interval for "${stateName}": ${interval} ms`);
+        console.log(`Set interval for "${stateName}": ${interval === null ? 'null' : interval + ' ms'}`);
       }
       return newIntervals;
     });
@@ -72,7 +73,7 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
 
   const setSelectedAudiosForState = (
     stateName: string,
-    data: { audios: string[]; mode: PlaybackMode }
+    data: { audios: string[]; mode: PlaybackMode; repetitions?: number | null }
   ) => {
     setSelectedAudios((prev) => {
       const newSelectedAudios = { ...prev, [stateName.toLowerCase()]: data };
@@ -126,14 +127,15 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
         }
 
         // Load intervals
-        const loadedIntervals: { [key: string]: number } = {};
+        const loadedIntervals: { [key: string]: number | null } = {};
         for (const state of states) {
           const lowerState = state.toLowerCase();
           const storedInterval = await AsyncStorage.getItem(`@interval_${lowerState}`);
-          if (storedInterval !== null) {
-            loadedIntervals[lowerState] = parseInt(storedInterval, 10);
-            console.log(`Loaded interval for "${lowerState}": ${loadedIntervals[lowerState]} ms`);
-          }
+          loadedIntervals[lowerState] =
+            storedInterval === 'null' ? null : parseInt(storedInterval || '0', 10);
+          console.log(
+            `Loaded interval for "${lowerState}": ${loadedIntervals[lowerState] === null ? 'null' : loadedIntervals[lowerState] + ' ms'}`
+          );
         }
         setIntervals(loadedIntervals);
 
@@ -182,9 +184,10 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     if (dataLoaded) {
       const timer = setTimeout(() => {
         Object.entries(intervals).forEach(([state, interval]) => {
-          AsyncStorage.setItem(`@interval_${state}`, interval.toString())
+          const intervalValue = interval === null ? 'null' : interval.toString();
+          AsyncStorage.setItem(`@interval_${state}`, intervalValue)
             .then(() => {
-              console.log(`Interval for "${state}" saved to AsyncStorage: ${interval} ms`);
+              console.log(`Interval for "${state}" saved to AsyncStorage: ${intervalValue}`);
             })
             .catch((error) => {
               console.error(`Failed to save interval for "${state}":`, error);
