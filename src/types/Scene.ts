@@ -3,6 +3,7 @@
 import { PlaybackMode } from './PlaybackMode';
 
 export interface Scene {
+  selectedDebriefs: any;
   name: string;
   states: string[];
   intervals: { [key: string]: number | null };

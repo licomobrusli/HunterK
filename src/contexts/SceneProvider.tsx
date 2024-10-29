@@ -13,7 +13,7 @@ type IntervalContextType = {
     [key: string]: {
       audios: string[];
       mode: PlaybackMode;
-      repetitions?: number | null; // Include repetitions here
+      repetitions?: number | null;
     };
   };
   setSelectedAudios: React.Dispatch<
@@ -25,6 +25,8 @@ type IntervalContextType = {
     stateName: string,
     data: { audios: string[]; mode: PlaybackMode; repetitions?: number | null }
   ) => void;
+  selectedDebriefs: { [key: string]: string[] };
+  setSelectedDebriefsForState: (stateName: string, debriefs: string[]) => void;
   loadSceneData: (scene: Scene) => void;
   states: string[];
   setStates: React.Dispatch<React.SetStateAction<string[]>>;
@@ -37,6 +39,8 @@ export const IntervalContext = createContext<IntervalContextType>({
   selectedAudios: {},
   setSelectedAudios: () => {},
   setSelectedAudiosForState: () => {},
+  selectedDebriefs: {},
+  setSelectedDebriefsForState: () => {},
   loadSceneData: () => {},
   states: [],
   setStates: () => {},
@@ -47,111 +51,102 @@ type SceneProviderProps = {
 };
 
 const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
-  const [states, setStates] = useState<string[]>([
-    'Active',
-    'Spotted',
-    'Proximity',
-    'Trigger',
-  ]);
-
+  const [states, setStates] = useState<string[]>(['Active', 'Spotted', 'Proximity', 'Trigger']);
   const [intervals, setIntervals] = useState<{ [key: string]: number | null }>({});
   const [selectedAudios, setSelectedAudios] = useState<{
-    [key: string]: { audios: string[]; mode: PlaybackMode };
+    [key: string]: { audios: string[]; mode: PlaybackMode; repetitions?: number | null };
   }>({});
-
+  const [selectedDebriefs, setSelectedDebriefs] = useState<{ [key: string]: string[] }>({});
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
 
   const setIntervalForState = (stateName: string, interval: number | null) => {
-    setIntervals((prev) => {
-      const newIntervals = { ...prev, [stateName.toLowerCase()]: interval };
-      if (prev[stateName.toLowerCase()] !== interval) {
-        console.log(`Set interval for "${stateName}": ${interval === null ? 'null' : interval + ' ms'}`);
-      }
-      return newIntervals;
-    });
+    setIntervals((prev) => ({
+      ...prev,
+      [stateName.toLowerCase()]: interval,
+    }));
   };
 
   const setSelectedAudiosForState = (
     stateName: string,
     data: { audios: string[]; mode: PlaybackMode; repetitions?: number | null }
   ) => {
-    setSelectedAudios((prev) => {
-      const newSelectedAudios = { ...prev, [stateName.toLowerCase()]: data };
-      if (JSON.stringify(prev[stateName.toLowerCase()]) !== JSON.stringify(data)) {
-        console.log(`Set selected audios for "${stateName}"`);
-      }
-      return newSelectedAudios;
-    });
+    setSelectedAudios((prev) => ({
+      ...prev,
+      [stateName.toLowerCase()]: data,
+    }));
+  };
+
+  const setSelectedDebriefsForState = (stateName: string, debriefs: string[]) => {
+    setSelectedDebriefs((prev) => ({
+      ...prev,
+      [stateName.toLowerCase()]: debriefs,
+    }));
   };
 
   const loadSceneData = (scene: Scene) => {
     console.log('Loading scene data:', scene);
 
-    // Update states
     if (scene.states && scene.states.length > 0) {
       setStates(scene.states);
     }
 
-    // Update intervals
     if (scene.intervals) {
       setIntervals(scene.intervals);
     }
 
-    // Update selectedAudios
     if (scene.selectedAudios) {
       setSelectedAudios(scene.selectedAudios);
     }
 
-    // Optionally, persist the loaded scene data to AsyncStorage
+    if (scene.selectedDebriefs) {
+      setSelectedDebriefs(scene.selectedDebriefs);
+    }
+
     setDataLoaded(true);
   };
 
-  // Load data on mount
   useEffect(() => {
     if (dataLoaded) {
       return;
     }
 
-    console.log('SceneProvider useEffect running, dataLoaded:', dataLoaded);
-
     const loadData = async () => {
       try {
-        // Load states
         const storedStates = await AsyncStorage.getItem('@states');
         if (storedStates) {
           const parsedStates: string[] = JSON.parse(storedStates);
-          if (parsedStates.length > 0) {
-            setStates(parsedStates);
-            console.log('Loaded states from AsyncStorage:', parsedStates);
-          }
+          if (parsedStates.length > 0) {setStates(parsedStates);}
         }
 
-        // Load intervals
         const loadedIntervals: { [key: string]: number | null } = {};
         for (const state of states) {
           const lowerState = state.toLowerCase();
           const storedInterval = await AsyncStorage.getItem(`@interval_${lowerState}`);
-          loadedIntervals[lowerState] =
-            storedInterval === 'null' ? null : parseInt(storedInterval || '0', 10);
-          console.log(
-            `Loaded interval for "${lowerState}": ${loadedIntervals[lowerState] === null ? 'null' : loadedIntervals[lowerState] + ' ms'}`
-          );
+          loadedIntervals[lowerState] = storedInterval === 'null' ? null : parseInt(storedInterval || '0', 10);
         }
         setIntervals(loadedIntervals);
 
-        // Load selectedAudios
         const loadedSelectedAudios: {
-          [key: string]: { audios: string[]; mode: PlaybackMode };
+          [key: string]: { audios: string[]; mode: PlaybackMode; repetitions?: number | null };
         } = {};
         for (const state of states) {
           const lowerState = state.toLowerCase();
           const storedAudios = await AsyncStorage.getItem(`@selectedAudios_${lowerState}`);
           if (storedAudios) {
             loadedSelectedAudios[lowerState] = JSON.parse(storedAudios);
-            console.log(`Loaded selectedAudios for "${lowerState}":`, loadedSelectedAudios[lowerState]);
           }
         }
         setSelectedAudios(loadedSelectedAudios);
+
+        const loadedSelectedDebriefs: { [key: string]: string[] } = {};
+        for (const state of states) {
+          const lowerState = state.toLowerCase();
+          const storedDebriefs = await AsyncStorage.getItem(`@selectedDebriefs_${lowerState}`);
+          if (storedDebriefs) {
+            loadedSelectedDebriefs[lowerState] = JSON.parse(storedDebriefs);
+          }
+        }
+        setSelectedDebriefs(loadedSelectedDebriefs);
 
         setDataLoaded(true);
       } catch (error) {
@@ -162,61 +157,59 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
     loadData();
   }, [dataLoaded, states]);
 
-  // Save states when they change, with debounce
   useEffect(() => {
     if (dataLoaded && states.length > 0) {
       const timer = setTimeout(() => {
-        AsyncStorage.setItem('@states', JSON.stringify(states))
-          .then(() => {
-            console.log('States saved to AsyncStorage:', states);
-          })
-          .catch((error) => {
-            console.error('Failed to save states:', error);
-          });
-      }, 500); // Debounce for 500ms
+        AsyncStorage.setItem('@states', JSON.stringify(states)).catch((error) => {
+          console.error('Failed to save states:', error);
+        });
+      }, 500);
 
       return () => clearTimeout(timer);
     }
   }, [states, dataLoaded]);
 
-  // Save intervals when they change, with debounce
   useEffect(() => {
     if (dataLoaded) {
       const timer = setTimeout(() => {
         Object.entries(intervals).forEach(([state, interval]) => {
-          const intervalValue = interval === null ? 'null' : interval.toString();
-          AsyncStorage.setItem(`@interval_${state}`, intervalValue)
-            .then(() => {
-              console.log(`Interval for "${state}" saved to AsyncStorage: ${intervalValue}`);
-            })
-            .catch((error) => {
-              console.error(`Failed to save interval for "${state}":`, error);
-            });
+          AsyncStorage.setItem(`@interval_${state}`, interval === null ? 'null' : interval.toString()).catch((error) => {
+            console.error(`Failed to save interval for "${state}":`, error);
+          });
         });
-      }, 500); // Debounce for 500ms
+      }, 500);
 
       return () => clearTimeout(timer);
     }
   }, [intervals, dataLoaded]);
 
-  // Save selectedAudios when they change, with debounce
   useEffect(() => {
     if (dataLoaded) {
       const timer = setTimeout(() => {
         Object.entries(selectedAudios).forEach(([state, data]) => {
-          AsyncStorage.setItem(`@selectedAudios_${state}`, JSON.stringify(data))
-            .then(() => {
-              console.log(`Selected audios for "${state}" saved to AsyncStorage.`);
-            })
-            .catch((error) => {
-              console.error(`Failed to save selected audios for "${state}":`, error);
-            });
+          AsyncStorage.setItem(`@selectedAudios_${state}`, JSON.stringify(data)).catch((error) => {
+            console.error(`Failed to save selected audios for "${state}":`, error);
+          });
         });
-      }, 500); // Debounce for 500ms
+      }, 500);
 
       return () => clearTimeout(timer);
     }
   }, [selectedAudios, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      const timer = setTimeout(() => {
+        Object.entries(selectedDebriefs).forEach(([state, debriefs]) => {
+          AsyncStorage.setItem(`@selectedDebriefs_${state}`, JSON.stringify(debriefs)).catch((error) => {
+            console.error(`Failed to save selected debriefs for "${state}":`, error);
+          });
+        });
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedDebriefs, dataLoaded]);
 
   return (
     <IntervalContext.Provider
@@ -227,6 +220,8 @@ const SceneProvider: React.FC<SceneProviderProps> = ({ children }) => {
         selectedAudios,
         setSelectedAudios,
         setSelectedAudiosForState,
+        selectedDebriefs,
+        setSelectedDebriefsForState,
         loadSceneData,
         states,
         setStates,

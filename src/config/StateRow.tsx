@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import Bin from '../assets/icons/bin.svg';
-import Queue from '../assets/icons/queue.svg';
+import Debrief from '../assets/icons/debrief.svg';
+import AssignDebriefsModal from '../screens/modals/AssignDebriefsModal'; // Import the new modal component
 
 type StateRowProps = {
   stateName: string;
@@ -15,6 +16,7 @@ type StateRowProps = {
   onEditInterval: () => void;
   onSaveInterval: () => void;
   onRenameState: (newName: string) => void;
+  onAssignDebrief: (debrief: string) => void; // Add a prop to handle debrief assignment
 };
 
 const StateRow: React.FC<StateRowProps> = ({
@@ -28,9 +30,11 @@ const StateRow: React.FC<StateRowProps> = ({
   onEditInterval,
   onSaveInterval,
   onRenameState,
+  onAssignDebrief,
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [tempStateName, setTempStateName] = useState(stateName);
+  const [isDebriefModalVisible, setDebriefModalVisible] = useState(false); // Modal state
 
   const handleChange = (value: string) => {
     if (value.length > 5) {return;}
@@ -62,9 +66,17 @@ const StateRow: React.FC<StateRowProps> = ({
     setLocalIntervals((prev) => ({ ...prev, [stateName.toLowerCase()]: null }));
   };
 
+  const openDebriefModal = () => {
+    setDebriefModalVisible(true);
+  };
+
+  const handleDebriefSelected = (debrief: string) => {
+    onAssignDebrief(debrief); // Assign selected debrief to the state
+    setDebriefModalVisible(false);
+  };
+
   return (
     <View style={commonStyles.stateColumnRow}>
-      {/* Position Number Input */}
       <TextInput
         style={commonStyles.positionInput}
         value={(index + 1).toString()}
@@ -74,7 +86,6 @@ const StateRow: React.FC<StateRowProps> = ({
         placeholder="Pos"
       />
 
-      {/* Editable State Name */}
       {isRenaming ? (
         <TextInput
           style={commonStyles.fixedWidthLabel}
@@ -89,7 +100,6 @@ const StateRow: React.FC<StateRowProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* Interval Field */}
       {editing ? (
         <TextInput
           style={commonStyles.inputText}
@@ -107,19 +117,24 @@ const StateRow: React.FC<StateRowProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* Delete Button */}
       <TouchableOpacity onPress={onDelete}>
         <View style={commonStyles.positionInput}>
           <Bin width={18} height={18} fill="#fff" stroke="#004225" />
         </View>
       </TouchableOpacity>
 
-      {/* Queue Button */}
-      <TouchableOpacity delayLongPress={200}>
+      {/* Debrief Button */}
+      <TouchableOpacity onPress={openDebriefModal} delayLongPress={200}>
         <View style={commonStyles.positionInput}>
-          <Queue width={18} height={18} fill="#fff" stroke="#004225" />
+          <Debrief width={18} height={18} fill="#fff" stroke="#004225" />
         </View>
       </TouchableOpacity>
+
+      {/* Debrief Modal */}
+      <AssignDebriefsModal
+        visible={isDebriefModalVisible}
+        onClose={() => setDebriefModalVisible(false)}
+        onDebriefSelected={handleDebriefSelected} stateName={''}      />
     </View>
   );
 };
