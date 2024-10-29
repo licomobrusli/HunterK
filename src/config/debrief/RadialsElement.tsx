@@ -1,4 +1,4 @@
-// src/screens/modals/elements/RadialsElement.tsx
+// src/config/debrief/RadialsElement.tsx
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';

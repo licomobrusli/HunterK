@@ -1,4 +1,4 @@
-// src/components/RadioButton.tsx
+// src/config/debrief/RadioButton.tsx
 
 import React from 'react';
 import { TouchableOpacity, Text } from 'react-native';
