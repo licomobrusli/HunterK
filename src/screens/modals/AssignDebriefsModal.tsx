@@ -1,16 +1,14 @@
 // src/screens/modals/AssignDebriefsModal.tsx
 
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  ToastAndroid,
 } from 'react-native';
 import RNFS from 'react-native-fs';
-import { IntervalContext } from '../../contexts/SceneProvider';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 
@@ -20,18 +18,19 @@ type AssignDebriefsModalProps = {
   visible: boolean;
   onClose: () => void;
   stateName: string;
-  onDebriefSelected: (debrief: string) => void; // New prop for handling selection
+  selectedDebrief: string | null; // Now holds a single debrief
+  onDebriefSelected: (debrief: string | null) => void;
 };
 
 const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
   visible,
   onClose,
   stateName,
-  onDebriefSelected, // Include this in the component's arguments
+  selectedDebrief,
+  onDebriefSelected,
 }) => {
-  const { selectedDebriefs, setSelectedDebriefsForState } = useContext(IntervalContext);
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string | null>(selectedDebrief);
 
   const loadDebriefFiles = useCallback(async () => {
     try {
@@ -43,13 +42,10 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
       const directoryItems = await RNFS.readDir(DEBRIEFS_DIR);
       const debriefFiles = directoryItems.filter((item) => item.isFile() && item.name.endsWith('.json'));
       setItems(debriefFiles);
-
-      const currentSelected = selectedDebriefs[stateName.toLowerCase()] || [];
-      setSelectedFiles(currentSelected);
     } catch (error) {
       console.error('Error loading debrief files:', error);
     }
-  }, [stateName, selectedDebriefs]);
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -57,25 +53,19 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
     }
   }, [visible, loadDebriefFiles]);
 
-  const handleSelectDebrief = (fileName: string) => {
-    setSelectedFiles((prevSelectedFiles) => {
-      if (prevSelectedFiles.includes(fileName)) {
-        return prevSelectedFiles.filter((name) => name !== fileName);
-      } else {
-        return [...prevSelectedFiles, fileName];
-      }
-    });
-    onDebriefSelected(fileName); // Notify parent of the selected debrief
-  };
+  useEffect(() => {
+    // Update selected file when selectedDebrief prop changes
+    setSelectedFile(selectedDebrief);
+  }, [selectedDebrief]);
 
-  const handleSaveSelection = () => {
-    setSelectedDebriefsForState(stateName, selectedFiles);
-    ToastAndroid.show('Debriefs assigned successfully!', ToastAndroid.SHORT);
-    onClose();
+  const handleSelectDebrief = (fileName: string) => {
+    const newSelection = selectedFile === fileName ? null : fileName;
+    setSelectedFile(newSelection);
+    onDebriefSelected(newSelection); // Update parent with new selection
   };
 
   const renderItem = ({ item }: { item: RNFS.ReadDirItem }) => {
-    const isSelected = selectedFiles.includes(item.name);
+    const isSelected = selectedFile === item.name;
     return (
       <View>
         <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={styles.itemButton}>
@@ -86,17 +76,14 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
   };
 
   return (
-    <AppModal isVisible={visible} onClose={onClose} animationIn="fadeIn" animationOut="fadeOut">
-      <Text style={commonStyles.title}>Assign Debriefs for {stateName}</Text>
+    <AppModal isVisible={visible} onClose={onClose}>
+      <Text style={commonStyles.title}>Assign Debrief for {stateName}</Text>
       <FlatList
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
         style={styles.flatList}
       />
-      <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
-        <Text style={commonStyles.saveButtonText}>Save Selection</Text>
-      </TouchableOpacity>
     </AppModal>
   );
 };
@@ -110,7 +97,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   selectedText: {
-    color: 'green',
+    color: 'green', // Change color to indicate selection
   },
   flatList: {
     width: '100%',
