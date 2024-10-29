@@ -17,7 +17,7 @@ import { commonStyles } from '../styles/commonStyles';
 import { Picker } from '@react-native-picker/picker';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import RadioButton from './RadioButton'; // Reusable RadioButton component
-import { Debriefing, DebriefElement } from '../types/Debriefing';
+import { Debriefing, DebriefElement } from '../types/Debrief';
 
 const { LogcatModule } = NativeModules;
 

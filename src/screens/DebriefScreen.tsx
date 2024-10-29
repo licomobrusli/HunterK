@@ -6,7 +6,7 @@ import { commonStyles } from '../styles/commonStyles';
 import DebriefComponent from '../config/DebriefComponent'; // Ensure the correct import path
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
-import { Debriefing } from '../types/Debriefing';
+import { Debriefing } from '../types/Debrief';
 
 type DebriefScreenProps = NativeStackScreenProps<RootStackParamList, 'Debrief'>;
 

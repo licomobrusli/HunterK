@@ -1,7 +1,9 @@
 // src/components/RadioButton.tsx
 
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import { commonStyles } from '../styles/commonStyles';
 
 interface RadioButtonProps {
   label: string;
@@ -19,40 +21,21 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   accessibilityHint,
 }) => (
   <TouchableOpacity
-    style={styles.container}
+    style={commonStyles.inputContainer}
     onPress={onPress}
     accessibilityRole="radio"
     accessibilityState={{ selected }}
     accessibilityLabel={accessibilityLabel}
     accessibilityHint={accessibilityHint}
   >
-    <View style={[styles.radio, selected && styles.radioSelected]} />
-    <Text style={styles.label}>{label}</Text>
+    <Icon
+      name={selected ? 'radio-button-on' : 'radio-button-off'}
+      size={20}
+      color={selected ? '#4CAF50' : '#ccc'}
+      style={commonStyles.headerIcon}
+    />
+    <Text style={commonStyles.text}>{label}</Text>
   </TouchableOpacity>
 );
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
-  },
-  radio: {
-    height: 20,
-    width: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#4CAF50',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  radioSelected: {
-    backgroundColor: '#4CAF50',
-  },
-  label: {
-    fontSize: 16,
-  },
-});
 
 export default RadioButton;

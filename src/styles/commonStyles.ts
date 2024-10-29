@@ -1,4 +1,5 @@
 // src/styles/commonStyles.ts
+
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -10,6 +11,7 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#004225', // British Racing Green
+    paddingHorizontal: 20, // Added padding for better layout
   },
   subModalContainer: {
     flex: 1,
@@ -89,6 +91,7 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
+    flexDirection: 'row', // Align icon and text horizontally
   },
   disabledButton: {
     backgroundColor: '#B0B0B0', // Grey color for disabled buttons
@@ -137,9 +140,8 @@ export const commonStyles = StyleSheet.create({
   inputContainer: {
     marginBottom: 10,
     width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column', // Changed to column for better alignment
+    alignItems: 'flex-start',
   },
   textInput: {
     borderColor: '#ccc',
@@ -148,6 +150,7 @@ export const commonStyles = StyleSheet.create({
     padding: 5,
     color: '#fff',
     backgroundColor: '#333',
+    width: '100%', // Ensure full width usage
   },
   picker: {
     marginBottom: 10,
@@ -218,6 +221,7 @@ export const commonStyles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
     textDecorationLine: 'underline', // Indicate it's clickable
+    marginBottom: 5, // Added for spacing
   },
 
   // **Messages**
@@ -289,8 +293,8 @@ export const commonStyles = StyleSheet.create({
     marginRight: 10,
   },
 
-   // **Modal Styles**
-   modalContainer: {
+  // **Modal Styles**
+  modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -351,33 +355,89 @@ export const commonStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'white',
   },
-    // **Fixed Width Label**
-    fixedWidthLabel: {
-      width: 100, // Adjust the width as needed
-      height: 30,
-      color: '#FFFFFF',
-      textAlign: 'left', // Center the text
-      padding: 5,
-      borderRadius: 1,
-      borderWidth: 1,
-      borderColor: 'white',
-    },
-    fullscreenTouchable: {
-      ...StyleSheet.absoluteFillObject,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    inputText: {
-      height: 30,
-      width: 60,
-      borderColor: '#ccc',
-      borderWidth: 1,
-      borderRadius: 1,
-      padding: 5,
-      justifyContent: 'center',
-      textAlignVertical: 'center',
-      textAlign: 'center',
-      color: '#fff',
-    },
-});
+  fixedWidthLabel: {
+    width: 100, // Adjust the width as needed
+    height: 30,
+    color: '#FFFFFF',
+    textAlign: 'left', // Align the text to the left
+    padding: 5,
+    borderRadius: 1,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  fullscreenTouchable: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inputText: {
+    height: 30,
+    width: 60,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 1,
+    padding: 5,
+    justifyContent: 'center',
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    color: '#fff',
+  },
 
+  // **New Styles Added**
+  closeModalButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    padding: 10,
+  },
+  elementItemContainer: {
+    backgroundColor: '#333',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  addedElementsTitle: {
+    color: '#fff',
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  noElementsText: {
+    color: '#fff',
+    fontStyle: 'italic',
+  },
+  elementTypeText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  elementPromptText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  radialOptionText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  addElementButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
+  marginTop20: {
+    marginTop: 20,
+  },
+  marginTop10: {
+    marginTop: 10,
+  },
+  marginTop5: {
+    marginTop: 5,
+  },
+  fullWidthMarginBottom20: {
+    width: '100%',
+    marginBottom: 20,
+  },
+});
