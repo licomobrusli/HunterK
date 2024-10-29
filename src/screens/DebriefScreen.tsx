@@ -3,7 +3,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
-import DebriefComponent from '../config/DebriefComponent'; // Ensure the correct import path
+import DebriefComponent from '../config/debrief/DebriefComponent'; // Ensure the correct import path
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
 import { Debriefing } from '../types/Debrief';

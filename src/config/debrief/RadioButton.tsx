@@ -3,7 +3,7 @@
 import React from 'react';
 import { TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { commonStyles } from '../styles/commonStyles';
+import { commonStyles } from '../../styles/commonStyles';
 
 interface RadioButtonProps {
   label: string;

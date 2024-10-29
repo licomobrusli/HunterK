@@ -489,4 +489,21 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: '#333',
     width: '100%',
   },
+  elementConfigContainer: {
+    marginTop: 20,
+    width: '100%',
+    backgroundColor: '#005F2E',
+    padding: 15,
+    borderRadius: 5,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    width: '100%',
+  },
+  cancelButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
 });
