@@ -1,48 +1,84 @@
 // src/components/DebriefComponent.tsx
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import {
+  Text,
+  TextInput,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  // Picker,
+  Alert,
+} from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
+import { Picker } from '@react-native-picker/picker';
 import { NativeEventEmitter, NativeModules } from 'react-native';
+import RadioButton from './RadioButton'; // Reusable RadioButton component
+import { Debriefing, DebriefElement } from '../types/Debriefing';
 
 const { LogcatModule } = NativeModules;
 
 interface DebriefComponentProps {
-  debriefType: string; // Identifier for the debrief type
+  debriefing: Debriefing; // The debriefing configuration
   onComplete: () => void; // Callback when debriefing is complete
 }
 
-interface LogcatEvent {
-  eventName: string;
-  timestamp: number;
-}
-
-const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefType, onComplete }) => {
-  const [debriefText, setDebriefText] = useState('');
+const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onComplete }) => {
+  const [responses, setResponses] = useState<{ [key: string]: any }>({});
   const listenerStartTimeRef = useRef<number>(0);
 
   const handleSubmit = useCallback(() => {
-    if (debriefText.trim() === '') {
-      console.warn('DebriefComponent: Debrief text is empty');
+    // Validation
+    let isValid = true;
+    let validationMessage = '';
+
+    debriefing.elements.forEach((element) => {
+      if (element.type === 'text' && (!responses[element.id] || responses[element.id].trim() === '')) {
+        isValid = false;
+        validationMessage = 'Please answer all text prompts.';
+      }
+
+      if (
+        element.type === 'multipleChoice' &&
+        (!responses[element.id] || responses[element.id] === null)
+      ) {
+        isValid = false;
+        validationMessage = 'Please answer all multiple-choice questions.';
+      }
+
+      // Add more validation based on element types as needed
+    });
+
+    if (!isValid) {
+      Alert.alert('Validation Error', validationMessage);
       return;
     }
-    console.log(`DebriefComponent: Submitting debrief for type "${debriefType}": ${debriefText}`);
-    // Add logic to handle the submitted debrief text, such as saving to a database
+
+    // If validation passes
+    console.log(`Submitting debriefing "${debriefing.name}" with responses:`, responses);
+    Alert.alert('Success', 'Your debriefing has been submitted.');
     onComplete();
-  }, [debriefText, debriefType, onComplete]);
+  }, [responses, debriefing.elements, debriefing.name, onComplete]);
 
-  const handleLogcatEvent = useCallback((event: LogcatEvent) => {
-    const { eventName, timestamp } = event;
+  const handleLogcatEvent = useCallback(
+    (event: { eventName: string; timestamp: number }) => {
+      const { eventName, timestamp } = event;
 
-    if (timestamp < listenerStartTimeRef.current) {
-      console.log(`DebriefComponent: Ignoring old event: ${eventName} at ${timestamp}`);
-      return;
-    }
+      if (timestamp < listenerStartTimeRef.current) {
+        console.log(`DebriefComponent: Ignoring old event: ${eventName} at ${timestamp}`);
+        return;
+      }
 
-    if (eventName === 'submit_debrief') {
-      console.log('DebriefComponent: Submit event detected');
-      handleSubmit();
-    }
-  }, [handleSubmit]);
+      if (eventName === 'submit_debrief') {
+        console.log('DebriefComponent: Submit event detected');
+        handleSubmit();
+      }
+    },
+    [handleSubmit]
+  );
 
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
@@ -63,54 +99,161 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefType, onComp
     };
   }, [handleLogcatEvent]);
 
+  const handleOptionSelect = useCallback(
+    (elementId: string, option: string) => {
+      setResponses((prevResponses) => ({
+        ...prevResponses,
+        [elementId]: option,
+      }));
+    },
+    []
+  );
+
+  const handlePickerChange = useCallback(
+    (elementId: string, value: string) => {
+      setResponses((prevResponses) => ({
+        ...prevResponses,
+        [elementId]: value,
+      }));
+    },
+    []
+  );
+
+  const renderElement = (element: DebriefElement) => {
+    switch (element.type) {
+      case 'text':
+        return (
+          <View key={element.id} style={styles.elementContainer}>
+            <Text style={styles.prompt}>{element.prompt}</Text>
+            <TextInput
+              style={[commonStyles.textInput, styles.textInput]}
+              multiline
+              placeholder="Your response..."
+              placeholderTextColor="#aaa"
+              value={responses[element.id] || ''}
+              onChangeText={(text) => setResponses({ ...responses, [element.id]: text })}
+              textAlignVertical="top"
+              scrollEnabled
+            />
+          </View>
+        );
+
+      case 'multipleChoice':
+        return (
+          <View key={element.id} style={styles.elementContainer}>
+            <Text style={styles.prompt}>{element.prompt}</Text>
+            {element.options?.map((option) => (
+              <RadioButton
+                key={option}
+                label={option}
+                selected={responses[element.id] === option}
+                onPress={() => handleOptionSelect(element.id, option)}
+                accessibilityLabel={`${option} option for ${element.prompt}`}
+                accessibilityHint={`Select ${option}`}
+              />
+            ))}
+          </View>
+        );
+
+      case 'dropdown':
+        return (
+          <View key={element.id} style={styles.elementContainer}>
+            <Text style={styles.prompt}>{element.prompt}</Text>
+            <Picker
+              selectedValue={responses[element.id] || ''}
+              style={styles.picker}
+              onValueChange={(itemValue) => handlePickerChange(element.id, itemValue)}
+            >
+              <Picker.Item label="Select an option..." value="" />
+              {element.options?.map((option) => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
+          </View>
+        );
+
+      case 'scale':
+        return (
+          <View key={element.id} style={styles.elementContainer}>
+            <Text style={styles.prompt}>{element.prompt}</Text>
+            {/* Implement a scale component or use a third-party library */}
+            {/* Placeholder implementation */}
+            <Text>
+              Scale from {element.scale?.min} to {element.scale?.max}
+            </Text>
+            <TextInput
+              style={[commonStyles.textInput, styles.textInput]}
+              keyboardType="numeric"
+              placeholder={`Enter a value between ${element.scale?.min} and ${element.scale?.max}`}
+              placeholderTextColor="#aaa"
+              value={responses[element.id] ? String(responses[element.id]) : ''}
+              onChangeText={(text) =>
+                setResponses({ ...responses, [element.id]: parseInt(text, 10) || 0 })
+              }
+            />
+          </View>
+        );
+
+      // Add more cases for different element types as needed
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={commonStyles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={commonStyles.title}>{debriefType} Debrief</Text>
-      <TextInput
-        style={[commonStyles.textInput, styles.debriefInput]}
-        multiline
-        placeholder={`Type your ${debriefType.toLowerCase()} debrief here...`}
-        placeholderTextColor="#aaa"
-        value={debriefText}
-        onChangeText={setDebriefText}
-        textAlignVertical="top" // Ensures text starts at the top-left
-        scrollEnabled
-      />
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit Debrief</Text>
-      </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={commonStyles.title}>{debriefing.name}</Text>
+        {debriefing.elements.map((element) => renderElement(element))}
+
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit Debrief</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  debriefInput: {
-    flex: 1,
-    width: '90%', // Adjust as needed
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    color: '#000',
-    // Optional: Add shadow for better visibility
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5, // For Android shadow
-    // Optional: Add a border to distinguish the input area
-    borderWidth: 1,
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingBottom: 20,
+    width: '100%',
+  },
+  elementContainer: {
+    width: '90%',
+    marginBottom: 20,
+  },
+  prompt: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  textInput: {
+    height: 80,
     borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
   },
   submitButton: {
-    marginTop: 20,
+    marginTop: 30,
     backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    width: '90%',
   },
   submitButtonText: {
     color: '#fff',
