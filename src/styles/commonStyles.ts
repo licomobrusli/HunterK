@@ -440,4 +440,53 @@ export const commonStyles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
+  // **Radial Label Styles**
+  radialLabelContainer: {
+    marginTop: 10,
+    width: '100%',
+  },
+  radialLabelInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radialTextInput: {
+    flex: 1,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 5,
+    color: '#fff',
+    backgroundColor: '#333',
+  },
+  deleteRadialButton: {
+    marginLeft: 10,
+    padding: 5,
+  },
+
+  // **Number of Radials Styles**
+  radialsNumberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    width: '100%',
+  },
+  radialsNumberDisplay: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    color: '#fff',
+    backgroundColor: '#333',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  radialsNumberInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    color: '#fff',
+    backgroundColor: '#333',
+    width: '100%',
+  },
 });

@@ -34,6 +34,10 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
   const [numberOfRadials, setNumberOfRadials] = useState<number>(2);
   const [radialLabels, setRadialLabels] = useState<string[]>(['', '']);
 
+  // State to manage editing mode for numberOfRadials
+  const [isEditingRadialsNumber, setIsEditingRadialsNumber] = useState<boolean>(false);
+  const [tempRadialsNumber, setTempRadialsNumber] = useState<string>('2'); // Initialize with default number
+
   // Adjust radialLabels based on numberOfRadials using functional update to avoid ESLint warning
   useEffect(() => {
     setRadialLabels((prevLabels) => {
@@ -78,6 +82,11 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
     if (incompleteLabels) {
       Alert.alert('Validation Error', 'Please enter all radial labels.');
+      return;
+    }
+
+    if (numberOfRadials <= 0) {
+      Alert.alert('Validation Error', 'Number of radials must be greater than 0.');
       return;
     }
 
@@ -132,14 +141,24 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
     onClose();
   };
 
-  // Handle changing the number of radials
-  const handleNumberOfRadialsChange = (num: string) => {
-    const parsed = parseInt(num, 10);
+  // Handle changing the number of radials when in edit mode
+  const handleRadialsNumberBlur = () => {
+    const parsed = parseInt(tempRadialsNumber, 10);
     if (!isNaN(parsed) && parsed > 0) {
       setNumberOfRadials(parsed);
+      setIsEditingRadialsNumber(false);
     } else {
       Alert.alert('Invalid Input', 'Please enter a valid number greater than 0.');
+      setTempRadialsNumber(numberOfRadials.toString());
+      setIsEditingRadialsNumber(false);
     }
+  };
+
+  // Function to remove a specific radial label
+  const removeRadialLabel = (index: number) => {
+    const updatedLabels = radialLabels.filter((_, idx) => idx !== index);
+    setRadialLabels(updatedLabels);
+    setNumberOfRadials(updatedLabels.length);
   };
 
   return (
@@ -212,31 +231,54 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
                   onChangeText={setPromptText}
                 />
 
+                {/* Number of Radials Field */}
                 <Text style={commonStyles.label}>Number of Radials</Text>
-                <TextInput
-                  style={commonStyles.textInput}
-                  placeholder="Enter number of radials..."
-                  placeholderTextColor="#aaa"
-                  keyboardType="number-pad"
-                  value={numberOfRadials.toString()}
-                  onChangeText={handleNumberOfRadialsChange}
-                />
+                {isEditingRadialsNumber ? (
+                  <TextInput
+                    style={commonStyles.radialsNumberInput}
+                    placeholder="Enter number of radials..."
+                    placeholderTextColor="#aaa"
+                    keyboardType="number-pad"
+                    value={tempRadialsNumber}
+                    onChangeText={setTempRadialsNumber}
+                    onBlur={handleRadialsNumberBlur}
+                    autoFocus
+                  />
+                ) : (
+                  <TouchableOpacity
+                    style={commonStyles.radialsNumberDisplay}
+                    onPress={() => {
+                      setIsEditingRadialsNumber(true);
+                      setTempRadialsNumber(numberOfRadials.toString());
+                    }}
+                  >
+                    <Text style={commonStyles.text}>{numberOfRadials}</Text>
+                  </TouchableOpacity>
+                )}
 
-                {/* Dynamic Radial Labels */}
+                {/* Dynamic Radial Labels with 'X' Buttons */}
                 {radialLabels.map((label, index) => (
-                  <View key={index} style={commonStyles.marginTop10}>
+                  <View key={index} style={commonStyles.radialLabelContainer}>
                     <Text style={commonStyles.label}>Radial {index + 1} Label</Text>
-                    <TextInput
-                      style={commonStyles.textInput}
-                      placeholder={`Enter label for Radial ${index + 1}`}
-                      placeholderTextColor="#aaa"
-                      value={label}
-                      onChangeText={(text) => {
-                        const updatedLabels = [...radialLabels];
-                        updatedLabels[index] = text;
-                        setRadialLabels(updatedLabels);
-                      }}
-                    />
+                    <View style={commonStyles.radialLabelInputContainer}>
+                      <TextInput
+                        style={commonStyles.radialTextInput}
+                        placeholder={`Enter label for Radial ${index + 1}`}
+                        placeholderTextColor="#aaa"
+                        value={label}
+                        onChangeText={(text) => {
+                          const updatedLabels = [...radialLabels];
+                          updatedLabels[index] = text;
+                          setRadialLabels(updatedLabels);
+                        }}
+                      />
+                      <TouchableOpacity
+                        onPress={() => removeRadialLabel(index)}
+                        style={commonStyles.deleteRadialButton}
+                      >
+                        <Icon name="x" size={16} color="#ff4d4d" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 ))}
 
