@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import StackNavigator from './src/config/StackNavigator';
 import SceneProvider from './src/contexts/SceneProvider';
+import { DebriefingsProvider } from './src/config/debrief/DebriefingsProvider';
 import FlashMessage from 'react-native-flash-message';
 
 const App: React.FC = () => {
@@ -59,12 +60,14 @@ const App: React.FC = () => {
   }, [requestAudioPermission]);
 
   return (
-      <SceneProvider>
+    <SceneProvider>
+      <DebriefingsProvider>
         <NavigationContainer>
           <StackNavigator />
         </NavigationContainer>
         <FlashMessage position="top" />
-      </SceneProvider>
+      </DebriefingsProvider>
+    </SceneProvider>
   );
 };
 

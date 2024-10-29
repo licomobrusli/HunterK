@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,16 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import RNFS from 'react-native-fs';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
-import { IntervalContext } from '../../contexts/SceneProvider';
 import Modal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 
-const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
+const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
+const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
+
+const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
   onClose,
 }) => {
-  useContext(IntervalContext);
   const [items, setItems] = useState<{ [key: string]: RNFS.ReadDirItem[] }>({});
   const [expandedDirs, setExpandedDirs] = useState<{ [key: string]: boolean }>({});
   const [playingFilePath, setPlayingFilePath] = useState<string | null>(null);
@@ -29,14 +30,11 @@ const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = (
       try {
         const exists = await RNFS.exists(path);
         if (!exists) {
-          console.log('Path does not exist:', path);
-          return;
+          await RNFS.mkdir(path);
         }
         const directoryItems = await RNFS.readDir(path);
         const filteredItems = directoryItems.filter(
-          (item) =>
-            item.isDirectory() ||
-            (item.isFile() && item.name.endsWith('.mp3'))
+          (item) => item.isDirectory() || (item.isFile() && (item.name.endsWith('.mp3') || item.name.endsWith('.json')))
         );
         setItems((prevItems) => ({ ...prevItems, [path]: filteredItems }));
       } catch (error) {
@@ -48,7 +46,8 @@ const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = (
 
   useEffect(() => {
     if (visible) {
-      loadDirectory(RNFS.DocumentDirectoryPath);
+      loadDirectory(AUDIOS_DIR);
+      loadDirectory(DEBRIEFS_DIR);
     }
   }, [visible, loadDirectory]);
 
@@ -101,32 +100,21 @@ const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = (
 
   const renderItem = ({ item }: { item: RNFS.ReadDirItem; path: string }) => {
     const isExpanded = expandedDirs[item.path];
+    const isAudioFile = item.name.endsWith('.mp3');
     return (
       <View>
         <View style={styles.itemContainer}>
           <TouchableOpacity
             style={styles.itemButton}
-            onPress={() => (item.isDirectory() ? toggleDirectory(item.path) : playOrStopAudio(item.path))}
+            onPress={() => item.isDirectory() ? toggleDirectory(item.path) : (isAudioFile && playOrStopAudio(item.path))}
           >
             {item.isDirectory() ? (
-              <Icon
-                name={isExpanded ? 'minus-square' : 'plus-square'}
-                size={20}
-                color="white"
-              />
+              <Icon name={isExpanded ? 'minus-square' : 'plus-square'} size={20} color="white" />
             ) : (
-              <Icon
-                name={playingFilePath === item.path ? 'pause' : 'play'}
-                size={20}
-                color={playingFilePath === item.path ? 'green' : 'white'}
-              />
+              <Icon name={isAudioFile ? (playingFilePath === item.path ? 'pause' : 'play') : 'file'} size={20} color={isAudioFile && playingFilePath === item.path ? 'green' : 'white'} />
             )}
             <Text
-              style={
-                playingFilePath === item.path
-                  ? [styles.itemText, styles.playingText]
-                  : styles.itemText
-              }
+              style={playingFilePath === item.path ? [styles.itemText, styles.playingText] : styles.itemText}
             >
               {item.name}
             </Text>
@@ -152,11 +140,29 @@ const AudioManagerModal: React.FC<{ visible: boolean; onClose: () => void }> = (
   return (
     <Modal isVisible={visible} onClose={onClose}>
       <View style={commonStyles.modalContent}>
-        <Text style={commonStyles.title}>Audio Manager</Text>
         <FlatList
-          data={items[RNFS.DocumentDirectoryPath]}
+          data={[
+            {
+              name: 'audios',
+              path: AUDIOS_DIR,
+              isDirectory: () => true,
+              isFile: () => false,
+              ctime: new Date(),
+              mtime: new Date(),
+              size: 0,
+            },
+            {
+              name: 'debriefs',
+              path: DEBRIEFS_DIR,
+              isDirectory: () => true,
+              isFile: () => false,
+              ctime: new Date(),
+              mtime: new Date(),
+              size: 0,
+            },
+          ]}
           keyExtractor={(item) => item.path}
-          renderItem={({ item }) => renderItem({ item, path: RNFS.DocumentDirectoryPath })}
+          renderItem={({ item }) => renderItem({ item, path: item.path })}
           style={styles.list}
         />
       </View>
@@ -192,4 +198,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AudioManagerModal;
+export default FileManager;

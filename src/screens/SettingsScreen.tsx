@@ -4,8 +4,8 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import RecordAudioModal from './modals/RecordAudioModal';
 import SceneBuilderModal from './modals/SceneBuilderModal';
-import AudioManagerModal from './modals/AudioManagerModal';
-import SceneManagerModal from './modals/SceneManagerModal';
+import AudioManagerModal from './modals/FileManagerModal';
+import FileManagerModal from './modals/FileManagerModal';
 import DebriefBuilderModal from './modals/DebriefBuilderModal';
 import DeleteAudiosModal from './modals/DeleteAudiosModal'; // Import the new modal
 import { IntervalContext } from '../contexts/SceneProvider';
@@ -15,7 +15,7 @@ const SettingsScreen: React.FC = () => {
   const [recordModalVisible, setRecordModalVisible] = useState<boolean>(false);
   const [sceneBuilderModalVisible, setSceneBuilderModalVisible] = useState<boolean>(false);
   const [audioManagerVisible, setAudioModalVisible] = useState<boolean>(false);
-  const [sceneManagerVisible, setSceneManagerVisible] = useState<boolean>(false);
+  const [FileManagerVisible, setFileManagerVisible] = useState<boolean>(false);
   const [debriefBuilderVisible, setDebriefBuilderVisible] = useState<boolean>(false);
   const [deleteAudiosModalVisible, setDeleteAudiosModalVisible] = useState<boolean>(false); // New state
 
@@ -33,8 +33,8 @@ const SettingsScreen: React.FC = () => {
     setAudioModalVisible(true);
   };
 
-  const openSceneManager = () => {
-    setSceneManagerVisible(true);
+  const openFileManager = () => {
+    setFileManagerVisible(true);
   };
 
   const openDeleteAudiosModal = () => {
@@ -60,11 +60,11 @@ const SettingsScreen: React.FC = () => {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openAudioManager} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Manage Audio Files</Text>
+        <Text style={commonStyles.menuText}>File Manager</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={openSceneManager} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Scene Management</Text>
+      <TouchableOpacity onPress={openFileManager} style={commonStyles.menuItem}>
+        <Text style={commonStyles.menuText}>Scene Manager</Text>
       </TouchableOpacity>
 
       {/* Modals */}
@@ -83,17 +83,14 @@ const SettingsScreen: React.FC = () => {
         onClose={() => setAudioModalVisible(false)}
       />
 
-      <SceneManagerModal
-        visible={sceneManagerVisible}
-        onClose={() => setSceneManagerVisible(false)}
+      <FileManagerModal
+        visible={FileManagerVisible}
+        onClose={() => setFileManagerVisible(false)}
       />
 
       <DebriefBuilderModal
         visible={debriefBuilderVisible}
         onClose={() => setDebriefBuilderVisible(false)}
-        onSave={() => {
-          console.log('Debrief saved!');
-        }}
       />
 
       {/* New Delete Custom Audios Modal */}
