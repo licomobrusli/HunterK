@@ -1,4 +1,4 @@
-// src/utils/sanitizer.ts
+// src/config/sanitizer.ts
 
 /**
  * Sanitizes a string to be safe for use as a file name.

@@ -17,6 +17,7 @@ import { commonStyles } from '../../styles/commonStyles';
 import PromptElement from '../../config/debrief/PromptElement';
 import RadialsElement from '../../config/debrief/RadialsElement';
 import { DebriefingsContext } from '../../config/debrief/DebriefingsContext';
+import { sanitizeFileName } from '../../config/sanitizer';
 
 interface DebriefingBuilderModalProps {
   visible: boolean;
@@ -32,7 +33,6 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
   const [selectedElementType, setSelectedElementType] = useState<DebriefElementType | null>(null);
   const [showElementTypeDropdown, setShowElementTypeDropdown] = useState<boolean>(false);
 
-  // Access the DebriefingsContext
   const { addDebriefing } = useContext(DebriefingsContext);
 
   // Handle adding a prompt element
@@ -52,8 +52,9 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
   // Handle saving the debriefing
   const handleSaveDebriefing = async () => {
-    if (debriefName.trim() === '') {
-      Alert.alert('Validation Error', 'Please enter a name for the debriefing.');
+    const sanitizedName = sanitizeFileName(debriefName);
+    if (sanitizedName === '') {
+      Alert.alert('Validation Error', 'Please enter a valid name for the debriefing.');
       return;
     }
 
@@ -63,8 +64,8 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
     }
 
     const newDebriefing: Debriefing = {
-      id: `debrief_${Date.now()}`,
-      name: debriefName.trim(),
+      id: sanitizedName,
+      name: sanitizedName,
       elements,
     };
 
