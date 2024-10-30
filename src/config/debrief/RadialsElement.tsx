@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { DebriefElement } from '../../types/Debriefing';
+import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 
 interface RadialsElementProps {
@@ -73,7 +73,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
 
     const newElement: DebriefElement = {
       id: `el_${Date.now()}`,
-      type: 'radials',
+      type: DebriefElementType.Radials, // Use enum value here
       prompt: promptText.trim(),
       options: trimmedLabels,
     };

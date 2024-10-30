@@ -10,20 +10,19 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  // Picker,
   Alert,
 } from 'react-native';
 import { commonStyles } from '../../styles/commonStyles';
 import { Picker } from '@react-native-picker/picker';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import RadioButton from './RadioButton'; // Reusable RadioButton component
-import { Debriefing, DebriefElement } from '../../types/Debrief';
+import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
 
 const { LogcatModule } = NativeModules;
 
 interface DebriefComponentProps {
   debriefing: Debriefing; // The debriefing configuration
-  onComplete: () => void; // Callback when debriefing is complete
+  onComplete: (responses: { [key: string]: any }) => void; // Callback when debriefing is complete
 }
 
 const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onComplete }) => {
@@ -36,13 +35,13 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     let validationMessage = '';
 
     debriefing.elements.forEach((element) => {
-      if (element.type === 'text' && (!responses[element.id] || responses[element.id].trim() === '')) {
+      if (element.type === DebriefElementType.Text && (!responses[element.id] || responses[element.id].trim() === '')) {
         isValid = false;
         validationMessage = 'Please answer all text prompts.';
       }
 
       if (
-        element.type === 'multipleChoice' &&
+        (element.type === DebriefElementType.MultipleChoice || element.type === DebriefElementType.Radials) &&
         (!responses[element.id] || responses[element.id] === null)
       ) {
         isValid = false;
@@ -60,7 +59,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     // If validation passes
     console.log(`Submitting debriefing "${debriefing.name}" with responses:`, responses);
     Alert.alert('Success', 'Your debriefing has been submitted.');
-    onComplete();
+    onComplete(responses);
   }, [responses, debriefing.elements, debriefing.name, onComplete]);
 
   const handleLogcatEvent = useCallback(
@@ -89,39 +88,37 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
         console.log(`DebriefComponent: ${message}`);
         listenerStartTimeRef.current = Date.now();
       })
-      .catch((error: any) => console.warn(`DebriefComponent: Error starting logcat listener - ${error}`));
+      .catch((error: any) =>
+        console.warn(`DebriefComponent: Error starting logcat listener - ${error}`)
+      );
 
     return () => {
       logcatListener.remove();
       LogcatModule.stopListening()
         .then((message: string) => console.log(`DebriefComponent: ${message}`))
-        .catch((error: any) => console.warn(`DebriefComponent: Error stopping logcat listener - ${error}`));
+        .catch((error: any) =>
+          console.warn(`DebriefComponent: Error stopping logcat listener - ${error}`)
+        );
     };
   }, [handleLogcatEvent]);
 
-  const handleOptionSelect = useCallback(
-    (elementId: string, option: string) => {
-      setResponses((prevResponses) => ({
-        ...prevResponses,
-        [elementId]: option,
-      }));
-    },
-    []
-  );
+  const handleOptionSelect = useCallback((elementId: string, option: string) => {
+    setResponses((prevResponses) => ({
+      ...prevResponses,
+      [elementId]: option,
+    }));
+  }, []);
 
-  const handlePickerChange = useCallback(
-    (elementId: string, value: string) => {
-      setResponses((prevResponses) => ({
-        ...prevResponses,
-        [elementId]: value,
-      }));
-    },
-    []
-  );
+  const handlePickerChange = useCallback((elementId: string, value: string) => {
+    setResponses((prevResponses) => ({
+      ...prevResponses,
+      [elementId]: value,
+    }));
+  }, []);
 
   const renderElement = (element: DebriefElement) => {
     switch (element.type) {
-      case 'text':
+      case DebriefElementType.Prompt:
         return (
           <View key={element.id} style={styles.elementContainer}>
             <Text style={styles.prompt}>{element.prompt}</Text>
@@ -131,14 +128,17 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
               placeholder="Your response..."
               placeholderTextColor="#aaa"
               value={responses[element.id] || ''}
-              onChangeText={(text) => setResponses({ ...responses, [element.id]: text })}
+              onChangeText={(text) =>
+                setResponses((prevResponses) => ({ ...prevResponses, [element.id]: text }))
+              }
               textAlignVertical="top"
               scrollEnabled
             />
           </View>
         );
 
-      case 'multipleChoice':
+      case DebriefElementType.MultipleChoice:
+      case DebriefElementType.Radials:
         return (
           <View key={element.id} style={styles.elementContainer}>
             <Text style={styles.prompt}>{element.prompt}</Text>
@@ -155,7 +155,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
           </View>
         );
 
-      case 'dropdown':
+      case DebriefElementType.Dropdown:
         return (
           <View key={element.id} style={styles.elementContainer}>
             <Text style={styles.prompt}>{element.prompt}</Text>
@@ -172,7 +172,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
           </View>
         );
 
-      case 'scale':
+      case DebriefElementType.Scale:
         return (
           <View key={element.id} style={styles.elementContainer}>
             <Text style={styles.prompt}>{element.prompt}</Text>
@@ -188,7 +188,10 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
               placeholderTextColor="#aaa"
               value={responses[element.id] ? String(responses[element.id]) : ''}
               onChangeText={(text) =>
-                setResponses({ ...responses, [element.id]: parseInt(text, 10) || 0 })
+                setResponses((prevResponses) => ({
+                  ...prevResponses,
+                  [element.id]: parseInt(text, 10) || 0,
+                }))
               }
             />
           </View>
@@ -197,6 +200,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       // Add more cases for different element types as needed
 
       default:
+        console.warn(`Unhandled element type: ${element.type}`);
         return null;
     }
   };
@@ -208,7 +212,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={commonStyles.title}>{debriefing.name}</Text>
-        {debriefing.elements.map((element) => renderElement(element))}
+        {debriefing.elements?.map((element) => renderElement(element))}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit Debrief</Text>

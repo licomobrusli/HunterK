@@ -1,9 +1,8 @@
-// src/config/debrief/RadioButton.tsx
+// RadioButton.tsx
 
 import React from 'react';
-import { TouchableOpacity, Text } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
-import { commonStyles } from '../../styles/commonStyles';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather'; // Keep using Feather
 
 interface RadioButtonProps {
   label: string;
@@ -21,21 +20,33 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   accessibilityHint,
 }) => (
   <TouchableOpacity
-    style={commonStyles.inputContainer}
+    style={styles.container}
     onPress={onPress}
-    accessibilityRole="radio"
-    accessibilityState={{ selected }}
     accessibilityLabel={accessibilityLabel}
     accessibilityHint={accessibilityHint}
   >
     <Icon
-      name={selected ? 'radio-button-on' : 'radio-button-off'}
-      size={20}
-      color={selected ? '#4CAF50' : '#ccc'}
-      style={commonStyles.headerIcon}
+      name={selected ? 'check-circle' : 'circle'} // Feather icons
+      size={24}
+      color="#000"
+      style={styles.icon}
     />
-    <Text style={commonStyles.text}>{label}</Text>
+    <Text style={styles.label}>{label}</Text>
   </TouchableOpacity>
 );
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  label: {
+    fontSize: 16,
+  },
+});
 
 export default RadioButton;

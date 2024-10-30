@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { DebriefElement } from '../../types/Debriefing';
+import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 
 interface PromptElementProps {
@@ -21,7 +21,7 @@ const PromptElement: React.FC<PromptElementProps> = ({ onAdd, onCancel }) => {
 
     const newElement: DebriefElement = {
       id: `el_${Date.now()}`,
-      type: 'prompt',
+      type: DebriefElementType.Prompt, // Use enum value here
       prompt: promptText.trim(),
     };
 

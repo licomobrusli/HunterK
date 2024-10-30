@@ -6,6 +6,7 @@ import {
   FlatList,
   StyleSheet,
   ToastAndroid,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import RNFS from 'react-native-fs';
@@ -23,26 +24,26 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
   const [items, setItems] = useState<{ [key: string]: RNFS.ReadDirItem[] }>({});
   const [expandedDirs, setExpandedDirs] = useState<{ [key: string]: boolean }>({});
   const [playingFilePath, setPlayingFilePath] = useState<string | null>(null);
+  const [jsonContent, setJsonContent] = useState<string | null>(null);
   const audioRecorderPlayer = new AudioRecorderPlayer();
 
-  const loadDirectory = useCallback(
-    async (path: string) => {
-      try {
-        const exists = await RNFS.exists(path);
-        if (!exists) {
-          await RNFS.mkdir(path);
-        }
-        const directoryItems = await RNFS.readDir(path);
-        const filteredItems = directoryItems.filter(
-          (item) => item.isDirectory() || (item.isFile() && (item.name.endsWith('.mp3') || item.name.endsWith('.json')))
-        );
-        setItems((prevItems) => ({ ...prevItems, [path]: filteredItems }));
-      } catch (error) {
-        console.error('Error reading directory:', error);
+  const loadDirectory = useCallback(async (path: string) => {
+    try {
+      const exists = await RNFS.exists(path);
+      if (!exists) {
+        await RNFS.mkdir(path);
       }
-    },
-    []
-  );
+      const directoryItems = await RNFS.readDir(path);
+      const filteredItems = directoryItems.filter(
+        (item) =>
+          item.isDirectory() ||
+          (item.isFile() && (item.name.endsWith('.mp3') || item.name.endsWith('.json')))
+      );
+      setItems((prevItems) => ({ ...prevItems, [path]: filteredItems }));
+    } catch (error) {
+      console.error('Error reading directory:', error);
+    }
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -98,15 +99,34 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
     }
   };
 
+  const showJsonContent = async (filePath: string) => {
+    try {
+      const content = await RNFS.readFile(filePath, 'utf8');
+      setJsonContent(content);
+    } catch (error) {
+      console.error('Error reading JSON file:', error);
+      ToastAndroid.show('Failed to read JSON file.', ToastAndroid.SHORT);
+    }
+  };
+
   const renderItem = ({ item }: { item: RNFS.ReadDirItem; path: string }) => {
     const isExpanded = expandedDirs[item.path];
     const isAudioFile = item.name.endsWith('.mp3');
+    const isJsonFile = item.name.endsWith('.json');
     return (
       <View>
         <View style={styles.itemContainer}>
           <TouchableOpacity
             style={styles.itemButton}
-            onPress={() => item.isDirectory() ? toggleDirectory(item.path) : (isAudioFile && playOrStopAudio(item.path))}
+            onPress={() =>
+              item.isDirectory()
+                ? toggleDirectory(item.path)
+                : isAudioFile
+                ? playOrStopAudio(item.path)
+                : isJsonFile
+                ? showJsonContent(item.path)
+                : null
+            }
           >
             {item.isDirectory() ? (
               <Icon name={isExpanded ? 'minus-square' : 'plus-square'} size={20} color="white" />
@@ -165,6 +185,12 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
           renderItem={({ item }) => renderItem({ item, path: item.path })}
           style={styles.list}
         />
+        {/* JSON Viewer Modal */}
+        <Modal isVisible={!!jsonContent} onClose={() => setJsonContent(null)}>
+          <ScrollView style={styles.jsonViewer}>
+            <Text style={styles.jsonText}>{jsonContent}</Text>
+          </ScrollView>
+        </Modal>
       </View>
     </Modal>
   );
@@ -195,6 +221,12 @@ const styles = StyleSheet.create({
   },
   subList: {
     paddingLeft: 20,
+  },
+  jsonViewer: {
+    padding: 20,
+  },
+  jsonText: {
+    color: 'white',
   },
 });
 
