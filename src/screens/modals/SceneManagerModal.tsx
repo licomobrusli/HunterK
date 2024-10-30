@@ -15,7 +15,7 @@ import { commonStyles } from '../../styles/commonStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
-import AppModal from '../../styles/AppModal'; // Correct import path
+import AppModal from '../../styles/AppModal';
 import { getSceneList, exportScene, importScene } from '../../config/SceneStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,7 +25,14 @@ type SceneManagerModalProps = {
 };
 
 const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose }) => {
-  const { states, intervals, selectedAudios, loadSceneData } = useContext(IntervalContext);
+  const {
+    states,
+    intervals,
+    selectedAudios,
+    selectedDebriefs,
+    loadSceneData,
+  } = useContext(IntervalContext);
+
   const [sceneName, setSceneName] = useState<string>('');
   const [sceneList, setSceneList] = useState<string[]>([]);
 
@@ -73,12 +80,13 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       states: states,
       intervals: intervals,
       selectedAudios: selectedAudios,
+      selectedDebriefs: selectedDebriefs, // Include selectedDebriefs here
     };
 
     console.log('Scene to save:', sceneToSave);
 
     try {
-      // Save the scene using saveScene function
+      // Save the scene using AsyncStorage
       await AsyncStorage.setItem(`@scene_${sanitizedSceneName}`, JSON.stringify(sceneToSave));
       console.log(`Scene "${sanitizedSceneName}" saved successfully.`);
       fetchSceneList();
@@ -172,12 +180,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   );
 
   return (
-    <AppModal
-      isVisible={visible}
-      onClose={onClose}
-      animationIn="fadeIn"
-      animationOut="fadeOut"
-    >
+    <AppModal isVisible={visible} onClose={onClose}>
       <Text style={commonStyles.title}>Scene Management</Text>
 
       {/* Save Scene Section */}
@@ -216,8 +219,6 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
           style={styles.flatList}
         />
       </View>
-
-      {/* Removed the Close button since "X" is now in the header */}
     </AppModal>
   );
 };

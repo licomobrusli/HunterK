@@ -18,7 +18,7 @@ type AssignDebriefsModalProps = {
   visible: boolean;
   onClose: () => void;
   stateName: string;
-  selectedDebrief: string | null; // Now holds a single debrief
+  selectedDebrief: string | null;
   onDebriefSelected: (debrief: string | null) => void;
 };
 
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   selectedText: {
-    color: 'green', // Change color to indicate selection
+    color: 'green',
   },
   flatList: {
     width: '100%',

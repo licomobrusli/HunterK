@@ -15,7 +15,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 export type RootStackParamList = {
   Welcome: undefined;
   Active: undefined;
-  Debrief: undefined;
+  Debrief: { debriefName?: string };
   Settings: undefined;
 };
 

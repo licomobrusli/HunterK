@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Scene } from '../types/Scene';
 import { sanitizeFileName } from '../config/sanitizer';
 
-const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
+const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
+const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
 
 export const saveScene = async (scene: Scene): Promise<void> => {
   try {
@@ -99,7 +100,7 @@ export const exportScene = async (sceneName: string): Promise<void> => {
     await RNFS.mkdir(tempDir);
 
     // Write scene JSON file to temp directory
-    const tempScenePath = `${tempDir}/${sanitizedSceneName}.json`;
+    const tempScenePath = `${tempDir}/scene.json`;
     await RNFS.writeFile(tempScenePath, sceneDataString, 'utf8');
 
     // Copy associated audio files to temp directory
@@ -113,8 +114,13 @@ export const exportScene = async (sceneName: string): Promise<void> => {
             audioFileName = audioFileName.substring(audioFileName.lastIndexOf('/') + 1);
           }
 
-          const sourceAudioPath = `${AUDIOS_FOLDER}/${lowerState}/${audioFileName}`;
-          const destAudioPath = `${tempDir}/${audioFileName}`;
+          const sourceAudioPath = `${AUDIOS_DIR}/${lowerState}/${audioFileName}`;
+          const destAudioDir = `${tempDir}/audios/${lowerState}`;
+          const destAudioPath = `${destAudioDir}/${audioFileName}`;
+
+          // Ensure destination directory exists
+          await RNFS.mkdir(destAudioDir);
+
           const audioExists = await RNFS.exists(sourceAudioPath);
           if (audioExists) {
             await RNFS.copyFile(sourceAudioPath, destAudioPath);
@@ -125,8 +131,29 @@ export const exportScene = async (sceneName: string): Promise<void> => {
       }
     }
 
+    // Copy associated debrief files to temp directory
+    for (const state of sceneData.states) {
+      const lowerState = state.toLowerCase();
+      const selectedDebriefName = sceneData.selectedDebriefs[lowerState];
+      if (selectedDebriefName) {
+        const sourceDebriefPath = `${DEBRIEFS_DIR}/${selectedDebriefName}`;
+        const destDebriefDir = `${tempDir}/debriefs`;
+        const destDebriefPath = `${destDebriefDir}/${selectedDebriefName}`;
+
+        // Ensure destination directory exists
+        await RNFS.mkdir(destDebriefDir);
+
+        const debriefExists = await RNFS.exists(sourceDebriefPath);
+        if (debriefExists) {
+          await RNFS.copyFile(sourceDebriefPath, destDebriefPath);
+        } else {
+          console.warn(`Debrief file does not exist: ${sourceDebriefPath}`);
+        }
+      }
+    }
+
     // Create a zip archive of the temp directory
-    const zipFilePath = `${RNFS.TemporaryDirectoryPath}/${sanitizedSceneName}.zip`;
+    const zipFilePath = `${RNFS.DocumentDirectoryPath}/${sanitizedSceneName}.zip`;
     await zip(tempDir, zipFilePath);
 
     // Share the zip file
@@ -162,49 +189,58 @@ export const importScene = async (): Promise<void> => {
     // Extract the zip file to the temporary directory
     const extractedPath = await unzip(zipFilePath, tempDir);
 
-    // Find the scene JSON file
-    const files = await RNFS.readDir(extractedPath);
-    const sceneFile = files.find((file) => file.name.endsWith('.json'));
-    if (!sceneFile) {
-      throw new Error('Scene JSON file not found in the archive');
+    // Read scene.json
+    const sceneJsonPath = `${extractedPath}/scene.json`;
+    const sceneJsonExists = await RNFS.exists(sceneJsonPath);
+    if (!sceneJsonExists) {
+      throw new Error('scene.json not found in the zip archive');
     }
 
-    // Read scene data
-    const sceneDataString = await RNFS.readFile(sceneFile.path, 'utf8');
+    const sceneDataString = await RNFS.readFile(sceneJsonPath, 'utf8');
     const sceneData: Scene = JSON.parse(sceneDataString);
 
-    // Save the scene data to AsyncStorage
+    // Save scene data to AsyncStorage
     const sanitizedSceneName = sanitizeFileName(sceneData.name);
     const sceneKey = `@scene_${sanitizedSceneName}`;
     await AsyncStorage.setItem(sceneKey, sceneDataString);
 
-    // Copy audio files to AUDIOS_FOLDER
-    for (const state of sceneData.states) {
-      const lowerState = state.toLowerCase();
-      const audiosInfo = sceneData.selectedAudios[lowerState];
-      if (audiosInfo && audiosInfo.audios) {
-        for (let audioFileName of audiosInfo.audios) {
-          // Ensure that audioFileName is just the file name
-          if (audioFileName.includes('/')) {
-            audioFileName = audioFileName.substring(audioFileName.lastIndexOf('/') + 1);
-          }
+    // Copy audio files to AUDIOS_DIR
+    const audiosDirPath = `${extractedPath}/audios`;
+    const audiosDirExists = await RNFS.exists(audiosDirPath);
+    if (audiosDirExists) {
+      const stateDirs = await RNFS.readDir(audiosDirPath);
+      for (const stateDir of stateDirs) {
+        if (stateDir.isDirectory()) {
+          const stateName = stateDir.name;
+          const audioFiles = await RNFS.readDir(stateDir.path);
+          for (const audioFile of audioFiles) {
+            if (audioFile.isFile()) {
+              const destAudioDir = `${AUDIOS_DIR}/${stateName}`;
+              const destAudioPath = `${destAudioDir}/${audioFile.name}`;
 
-          const sourceAudioPath = `${extractedPath}/${audioFileName}`;
-          const destAudioDir = `${AUDIOS_FOLDER}/${lowerState}`;
-          const destAudioPath = `${destAudioDir}/${audioFileName}`;
+              // Ensure destination directory exists
+              await RNFS.mkdir(destAudioDir);
+
+              await RNFS.copyFile(audioFile.path, destAudioPath);
+            }
+          }
+        }
+      }
+    }
+
+    // Copy debrief files to DEBRIEFS_DIR
+    const debriefsDirPath = `${extractedPath}/debriefs`;
+    const debriefsDirExists = await RNFS.exists(debriefsDirPath);
+    if (debriefsDirExists) {
+      const debriefFiles = await RNFS.readDir(debriefsDirPath);
+      for (const debriefFile of debriefFiles) {
+        if (debriefFile.isFile()) {
+          const destDebriefPath = `${DEBRIEFS_DIR}/${debriefFile.name}`;
 
           // Ensure destination directory exists
-          const dirExists = await RNFS.exists(destAudioDir);
-          if (!dirExists) {
-            await RNFS.mkdir(destAudioDir);
-          }
+          await RNFS.mkdir(DEBRIEFS_DIR);
 
-          const audioExists = await RNFS.exists(sourceAudioPath);
-          if (audioExists) {
-            await RNFS.copyFile(sourceAudioPath, destAudioPath);
-          } else {
-            console.warn(`Audio file does not exist in the archive: ${sourceAudioPath}`);
-          }
+          await RNFS.copyFile(debriefFile.path, destDebriefPath);
         }
       }
     }

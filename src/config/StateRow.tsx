@@ -17,7 +17,8 @@ type StateRowProps = {
   onEditInterval: () => void;
   onSaveInterval: () => void;
   onRenameState: (newName: string) => void;
-  onAssignDebrief: () => void; // Updated to match new usage
+  onAssignDebrief: () => void;
+  selectedDebrief: string | null; // Use this prop to determine icon color
 };
 
 const StateRow: React.FC<StateRowProps> = ({
@@ -32,6 +33,7 @@ const StateRow: React.FC<StateRowProps> = ({
   onSaveInterval,
   onRenameState,
   onAssignDebrief,
+  selectedDebrief,
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [tempStateName, setTempStateName] = useState(stateName);
@@ -114,10 +116,15 @@ const StateRow: React.FC<StateRowProps> = ({
         </View>
       </TouchableOpacity>
 
-      {/* Debrief Button */}
+      {/* Debrief Button with color change */}
       <TouchableOpacity onPress={onAssignDebrief} delayLongPress={200}>
         <View style={commonStyles.positionInput}>
-          <Debrief width={18} height={18} fill="#fff" stroke="#004225" />
+          <Debrief
+            width={18}
+            height={18}
+            fill={selectedDebrief ? '#00ff00' : '#fff'} // Change fill color based on assignment
+            stroke="#004225"
+          />
         </View>
       </TouchableOpacity>
     </View>

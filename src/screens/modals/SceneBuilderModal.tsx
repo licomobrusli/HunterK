@@ -24,6 +24,7 @@ const convertMsToMinutesSeconds = (milliseconds: number) => {
 };
 
 const convertMinutesSecondsToMs = (time: string) => {
+  if (!time) {return NaN;}
   const [minutes, seconds] = time.split(':').map(Number);
   if (isNaN(minutes) || isNaN(seconds)) {
     return NaN;
@@ -68,9 +69,10 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           if (!state) {continue;}
 
           const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
-          loadedIntervals[state.toLowerCase()] = storedInterval === 'null' || intervals[state.toLowerCase()] === null
-            ? 'mm:ss'
-            : convertMsToMinutesSeconds(parseInt(storedInterval || '0', 10));
+          loadedIntervals[state.toLowerCase()] =
+            storedInterval === 'null' || intervals[state.toLowerCase()] === null
+              ? 'mm:ss'
+              : convertMsToMinutesSeconds(parseInt(storedInterval || '0', 10));
         }
 
         if (isMounted) {
@@ -94,13 +96,19 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     try {
       for (const state of states) {
         const intervalStr = localIntervals[state.toLowerCase()];
-        if (intervalStr === null) {
+        if (!intervalStr) { // Handles null, undefined, empty string
           setIntervalForState(state, null);
           continue;
         }
 
         const intervalMs = convertMinutesSecondsToMs(intervalStr);
-        if (!isNaN(intervalMs)) {setIntervalForState(state, intervalMs);}
+        if (!isNaN(intervalMs)) {
+          setIntervalForState(state, intervalMs);
+        } else {
+          // Optionally handle invalid intervals
+          console.warn(`Invalid interval for state "${state}": "${intervalStr}"`);
+          setIntervalForState(state, null);
+        }
       }
       onClose();
     } catch (error) {
@@ -112,7 +120,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   const handleAssignDebrief = (debrief: string | null) => {
     if (selectedState) {
       console.log(`Assigning debrief "${debrief}" to state "${selectedState}"`);
-      setSelectedDebriefsForState(selectedState, debrief ? [debrief] : []);
+      setSelectedDebriefsForState(selectedState, debrief);
     }
   };
 
@@ -148,17 +156,24 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   const handleAddState = () => {
     if (!newStateName.trim() || states.includes(newStateName)) {return;}
 
-    const insertIndex = isNaN(parseInt(newStatePosition, 10)) ? states.length : parseInt(newStatePosition, 10) - 1;
+    const insertIndex = isNaN(parseInt(newStatePosition, 10))
+      ? states.length
+      : parseInt(newStatePosition, 10) - 1;
     const updatedStates = [...states];
     updatedStates.splice(insertIndex, 0, newStateName);
     setStates(updatedStates);
 
-    setIntervalForState(newStateName, 5000);
+    setIntervalForState(newStateName, null); // Initialize interval as null
     setSelectedAudiosForState(newStateName, { audios: [], mode: 'Selected' });
-    setSelectedDebriefsForState(newStateName, []); // Initialize debrief as empty array
+    setSelectedDebriefsForState(newStateName, null); // Initialize debrief as null
+    setLocalIntervals((prev) => ({
+      ...prev,
+      [newStateName.toLowerCase()]: null,
+    }));
     setNewStateName('');
     setNewStatePosition('');
   };
+
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
@@ -195,6 +210,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
                 if (!isNaN(intervalMs)) {setIntervalForState(item, intervalMs);}
               }}
               onRenameState={() => {}}
+              selectedDebrief={selectedDebriefs[item.toLowerCase()] || null} // Pass selectedDebrief
             />
           )}
           ListEmptyComponent={<Text style={commonStyles.text}>No states available.</Text>}
@@ -223,7 +239,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           visible={assignDebriefsModalVisible}
           onClose={() => setAssignDebriefsModalVisible(false)}
           stateName={selectedState}
-          selectedDebrief={selectedDebriefs[selectedState.toLowerCase()]?.[0] || null}
+          selectedDebrief={selectedDebriefs[selectedState.toLowerCase()] || null}
           onDebriefSelected={handleAssignDebrief}
         />
       )}

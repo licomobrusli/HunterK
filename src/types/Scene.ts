@@ -3,7 +3,6 @@
 import { PlaybackMode } from './PlaybackMode';
 
 export interface Scene {
-  selectedDebriefs: any;
   name: string;
   states: string[];
   intervals: { [key: string]: number | null };
@@ -14,5 +13,5 @@ export interface Scene {
       repetitions?: number | null;
     };
   };
-  // Add any other properties your Scene might have
+  selectedDebriefs: { [key: string]: string | null }; // Updated to include selectedDebriefs
 }

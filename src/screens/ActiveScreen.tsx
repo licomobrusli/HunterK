@@ -1,3 +1,5 @@
+// src/screens/ActiveScreen.tsx
+
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { TouchableOpacity, View, Text, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
@@ -5,9 +7,8 @@ import StateComponent from '../config/StateComponent';
 import { IntervalContext } from '../contexts/SceneProvider';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
-
-// Import the audio player module and native logcat module
 import TrackPlayer from 'react-native-track-player';
+
 const { LogcatModule } = NativeModules;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Active'>;
@@ -18,7 +19,7 @@ interface LogcatEvent {
 }
 
 const ActiveScreen: React.FC<Props> = ({ navigation }) => {
-  const { states } = useContext(IntervalContext);
+  const { states, selectedDebriefs } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -44,34 +45,65 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       .catch((error: any) => console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`));
   };
 
-  const advanceState = useCallback((steps: number) => {
-    if (isNavigating) {return;}
-
-    setCurrentStateIndex((prevIndex) => {
-      const newIndex = prevIndex + steps;
-
-      if (newIndex >= states.length) {
-        console.log('ActiveScreen: Reached the end of states. Navigating to DebriefScreen.');
-        setIsNavigating(true);
-        stopAudioAndCleanup();
-        navigation.replace('Debrief');
-        return prevIndex;
-      } else {
-        const wrappedIndex = newIndex % states.length;
-        console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${wrappedIndex}`);
-        return wrappedIndex;
+  // Helper function to find the assigned debrief
+  const findAssignedDebrief = useCallback((index: number): string | null => {
+    for (let i = index; i >= 0; i--) {
+      const stateName = states[i].toLowerCase();
+      const debrief = selectedDebriefs[stateName];
+      if (debrief) {
+        return debrief;
       }
-    });
-  }, [isNavigating, states.length, navigation]);
+    }
+    return null;
+  }, [states, selectedDebriefs]);
+
+  // Function to advance the state
+  const advanceState = useCallback(
+    (steps: number) => {
+      if (isNavigating) {return;}
+
+      setCurrentStateIndex((prevIndex) => {
+        const newIndex = prevIndex + steps;
+
+        if (newIndex >= states.length) {
+          console.log('ActiveScreen: Reached the end of states.');
+          setIsNavigating(true);
+          stopAudioAndCleanup();
+
+          const debriefToShow = findAssignedDebrief(prevIndex);
+
+          if (debriefToShow) {
+            navigation.replace('Debrief', { debriefName: debriefToShow });
+          } else {
+            navigation.replace('Welcome');
+          }
+
+          return prevIndex;
+        } else {
+          const wrappedIndex = newIndex % states.length;
+          console.log(`ActiveScreen: Advancing ${steps} state(s): ${prevIndex} -> ${wrappedIndex}`);
+          return wrappedIndex;
+        }
+      });
+    },
+    [isNavigating, states.length, navigation, findAssignedDebrief]
+  );
 
   const handleLongPress = useCallback(() => {
     console.log('ActiveScreen: Long press detected. Triggering abort.');
     if (!isNavigating) {
       setIsNavigating(true);
       stopAudioAndCleanup();
-      navigation.replace('Debrief');
+
+      const debriefToShow = findAssignedDebrief(currentStateIndex);
+
+      if (debriefToShow) {
+        navigation.replace('Debrief', { debriefName: debriefToShow });
+      } else {
+        navigation.replace('Welcome');
+      }
     }
-  }, [isNavigating, navigation]);
+  }, [isNavigating, navigation, currentStateIndex, findAssignedDebrief]);
 
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
@@ -79,7 +111,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       const { eventName, timestamp } = event;
 
       if (timestamp < listenerStartTimeRef.current) {
-        console.log(`ActiveScreen Ignoring old event: ${eventName} at ${timestamp}`);
+        console.log(`ActiveScreen: Ignoring old event: ${eventName} at ${timestamp}`);
         return;
       }
 
@@ -100,13 +132,15 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
         console.log(`ActiveScreen: ${message}`);
         listenerStartTimeRef.current = Date.now();
       })
-      .catch((error: any) => console.warn(`ActiveScreen: Error starting logcat listener - ${error}`));
+      .catch((error: any) =>
+        console.warn(`ActiveScreen: Error starting logcat listener - ${error}`)
+      );
 
     return () => {
       logcatListener.remove();
       stopAudioAndCleanup();
     };
-  }, [states.length, advanceState, handleLongPress]);
+  }, [advanceState, handleLongPress]);
 
   useEffect(() => {
     const unsubscribeBlur = navigation.addListener('blur', () => {
@@ -128,7 +162,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
   }, [navigation]);
 
   const currentStateName = states[currentStateIndex];
-  const interval = 5000; // Default interval
+  const interval = 5000; // Default interval or get from context if available
 
   return (
     <View style={commonStyles.container}>
