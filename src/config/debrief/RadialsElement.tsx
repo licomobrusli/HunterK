@@ -111,13 +111,13 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
         />
       ) : (
         <TouchableOpacity
-          style={commonStyles.radialsNumberDisplay}
+          style={commonStyles.radialsNumberInput}
           onPress={() => {
             setIsEditingRadialsNumber(true);
             setTempRadialsNumber(numberOfRadials.toString());
           }}
         >
-          <Text style={commonStyles.text}>{numberOfRadials}</Text>
+          <Text style={commonStyles.text0}>{numberOfRadials}</Text>
         </TouchableOpacity>
       )}
 
@@ -148,11 +148,11 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
       ))}
 
       <View style={commonStyles.buttonRow}>
-        <TouchableOpacity style={commonStyles.saveButton} onPress={handleAddRadials}>
-          <Text style={commonStyles.saveButtonText}>Add Radials</Text>
+        <TouchableOpacity style={commonStyles.button} onPress={handleAddRadials}>
+          <Text style={commonStyles.text0}>Add Radials</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={commonStyles.cancelButton} onPress={onCancel}>
-          <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+        <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
+          <Text style={commonStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>

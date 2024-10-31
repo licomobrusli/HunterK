@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   ToastAndroid,
   ScrollView,
 } from 'react-native';
@@ -117,9 +116,9 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
     const isJsonFile = item.name.endsWith('.json');
     return (
       <View>
-        <View style={styles.itemContainer}>
+        <View style={commonStyles.itemContainer}>
           <TouchableOpacity
-            style={styles.itemButton}
+            style={commonStyles.button}
             onPress={() =>
               item.isDirectory()
                 ? toggleDirectory(item.path)
@@ -136,7 +135,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
               <Icon name={isAudioFile ? (playingFilePath === item.path ? 'pause' : 'play') : 'file'} size={20} color={isAudioFile && playingFilePath === item.path ? 'green' : 'white'} />
             )}
             <Text
-              style={playingFilePath === item.path ? [styles.itemText, styles.playingText] : styles.itemText}
+              style={playingFilePath === item.path ? [commonStyles.text0, commonStyles.greenText] : commonStyles.text0}
             >
               {item.name}
             </Text>
@@ -152,7 +151,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
             data={items[item.path]}
             keyExtractor={(subItem) => subItem.path}
             renderItem={({ item: subItem }) => renderItem({ item: subItem, path: item.path })}
-            style={styles.subList}
+            style={commonStyles.subList}
           />
         )}
       </View>
@@ -194,51 +193,17 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
           ]}
           keyExtractor={(item) => item.path}
           renderItem={({ item }) => renderItem({ item, path: item.path })}
-          style={styles.list}
+          style={commonStyles.list}
         />
         {/* JSON Viewer Modal */}
         <Modal isVisible={!!jsonContent} onClose={() => setJsonContent(null)}>
-          <ScrollView style={styles.jsonViewer}>
-            <Text style={styles.jsonText}>{jsonContent}</Text>
+          <ScrollView style={commonStyles.jsonViewer}>
+            <Text style={commonStyles.text0}>{jsonContent}</Text>
           </ScrollView>
         </Modal>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  itemButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  itemText: {
-    color: 'white',
-    marginLeft: 10,
-  },
-  playingText: {
-    color: 'green',
-  },
-  list: {
-    width: '100%',
-  },
-  subList: {
-    paddingLeft: 20,
-  },
-  jsonViewer: {
-    padding: 20,
-  },
-  jsonText: {
-    color: 'white',
-  },
-});
 
 export default FileManager;

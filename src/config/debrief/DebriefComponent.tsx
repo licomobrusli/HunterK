@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Text,
   TextInput,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
@@ -120,10 +119,10 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     switch (element.type) {
       case DebriefElementType.Prompt:
         return (
-          <View key={element.id} style={styles.elementContainer}>
-            <Text style={styles.prompt}>{element.prompt}</Text>
+          <View key={element.id} style={commonStyles.container}>
+            <Text style={commonStyles.text0}>{element.prompt}</Text>
             <TextInput
-              style={[commonStyles.textInput, styles.textInput]}
+              style={[commonStyles.textInput, commonStyles.greenText]}
               multiline
               placeholder="Your response..."
               placeholderTextColor="#aaa"
@@ -140,8 +139,8 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       case DebriefElementType.MultipleChoice:
       case DebriefElementType.Radials:
         return (
-          <View key={element.id} style={styles.elementContainer}>
-            <Text style={styles.prompt}>{element.prompt}</Text>
+          <View key={element.id} style={commonStyles.container}>
+            <Text style={commonStyles.text0}>{element.prompt}</Text>
             {element.options?.map((option) => (
               <RadioButton
                 key={option}
@@ -157,11 +156,11 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Dropdown:
         return (
-          <View key={element.id} style={styles.elementContainer}>
-            <Text style={styles.prompt}>{element.prompt}</Text>
+          <View key={element.id} style={commonStyles.container}>
+            <Text style={commonStyles.text0}>{element.prompt}</Text>
             <Picker
               selectedValue={responses[element.id] || ''}
-              style={styles.picker}
+              style={commonStyles.picker}
               onValueChange={(itemValue) => handlePickerChange(element.id, itemValue)}
             >
               <Picker.Item label="Select an option..." value="" />
@@ -174,15 +173,15 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Scale:
         return (
-          <View key={element.id} style={styles.elementContainer}>
-            <Text style={styles.prompt}>{element.prompt}</Text>
+          <View key={element.id} style={commonStyles.container}>
+            <Text style={commonStyles.text0}>{element.prompt}</Text>
             {/* Implement a scale component or use a third-party library */}
             {/* Placeholder implementation */}
             <Text>
               Scale from {element.scale?.min} to {element.scale?.max}
             </Text>
             <TextInput
-              style={[commonStyles.textInput, styles.textInput]}
+              style={[commonStyles.textInput, commonStyles.greenText]}
               keyboardType="numeric"
               placeholder={`Enter a value between ${element.scale?.min} and ${element.scale?.max}`}
               placeholderTextColor="#aaa"
@@ -210,59 +209,16 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       style={commonStyles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={commonStyles.title}>{debriefing.name}</Text>
+      <ScrollView contentContainerStyle={commonStyles.scrollContainer}>
+        <Text style={commonStyles.boldText1}>{debriefing.name}</Text>
         {debriefing.elements?.map((element) => renderElement(element))}
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit Debrief</Text>
+        <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
+          <Text style={commonStyles.button}>Submit Debrief</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-    paddingBottom: 20,
-    width: '100%',
-  },
-  elementContainer: {
-    width: '90%',
-    marginBottom: 20,
-  },
-  prompt: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  textInput: {
-    height: 80,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  submitButton: {
-    marginTop: 30,
-    backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '90%',
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-});
 
 export default DebriefComponent;

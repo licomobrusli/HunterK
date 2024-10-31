@@ -5,6 +5,20 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export const commonStyles = StyleSheet.create({
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  subList: {
+    paddingLeft: 20,
+  },
+  jsonViewer: {
+    padding: 20,
+  },
+
   // **Containers**
   container: {
     flex: 1,
@@ -41,46 +55,32 @@ export const commonStyles = StyleSheet.create({
   },
 
   // **Text Elements**
-  text: {
+  text1: {
     fontSize: 24,
     color: '#FFFFFF',
   },
-  title: {
+  text0: {
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  greenText: {
+    color: 'green',
+  },
+  textA: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  boldText0: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  boldText1: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 10,
     alignSelf: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 10,
-    color: '#FFFFFF',
-    alignSelf: 'center',
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  itemText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  menuText: {
-    fontSize: 18,
-    color: '#fff', // Cream off-white
-  },
-  messageText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  currentPath: {
-    color: '#fff',
-    fontSize: 16,
   },
 
   // **Buttons**
@@ -96,53 +96,24 @@ export const commonStyles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#B0B0B0', // Grey color for disabled buttons
   },
-  backButton: {
-    padding: 10,
-  },
-  closeButton: {
-    padding: 10,
-  },
-  abortButton: {
-    position: 'absolute',
-    bottom: 30,
-    left: 20,
-    right: 20,
-    backgroundColor: 'red',
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  abortButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  saveButton: {
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#007F4E',
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  deleteButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-  },
+
+
+
   headerIcon: {
     paddingRight: 10,
   },
+  stateColumnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 1,
+    width: '100%',
+    paddingHorizontal: 1,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
 
   // **Inputs**
-  inputContainer: {
-    marginBottom: 10,
-    width: '100%',
-    flexDirection: 'column', // Changed to column for better alignment
-    alignItems: 'flex-start',
-  },
   textInput: {
     borderColor: '#ccc',
     borderWidth: 1,
@@ -194,12 +165,6 @@ export const commonStyles = StyleSheet.create({
   },
 
   // **Scene Items**
-  sceneItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-  },
   sceneItem: {
     flex: 1,
     padding: 10,
@@ -242,12 +207,6 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: '#005F2E', // Dark green background for selected items
     padding: 10,
     borderRadius: 5,
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    width: '100%',
   },
   pickerLabel: {
     color: '#fff',
@@ -294,12 +253,6 @@ export const commonStyles = StyleSheet.create({
   },
 
   // **Modal Styles**
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
-  },
   modalContent: {
     backgroundColor: '#004225', // British Racing Green
     padding: 10,
@@ -310,50 +263,10 @@ export const commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start', // Start from the top
   },
-  modalText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-  },
-  deleteButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 5,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    padding: 10,
-    borderRadius: 5,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  iconButton: {
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  stateColumnRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 1,
-    width: '100%',
-    paddingHorizontal: 1,
-    borderWidth: 1,
-    borderColor: 'white',
   },
   fixedWidthLabel: {
     width: 100, // Adjust the width as needed
@@ -399,33 +312,9 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  addedElementsTitle: {
-    color: '#fff',
-    fontSize: 18,
-    marginBottom: 10,
-  },
   noElementsText: {
     color: '#fff',
     fontStyle: 'italic',
-  },
-  elementTypeText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  elementPromptText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  radialOptionText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  addElementButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
   },
   marginTop20: {
     marginTop: 20,
@@ -470,16 +359,6 @@ export const commonStyles = StyleSheet.create({
     marginTop: 10,
     width: '100%',
   },
-  radialsNumberDisplay: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    color: '#fff',
-    backgroundColor: '#333',
-    width: '100%',
-    justifyContent: 'center',
-  },
   radialsNumberInput: {
     borderColor: '#ccc',
     borderWidth: 1,
@@ -502,8 +381,19 @@ export const commonStyles = StyleSheet.create({
     marginTop: 15,
     width: '100%',
   },
-  cancelButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+  repetitionsInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    width: 60,
+    textAlign: 'center',
+    color: 'white',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingBottom: 20,
+    width: '100%',
   },
 });

@@ -45,27 +45,27 @@ const SettingsScreen: React.FC = () => {
   return (
     <View style={commonStyles.container}>
       <TouchableOpacity onPress={openRecordAudioModal} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Record Audios</Text>
+        <Text style={commonStyles.text0}>Record Audios</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openSceneBuilderModal} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Scene Builder</Text>
+        <Text style={commonStyles.text0}>Scene Builder</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setDebriefBuilderVisible(true)} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Debrief Builder</Text>
+        <Text style={commonStyles.text0}>Debrief Builder</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openDeleteAudiosModal} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Delete Custom Audios</Text>
+        <Text style={commonStyles.text0}>Delete Custom Audios</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openFileManager} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>File Manager</Text>
+        <Text style={commonStyles.text0}>File Manager</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openSceneManager} style={commonStyles.menuItem}>
-        <Text style={commonStyles.menuText}>Scene Manager</Text>
+        <Text style={commonStyles.text0}>Scene Manager</Text>
       </TouchableOpacity>
 
       {/* Modals */}

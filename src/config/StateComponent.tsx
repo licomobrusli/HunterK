@@ -19,7 +19,7 @@ const StateComponent: React.FC<StateComponentProps> = ({ stateName, interval, on
 
   return (
     <View style={commonStyles.container}>
-      <Text style={commonStyles.text}>{stateName} State</Text>
+      <Text style={commonStyles.text0}>{stateName} State</Text>
     </View>
   );
 };

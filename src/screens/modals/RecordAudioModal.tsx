@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   ToastAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -151,7 +150,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
       <View style={commonStyles.modalContent}>
         {states && states.length > 0 ? (
           <>
-            <Text style={commonStyles.title}>Record Audio</Text>
+            <Text style={commonStyles.boldText1}>Record Audio</Text>
 
             <Text style={commonStyles.label}>Select State:</Text>
             <Picker
@@ -165,7 +164,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               ))}
             </Picker>
 
-            <View style={commonStyles.inputContainer}>
+            <View style={commonStyles.container}>
               <Text style={commonStyles.label}>Recording Name:</Text>
               <TextInput
                 style={commonStyles.textInput}
@@ -176,8 +175,8 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               />
             </View>
 
-            <View style={[commonStyles.buttonContainer, localStyles.controlsRow]}>
-              <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={commonStyles.iconButton}>
+            <View style={[commonStyles.buttonContainer, commonStyles.disabledButton]}>
+              <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={commonStyles.button}>
                 <Icon name="mic" size={30} color={isRecording ? 'red' : 'white'} />
               </TouchableOpacity>
 
@@ -189,7 +188,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
                     ToastAndroid.show('No recording to play', ToastAndroid.SHORT);
                   }
                 }}
-                style={[commonStyles.iconButton, !recordedFilePath && localStyles.disabledButton]}
+                style={[commonStyles.button, !recordedFilePath && commonStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
                 <Icon
@@ -207,7 +206,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
                     ToastAndroid.show('No recording to save', ToastAndroid.SHORT);
                   }
                 }}
-                style={[commonStyles.iconButton, !recordedFilePath && localStyles.disabledButton]}
+                style={[commonStyles.button, !recordedFilePath && commonStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
                 <Icon name="save" size={30} color={!recordedFilePath ? 'grey' : 'white'} />
@@ -215,30 +214,11 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
             </View>
           </>
         ) : (
-          <Text style={localStyles.errorText}>No states available. Please check your scene configuration.</Text>
+          <Text style={commonStyles.text0}>No states available. Please check your scene configuration.</Text>
         )}
       </View>
     </Modal>
   );
 };
-
-const localStyles = StyleSheet.create({
-  errorText: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    marginTop: 20,
-    width: '100%',
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-});
 
 export default RecordAudioModal;

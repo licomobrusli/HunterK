@@ -1,8 +1,9 @@
 // RadioButton.tsx
 
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'; // Keep using Feather
+import { commonStyles } from '../../styles/commonStyles';
 
 interface RadioButtonProps {
   label: string;
@@ -20,7 +21,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   accessibilityHint,
 }) => (
   <TouchableOpacity
-    style={styles.container}
+    style={commonStyles.container}
     onPress={onPress}
     accessibilityLabel={accessibilityLabel}
     accessibilityHint={accessibilityHint}
@@ -29,24 +30,10 @@ const RadioButton: React.FC<RadioButtonProps> = ({
       name={selected ? 'check-circle' : 'circle'} // Feather icons
       size={24}
       color="#000"
-      style={styles.icon}
+      style={commonStyles.iconButton}
     />
-    <Text style={styles.label}>{label}</Text>
+    <Text style={commonStyles.itemText}>{label}</Text>
   </TouchableOpacity>
 );
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  label: {
-    fontSize: 16,
-  },
-});
 
 export default RadioButton;

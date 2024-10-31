@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -164,15 +163,15 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   };
 
   const renderSceneItem = ({ item }: { item: string }) => (
-    <View style={styles.sceneItemContainer}>
+    <View style={commonStyles.container}>
       <TouchableOpacity onPress={() => handleLoadScene(item)} style={commonStyles.sceneItem}>
-        <Text style={commonStyles.itemText}>{item}</Text>
+        <Text style={commonStyles.text0}>{item}</Text>
       </TouchableOpacity>
-      <View style={styles.sceneItemButtons}>
-        <TouchableOpacity onPress={() => handleExportScene(item)} style={styles.exportButton}>
+      <View style={commonStyles.button}>
+        <TouchableOpacity onPress={() => handleExportScene(item)} style={commonStyles.button}>
           <Icon name="upload" size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={styles.deleteButton}>
+        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={commonStyles.button}>
           <Icon name="trash-2" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -181,10 +180,10 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <Text style={commonStyles.title}>Scene Management</Text>
+      <Text style={commonStyles.boldText0}>Scene Management</Text>
 
       {/* Save Scene Section */}
-      <View style={styles.inputRow}>
+      <View style={commonStyles.stateRow}>
         <TextInput
           style={commonStyles.textInput}
           placeholder="Enter scene name"
@@ -194,7 +193,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
         />
         <TouchableOpacity
           onPress={handleSaveScene}
-          style={styles.saveButton}
+          style={commonStyles.button}
           accessibilityLabel="Save current scene"
           accessibilityRole="button"
         >
@@ -203,83 +202,24 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       </View>
 
       {/* Import Button */}
-      <TouchableOpacity onPress={handleImportScene} style={styles.importButton}>
+      <TouchableOpacity onPress={handleImportScene} style={commonStyles.button}>
         <Icon name="download" size={24} color="#fff" />
-        <Text style={styles.buttonText}>Import Scene</Text>
+        <Text style={commonStyles.boldText0}>Import Scene</Text>
       </TouchableOpacity>
 
       {/* Load Scene Section */}
-      <View style={styles.section}>
-        <Text style={commonStyles.modalTitle}>Saved Scenes:</Text>
+      <View style={commonStyles.container}>
+        <Text style={commonStyles.boldText1}>Saved Scenes:</Text>
         <FlatList
           data={sceneList}
           keyExtractor={(item) => item}
           renderItem={renderSceneItem}
-          ListEmptyComponent={<Text style={commonStyles.text}>No saved scenes.</Text>}
-          style={styles.flatList}
+          ListEmptyComponent={<Text style={commonStyles.text0}>No saved scenes.</Text>}
+          style={commonStyles.list}
         />
       </View>
     </AppModal>
   );
 };
-
-const styles = StyleSheet.create({
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    marginVertical: 10,
-  },
-  saveButton: {
-    marginLeft: 10,
-    padding: 10,
-    backgroundColor: '#008000', // Same as commonStyles.button background color
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  section: {
-    marginVertical: 10,
-    width: '100%',
-    alignItems: 'center',
-  },
-  sceneItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 5,
-    width: '100%',
-    justifyContent: 'space-between',
-  },
-  sceneItemButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  exportButton: {
-    backgroundColor: '#007BFF',
-    padding: 5,
-    borderRadius: 5,
-    marginRight: 5,
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    padding: 5,
-    borderRadius: 5,
-  },
-  importButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007BFF',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    marginLeft: 5,
-  },
-  flatList: {
-    width: '100%',
-  },
-});
 
 export default SceneManagerModal;

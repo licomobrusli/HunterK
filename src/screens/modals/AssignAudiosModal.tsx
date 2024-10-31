@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
   ToastAndroid,
   TextInput,
 } from 'react-native';
@@ -83,8 +82,8 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
     const isSelected = selectedFiles.includes(item.name);
     return (
       <View>
-        <TouchableOpacity onPress={() => handleSelectAudio(item.name)} style={styles.itemButton}>
-          <Text style={[styles.itemText, isSelected && styles.selectedText]}>{item.name}</Text>
+        <TouchableOpacity onPress={() => handleSelectAudio(item.name)} style={commonStyles.button}>
+          <Text style={[commonStyles.itemText, isSelected && commonStyles.selectedText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -107,10 +106,10 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         </Picker>
       </View>
 
-      <View style={styles.repetitionsContainer}>
+      <View style={commonStyles.container}>
         <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
         <TextInput
-          style={styles.repetitionsInput}
+          style={commonStyles.repetitionsInput}
           value={repetitions}
           onChangeText={(text) => {
             if (/^\d{0,2}$/.test(text)) {
@@ -126,7 +125,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
-        style={styles.flatList}
+        style={commonStyles.list}
       />
 
       <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
@@ -135,35 +134,5 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
     </AppModal>
   );
 };
-
-const styles = StyleSheet.create({
-  itemButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  itemText: {
-    color: 'white',
-  },
-  selectedText: {
-    color: 'green',
-  },
-  flatList: {
-    width: '100%',
-  },
-  repetitionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  repetitionsInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'gray',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    width: 60,
-    textAlign: 'center',
-    color: 'white',
-  },
-});
 
 export default AssignAudiosModal;

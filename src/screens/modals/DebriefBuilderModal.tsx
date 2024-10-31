@@ -87,10 +87,10 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
       <ScrollView contentContainerStyle={commonStyles.container}>
-        <Text style={commonStyles.title}>Create New Debriefing</Text>
+        <Text style={commonStyles.boldText1}>Create New Debriefing</Text>
 
         {/* Debriefing Name Input */}
-        <View style={commonStyles.inputContainer}>
+        <View style={commonStyles.container}>
           <Text style={commonStyles.label}>Debriefing Name</Text>
           <TextInput
             style={commonStyles.textInput}
@@ -107,7 +107,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
           onPress={() => setShowElementTypeDropdown(!showElementTypeDropdown)}
         >
           <Icon name="plus" size={20} color="#fff" />
-          <Text style={commonStyles.addElementButtonText}> Add Element</Text>
+          <Text style={commonStyles.boldText0}> Add Element</Text>
         </TouchableOpacity>
 
         {/* Element Type Dropdown */}
@@ -142,21 +142,21 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* List of Added Elements */}
         <View style={commonStyles.fullWidthMarginBottom20}>
-          <Text style={commonStyles.addedElementsTitle}>Added Elements</Text>
+          <Text style={commonStyles.text1}>Added Elements</Text>
           {elements.length === 0 ? (
             <Text style={commonStyles.noElementsText}>No elements added yet.</Text>
           ) : (
             elements.map((el) => (
               <View key={el.id} style={commonStyles.elementItemContainer}>
                 <View>
-                  <Text style={commonStyles.elementTypeText}>
+                  <Text style={commonStyles.boldText0}>
                     {el.type === 'prompt' ? 'Prompt' : 'Radials'}
                   </Text>
-                  <Text style={commonStyles.elementPromptText}>{el.prompt}</Text>
+                  <Text style={commonStyles.textA}>{el.prompt}</Text>
                   {el.type === 'radials' && el.options && (
                     <View style={commonStyles.marginTop5}>
                       {el.options.map((option, idx) => (
-                        <Text key={idx} style={commonStyles.radialOptionText}>
+                        <Text key={idx} style={commonStyles.textA}>
                           • {option}
                         </Text>
                       ))}
@@ -173,10 +173,10 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* Save Debriefing Button */}
         <TouchableOpacity
-          style={commonStyles.saveButton}
+          style={commonStyles.button}
           onPress={handleSaveDebriefing}
         >
-          <Text style={commonStyles.saveButtonText}>Save Debriefing</Text>
+          <Text style={commonStyles.text0}>Save Debriefing</Text>
         </TouchableOpacity>
 
         {/* Close Modal Button */}

@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  StyleSheet,
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import AppModal from '../../styles/AppModal';
@@ -68,8 +67,8 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
     const isSelected = selectedFile === item.name;
     return (
       <View>
-        <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={styles.itemButton}>
-          <Text style={[styles.itemText, isSelected && styles.selectedText]}>{item.name}</Text>
+        <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={commonStyles.button}>
+          <Text style={[commonStyles.itemText, isSelected && commonStyles.selectedText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -82,26 +81,10 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
-        style={styles.flatList}
+        style={commonStyles.list}
       />
     </AppModal>
   );
 };
-
-const styles = StyleSheet.create({
-  itemButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  itemText: {
-    color: 'white',
-  },
-  selectedText: {
-    color: 'green',
-  },
-  flatList: {
-    width: '100%',
-  },
-});
 
 export default AssignDebriefsModal;

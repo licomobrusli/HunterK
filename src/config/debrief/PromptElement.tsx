@@ -40,11 +40,11 @@ const PromptElement: React.FC<PromptElementProps> = ({ onAdd, onCancel }) => {
         onChangeText={setPromptText}
       />
       <View style={commonStyles.buttonRow}>
-        <TouchableOpacity style={commonStyles.saveButton} onPress={handleAddPrompt}>
-          <Text style={commonStyles.saveButtonText}>Add Prompt</Text>
+        <TouchableOpacity style={commonStyles.button} onPress={handleAddPrompt}>
+          <Text style={commonStyles.text0}>Add Prompt</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={commonStyles.cancelButton} onPress={onCancel}>
-          <Text style={commonStyles.cancelButtonText}>Cancel</Text>
+        <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
+          <Text style={commonStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -34,7 +34,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
       if (eventName === 'long_press') {
         console.log('WelcomeScreen: Long press detected from peripheral device');
-        navigation.navigate('Active');
+        navigation.navigate({ name: 'Active', params: { sceneName: 'defaultScene' } });
       }
       // Handle other events if needed
       // else if (eventName === 'single_press') {
@@ -66,9 +66,9 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={commonStyles.container}>
-      <TouchableOpacity onPress={() => navigation.navigate('Active')}>
+      <TouchableOpacity onPress={() => navigation.navigate({ name: 'Active', params: { sceneName: 'defaultScene' } })}>
         <Text
-          style={commonStyles.text}
+          style={commonStyles.text0}
           testID="welcomeText"
           accessibilityLabel="welcomeText"
         >

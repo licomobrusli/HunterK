@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity,  Dimensions } from 'react-native';
 import RNModal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
 import { commonStyles } from '../styles/commonStyles';
@@ -72,7 +72,7 @@ const AppModal: React.FC<AppModalProps> = ({
       backdropOpacity={0.7}
       backdropTransitionInTiming={500}
       supportedOrientations={['portrait', 'landscape']}
-      style={styles.modalStyle}
+      style={commonStyles.modalContainer}
       customBackdrop={<View />}
       deviceHeight={Dimensions.get('window').height}
       deviceWidth={Dimensions.get('window').width}
@@ -80,9 +80,9 @@ const AppModal: React.FC<AppModalProps> = ({
     >
       <View style={commonStyles.modalContent}>
         {/* Header with X button */}
-        <View style={styles.header}>
-          <View style={styles.flexSpacer} />
-          <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityLabel="Close modal">
+        <View style={commonStyles.header}>
+          <View style={commonStyles.subModalContainer} />
+          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -92,23 +92,5 @@ const AppModal: React.FC<AppModalProps> = ({
     </RNModal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalStyle: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 10,
-  },
-  closeButton: {
-    padding: 5,
-  },
-  flexSpacer: {
-    flex: 1,
-  },
-});
 
 export default AppModal;

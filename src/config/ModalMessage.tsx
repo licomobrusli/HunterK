@@ -12,7 +12,7 @@ type ModalMessageProps = {
 const ModalMessage: React.FC<ModalMessageProps> = ({ message, type }) => {
   return (
     <View style={[commonStyles.container, type === 'success' ? commonStyles.success : commonStyles.error]}>
-      <Text style={commonStyles.messageText}>{message}</Text>
+      <Text style={commonStyles.text0}>{message}</Text>
     </View>
   );
 };

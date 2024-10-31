@@ -116,18 +116,18 @@ const DeleteAudiosModal: React.FC<DeleteCustomAudiosModalProps> = ({
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <Text style={commonStyles.modalText}>
+      <Text style={commonStyles.text1}>
         Are you sure you want to delete all custom audios?
       </Text>
       {isDeleting ? (
         <ActivityIndicator size="large" color="#FFFFFF" />
       ) : (
         <View style={commonStyles.buttonContainer}>
-          <TouchableOpacity onPress={handleConfirmDelete} style={commonStyles.deleteButton}>
-            <Text style={commonStyles.buttonText}>Delete</Text>
+          <TouchableOpacity onPress={handleConfirmDelete} style={commonStyles.button}>
+            <Text style={commonStyles.text0}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={commonStyles.cancelButton}>
-            <Text style={commonStyles.buttonText}>Cancel</Text>
+          <TouchableOpacity onPress={onClose} style={commonStyles.button}>
+            <Text style={commonStyles.text0}>Cancel</Text>
           </TouchableOpacity>
         </View>
       )}

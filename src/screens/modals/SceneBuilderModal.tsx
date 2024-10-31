@@ -69,9 +69,10 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           if (!state) {continue;}
 
           const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
+          // Use null for new states or states without valid intervals
           loadedIntervals[state.toLowerCase()] =
             storedInterval === 'null' || intervals[state.toLowerCase()] === null
-              ? 'mm:ss'
+              ? null // Set to null instead of "mm:ss"
               : convertMsToMinutesSeconds(parseInt(storedInterval || '0', 10));
         }
 
@@ -178,7 +179,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
       <View style={commonStyles.modalContent}>
-        <Text style={commonStyles.title}>Scene Builder</Text>
+        <Text style={commonStyles.boldText1}>Scene Builder</Text>
         <FlatList
           data={states}
           keyExtractor={(item) => item}
@@ -213,7 +214,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
               selectedDebrief={selectedDebriefs[item.toLowerCase()] || null} // Pass selectedDebrief
             />
           )}
-          ListEmptyComponent={<Text style={commonStyles.text}>No states available.</Text>}
+          ListEmptyComponent={<Text style={commonStyles.text0}>No states available.</Text>}
         />
         <AddStateRow
           position={newStatePosition}
@@ -223,8 +224,8 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           onAdd={handleAddState}
         />
 
-        <TouchableOpacity onPress={handleSave} style={commonStyles.saveButton}>
-          <Text style={commonStyles.saveButtonText}>Save Intervals</Text>
+        <TouchableOpacity onPress={handleSave} style={commonStyles.button}>
+          <Text style={commonStyles.text0}>Save Intervals</Text>
         </TouchableOpacity>
       </View>
       {assignAudiosModalVisible && selectedState && (

@@ -93,7 +93,7 @@ const DebriefScreen: React.FC<DebriefScreenProps> = ({ navigation, route }) => {
       {currentDebriefing ? (
         <DebriefComponent debriefing={currentDebriefing} onComplete={handleDebriefComplete} />
       ) : (
-        <Text style={commonStyles.text}>Loading debrief...</Text>
+        <Text style={commonStyles.text0}>Loading debrief...</Text>
       )}
     </View>
   );
