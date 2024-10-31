@@ -14,8 +14,13 @@ import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootStackParamList = {
   Welcome: undefined;
-  Active: undefined;
-  Debrief: { debriefName?: string };
+  Active: { sceneName: string };
+  Debrief: {
+    debriefName?: string;
+    journeyId?: string;
+    journeyStartTime?: number;
+    stateLogs?: any[]
+  };
   Settings: undefined;
 };
 

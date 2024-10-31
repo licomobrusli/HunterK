@@ -16,6 +16,7 @@ import { commonStyles } from '../../styles/commonStyles';
 
 const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
+const JOURNEYS_DIR = `${RNFS.DocumentDirectoryPath}/journeys`;
 
 const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
@@ -49,6 +50,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
     if (visible) {
       loadDirectory(AUDIOS_DIR);
       loadDirectory(DEBRIEFS_DIR);
+      loadDirectory(JOURNEYS_DIR);
     }
   }, [visible, loadDirectory]);
 
@@ -174,6 +176,15 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
             {
               name: 'debriefs',
               path: DEBRIEFS_DIR,
+              isDirectory: () => true,
+              isFile: () => false,
+              ctime: new Date(),
+              mtime: new Date(),
+              size: 0,
+            },
+            {
+              name: 'journeys',
+              path: JOURNEYS_DIR,
               isDirectory: () => true,
               isFile: () => false,
               ctime: new Date(),
