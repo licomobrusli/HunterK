@@ -1,16 +1,14 @@
 // src/config/StackNavigator.tsx
-import { commonStyles } from '../styles/commonStyles';
-
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import WelcomeScreen from '../screens/WelcomeScreen';
 import ActiveScreen from '../screens/ActiveScreen';
 import DebriefScreen from '../screens/DebriefScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -30,7 +28,7 @@ const StackNavigator: React.FC = () => {
   const renderSettingsIcon = (navigation: NativeStackNavigationProp<RootStackParamList>) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('Settings')}
-      style={commonStyles.container}
+      style={containerStyles.container}
     >
       <Icon name="settings" size={24} color="#000" />
     </TouchableOpacity>

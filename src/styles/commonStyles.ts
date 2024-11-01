@@ -7,32 +7,6 @@ export const commonStyles = StyleSheet.create({
     padding: 10,
   },
 
-  // **Containers**
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#004225', // British Racing Green
-    paddingHorizontal: 20, // Added padding for better layout
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 10,
-  },
-  subModalContent: {
-    width: 300,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  list: {
-    flex: 1,
-    width: '100%',
-  },
-
   // **Buttons**
   button: {
     backgroundColor: '#FF6347', // Tomato color for the button background
@@ -134,11 +108,6 @@ export const commonStyles = StyleSheet.create({
   },
 
   // **Modal Styles**
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
   fixedWidthLabel: {
     width: 100, // Adjust the width as needed
     height: 30,
@@ -212,14 +181,5 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 15,
     width: '100%',
-  },
-  repetitionsInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'gray',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    width: 60,
-    textAlign: 'center',
-    color: 'white',
   },
 });

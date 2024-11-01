@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
@@ -164,8 +165,8 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   };
 
   const renderSceneItem = ({ item }: { item: string }) => (
-    <View style={commonStyles.container}>
-      <TouchableOpacity onPress={() => handleLoadScene(item)} style={commonStyles.list}>
+    <View style={containerStyles.container}>
+      <TouchableOpacity onPress={() => handleLoadScene(item)} style={containerStyles.list}>
         <Text style={textStyles.text0}>{item}</Text>
       </TouchableOpacity>
       <View style={commonStyles.button}>
@@ -209,14 +210,14 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       </TouchableOpacity>
 
       {/* Load Scene Section */}
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         <Text style={textStyles.boldText1}>Saved Scenes:</Text>
         <FlatList
           data={sceneList}
           keyExtractor={(item) => item}
           renderItem={renderSceneItem}
           ListEmptyComponent={<Text style={textStyles.text0}>No saved scenes.</Text>}
-          style={commonStyles.list}
+          style={containerStyles.list}
         />
       </View>
     </AppModal>

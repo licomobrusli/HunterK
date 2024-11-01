@@ -3,6 +3,7 @@ import { View, TouchableOpacity,  Dimensions } from 'react-native';
 import RNModal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
 import { commonStyles } from '../styles/commonStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 type AnimationInTypes =
   | 'slideInUp'
@@ -72,16 +73,16 @@ const AppModal: React.FC<AppModalProps> = ({
       backdropOpacity={0.7}
       backdropTransitionInTiming={500}
       supportedOrientations={['portrait', 'landscape']}
-      style={commonStyles.container}
+      style={containerStyles.container}
       customBackdrop={<View />}
       deviceHeight={Dimensions.get('window').height}
       deviceWidth={Dimensions.get('window').width}
       propagateSwipe
     >
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         {/* Header with X button */}
-        <View style={commonStyles.container}>
-          <View style={commonStyles.container} />
+        <View style={containerStyles.container}>
+          <View style={containerStyles.container} />
           <TouchableOpacity onPress={onClose} style={commonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>

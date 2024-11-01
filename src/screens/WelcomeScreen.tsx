@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, NativeEventEmitter, NativeModules } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
-import { commonStyles } from '../styles/commonStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 import { textStyles } from '../styles/textStyles';
 
 // Import your native module
@@ -66,7 +66,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <View style={commonStyles.container}>
+    <View style={containerStyles.container}>
       <TouchableOpacity onPress={() => navigation.navigate({ name: 'Active', params: { sceneName: 'defaultScene' } })}>
         <Text
           style={textStyles.boldText1}

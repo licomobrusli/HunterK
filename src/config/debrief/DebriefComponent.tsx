@@ -11,12 +11,13 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { commonStyles } from '../../styles/commonStyles';
-import { textStyles } from '../../styles/textStyles';
 import { Picker } from '@react-native-picker/picker';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import RadioButton from './RadioButton'; // Reusable RadioButton component
 import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
+import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 const { LogcatModule } = NativeModules;
 
@@ -120,7 +121,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     switch (element.type) {
       case DebriefElementType.Prompt:
         return (
-          <View key={element.id} style={commonStyles.container}>
+          <View key={element.id} style={containerStyles.container}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             <TextInput
               style={[commonStyles.textInput, textStyles.greenText]}
@@ -140,7 +141,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       case DebriefElementType.MultipleChoice:
       case DebriefElementType.Radials:
         return (
-          <View key={element.id} style={commonStyles.container}>
+          <View key={element.id} style={containerStyles.container}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             {element.options?.map((option) => (
               <RadioButton
@@ -157,7 +158,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Dropdown:
         return (
-          <View key={element.id} style={commonStyles.container}>
+          <View key={element.id} style={containerStyles.container}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             <Picker
               selectedValue={responses[element.id] || ''}
@@ -174,7 +175,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Scale:
         return (
-          <View key={element.id} style={commonStyles.container}>
+          <View key={element.id} style={containerStyles.container}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             {/* Implement a scale component or use a third-party library */}
             {/* Placeholder implementation */}
@@ -207,10 +208,10 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
   return (
     <KeyboardAvoidingView
-      style={commonStyles.container}
+      style={containerStyles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={commonStyles.container}>
+      <ScrollView contentContainerStyle={containerStyles.container}>
         <Text style={textStyles.boldText1}>{debriefing.name}</Text>
         {debriefing.elements?.map((element) => renderElement(element))}
 

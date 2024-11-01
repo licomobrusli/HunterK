@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text } from 'react-native';
-import { commonStyles } from '../styles/commonStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 import { textStyles } from '../styles/textStyles';
 import { IntervalContext } from '../contexts/SceneProvider';
 import usePlaySound from '../config/usePlaySound';
@@ -19,7 +19,7 @@ const StateComponent: React.FC<StateComponentProps> = ({ stateName, interval, on
   usePlaySound(stateName, currentInterval, onComplete);
 
   return (
-    <View style={commonStyles.container}>
+    <View style={containerStyles.container}>
       <Text style={textStyles.text1}>{stateName} State</Text>
     </View>
   );

@@ -11,6 +11,7 @@ import type { RootStackParamList } from '../config/StackNavigator';
 import TrackPlayer from 'react-native-track-player';
 import RNFS from 'react-native-fs';
 import { Journey, StateLog } from '../types/Journey';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 const { LogcatModule } = NativeModules;
 
@@ -284,7 +285,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => {
   const interval = 5000;
 
   return (
-    <View style={commonStyles.container}>
+    <View style={containerStyles.container}>
       <TouchableOpacity
         style={commonStyles.fullscreenTouchable}
         onPress={() => advanceState(1)}

@@ -13,12 +13,13 @@ import {
 import Icon from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
-import { commonStyles } from '../../styles/commonStyles';
-import { textStyles } from '../../styles/textStyles';
 import PromptElement from '../../config/debrief/PromptElement';
 import RadialsElement from '../../config/debrief/RadialsElement';
 import { DebriefingsContext } from '../../config/debrief/DebriefingsContext';
 import { sanitizeFileName } from '../../config/sanitizer';
+import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 interface DebriefingBuilderModalProps {
   visible: boolean;
@@ -87,11 +88,11 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
-      <ScrollView contentContainerStyle={commonStyles.container}>
+      <ScrollView contentContainerStyle={containerStyles.container}>
         <Text style={textStyles.boldText1}>Create New Debriefing</Text>
 
         {/* Debriefing Name Input */}
-        <View style={commonStyles.container}>
+        <View style={containerStyles.container}>
           <Text style={textStyles.text0}>Debriefing Name</Text>
           <TextInput
             style={commonStyles.textInput}
@@ -113,7 +114,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* Element Type Dropdown */}
         {showElementTypeDropdown && (
-          <View style={commonStyles.container}>
+          <View style={containerStyles.container}>
             <Picker
               selectedValue={selectedElementType}
               onValueChange={(itemValue) => setSelectedElementType(itemValue)}
@@ -142,20 +143,20 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
         )}
 
         {/* List of Added Elements */}
-        <View style={commonStyles.container}>
+        <View style={containerStyles.container}>
           <Text style={textStyles.text1}>Added Elements</Text>
           {elements.length === 0 ? (
             <Text style={commonStyles.noElementsText}>No elements added yet.</Text>
           ) : (
             elements.map((el) => (
-              <View key={el.id} style={commonStyles.container}>
+              <View key={el.id} style={containerStyles.container}>
                 <View>
                   <Text style={textStyles.boldText0}>
                     {el.type === 'prompt' ? 'Prompt' : 'Radials'}
                   </Text>
                   <Text style={textStyles.textA}>{el.prompt}</Text>
                   {el.type === 'radials' && el.options && (
-                    <View style={commonStyles.container}>
+                    <View style={containerStyles.container}>
                       {el.options.map((option, idx) => (
                         <Text key={idx} style={textStyles.textA}>
                           • {option}

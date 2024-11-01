@@ -13,6 +13,7 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import Modal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
@@ -117,7 +118,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
     const isJsonFile = item.name.endsWith('.json');
     return (
       <View>
-        <View style={commonStyles.itemContainer}>
+        <View style={containerStyles.itemContainer}>
           <TouchableOpacity
             style={commonStyles.button}
             onPress={() =>
@@ -161,7 +162,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         <FlatList
           data={[
             {
@@ -194,7 +195,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
           ]}
           keyExtractor={(item) => item.path}
           renderItem={({ item }) => renderItem({ item, path: item.path })}
-          style={commonStyles.list}
+          style={containerStyles.list}
         />
         {/* JSON Viewer Modal */}
         <Modal isVisible={!!jsonContent} onClose={() => setJsonContent(null)}>

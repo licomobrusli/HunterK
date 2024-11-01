@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 type ModalMessageProps = {
   message: string;
@@ -11,7 +12,7 @@ type ModalMessageProps = {
 
 const ModalMessage: React.FC<ModalMessageProps> = ({ message, type }) => {
   return (
-    <View style={[commonStyles.container, type === 'success' ? commonStyles.success : commonStyles.error]}>
+    <View style={[containerStyles.container, type === 'success' ? commonStyles.success : commonStyles.error]}>
       <Text style={textStyles.text0}>{message}</Text>
     </View>
   );

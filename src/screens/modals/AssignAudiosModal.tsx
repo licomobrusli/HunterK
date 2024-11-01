@@ -14,6 +14,7 @@ import { PlaybackMode } from '../../types/PlaybackMode';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; stateName: string }> = ({
   visible,
@@ -94,7 +95,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
     <AppModal isVisible={visible} onClose={onClose} animationIn="fadeIn" animationOut="fadeOut">
       <Text style={textStyles.text1}>Assign Audios for {stateName}</Text>
 
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
         <Picker
           selectedValue={playbackMode}
@@ -107,10 +108,10 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         </Picker>
       </View>
 
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
         <TextInput
-          style={commonStyles.repetitionsInput}
+          style={commonStyles.positionInput}
           value={repetitions}
           onChangeText={(text) => {
             if (/^\d{0,2}$/.test(text)) {
@@ -126,7 +127,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
-        style={commonStyles.list}
+        style={containerStyles.list}
       />
 
       <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.button}>

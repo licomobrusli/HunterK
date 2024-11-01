@@ -5,6 +5,7 @@ import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import AssignAudiosModal from './AssignAudiosModal';
 import AssignDebriefsModal from './AssignDebriefsModal';
@@ -179,7 +180,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         <Text style={textStyles.boldText1}>Scene Builder</Text>
         <FlatList
           data={states}

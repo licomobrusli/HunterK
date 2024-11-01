@@ -5,6 +5,7 @@ import { TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'; // Keep using Feather
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 interface RadioButtonProps {
   label: string;
@@ -22,7 +23,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
   accessibilityHint,
 }) => (
   <TouchableOpacity
-    style={commonStyles.container}
+    style={containerStyles.container}
     onPress={onPress}
     accessibilityLabel={accessibilityLabel}
     accessibilityHint={accessibilityHint}

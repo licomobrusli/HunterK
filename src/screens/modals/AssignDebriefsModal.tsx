@@ -11,6 +11,7 @@ import RNFS from 'react-native-fs';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
 
@@ -82,7 +83,7 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
-        style={commonStyles.list}
+        style={containerStyles.list}
       />
     </AppModal>
   );

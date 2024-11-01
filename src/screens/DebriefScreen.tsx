@@ -3,13 +3,13 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text } from 'react-native';
 import RNFS from 'react-native-fs';
-import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
 import DebriefComponent from '../config/debrief/DebriefComponent';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
 import { Debriefing } from '../types/Debriefing';
 import { Journey } from '../types/Journey';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 type DebriefScreenProps = NativeStackScreenProps<RootStackParamList, 'Debrief'>;
 
@@ -90,7 +90,7 @@ const DebriefScreen: React.FC<DebriefScreenProps> = ({ navigation, route }) => {
   }, [debriefName, navigation]);
 
   return (
-    <View style={commonStyles.container}>
+    <View style={containerStyles.container}>
       {currentDebriefing ? (
         <DebriefComponent debriefing={currentDebriefing} onComplete={handleDebriefComplete} />
       ) : (

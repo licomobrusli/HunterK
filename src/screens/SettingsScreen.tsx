@@ -11,6 +11,7 @@ import SceneManagerModal from './modals/SceneManagerModal';
 import { IntervalContext } from '../contexts/SceneProvider';
 import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 const SettingsScreen: React.FC = () => {
   const [recordModalVisible, setRecordModalVisible] = useState<boolean>(false);
@@ -43,7 +44,7 @@ const SettingsScreen: React.FC = () => {
   };
 
   return (
-    <View style={commonStyles.container}>
+    <View style={containerStyles.container}>
       <TouchableOpacity onPress={openRecordAudioModal} style={commonStyles.item}>
         <Text style={textStyles.text0}>Record Audios</Text>
       </TouchableOpacity>

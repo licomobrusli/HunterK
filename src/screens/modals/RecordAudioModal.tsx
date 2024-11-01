@@ -15,6 +15,7 @@ import RNFS from 'react-native-fs';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 import Modal from '../../styles/AppModal';
 
 const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
@@ -148,7 +149,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.container}>
+      <View style={containerStyles.container}>
         {states && states.length > 0 ? (
           <>
             <Text style={textStyles.boldText1}>Record Audio</Text>
@@ -165,7 +166,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               ))}
             </Picker>
 
-            <View style={commonStyles.container}>
+            <View style={containerStyles.container}>
               <Text style={textStyles.text0}>Recording Name:</Text>
               <TextInput
                 style={commonStyles.textInput}
@@ -176,7 +177,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               />
             </View>
 
-            <View style={[commonStyles.buttonContainer, commonStyles.disabledButton]}>
+            <View style={[containerStyles.container, commonStyles.disabledButton]}>
               <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={commonStyles.button}>
                 <Icon name="mic" size={30} color={isRecording ? 'red' : 'white'} />
               </TouchableOpacity>

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
 
 interface RadialsElementProps {
   onAdd: (element: DebriefElement) => void;
@@ -124,11 +125,11 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
 
       {/* Dynamic Radial Labels with 'X' Buttons */}
       {radialLabels.map((label, index) => (
-        <View key={index} style={commonStyles.container}>
+        <View key={index} style={containerStyles.container}>
           <Text style={textStyles.text0}>Radial {index + 1} Label</Text>
           <View style={commonStyles.radialLabelInputContainer}>
             <TextInput
-              style={commonStyles.list}
+              style={containerStyles.list}
               placeholder={`Enter label for Radial ${index + 1}`}
               placeholderTextColor="#aaa"
               value={label}
