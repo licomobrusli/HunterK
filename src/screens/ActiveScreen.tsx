@@ -12,6 +12,7 @@ import TrackPlayer from 'react-native-track-player';
 import RNFS from 'react-native-fs';
 import { Journey, StateLog } from '../types/Journey';
 import { containerStyles } from '../styles/containerStyles.ts';
+import { buttonStyles } from '../styles/buttonStyles.ts';
 
 const { LogcatModule } = NativeModules;
 
@@ -298,7 +299,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity style={commonStyles.button} onPress={handleLongPress}>
+      <TouchableOpacity style={buttonStyles.button} onPress={handleLongPress}>
         <Text style={textStyles.text0}>Abort</Text>
       </TouchableOpacity>
     </View>

@@ -5,6 +5,8 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles';
+import { buttonStyles } from '../../styles/buttonStyles';
 
 interface PromptElementProps {
   onAdd: (element: DebriefElement) => void;
@@ -40,11 +42,11 @@ const PromptElement: React.FC<PromptElementProps> = ({ onAdd, onCancel }) => {
         value={promptText}
         onChangeText={setPromptText}
       />
-      <View style={commonStyles.buttonRow}>
-        <TouchableOpacity style={commonStyles.button} onPress={handleAddPrompt}>
+      <View style={containerStyles.itemContainer}>
+        <TouchableOpacity style={buttonStyles.button} onPress={handleAddPrompt}>
           <Text style={textStyles.text0}>Add Prompt</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
+        <TouchableOpacity style={buttonStyles.button} onPress={onCancel}>
           <Text style={textStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>

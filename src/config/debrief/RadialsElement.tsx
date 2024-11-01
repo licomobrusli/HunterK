@@ -7,6 +7,7 @@ import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 interface RadialsElementProps {
   onAdd: (element: DebriefElement) => void;
@@ -127,7 +128,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
       {radialLabels.map((label, index) => (
         <View key={index} style={containerStyles.container}>
           <Text style={textStyles.text0}>Radial {index + 1} Label</Text>
-          <View style={commonStyles.radialLabelInputContainer}>
+          <View style={containerStyles.itemContainer}>
             <TextInput
               style={containerStyles.list}
               placeholder={`Enter label for Radial ${index + 1}`}
@@ -141,7 +142,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
             />
             <TouchableOpacity
               onPress={() => removeRadialLabel(index)}
-              style={commonStyles.button}
+              style={buttonStyles.button}
             >
               <Icon name="x" size={16} color="#ff4d4d" />
             </TouchableOpacity>
@@ -149,11 +150,11 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
         </View>
       ))}
 
-      <View style={commonStyles.buttonRow}>
-        <TouchableOpacity style={commonStyles.button} onPress={handleAddRadials}>
+      <View style={containerStyles.itemContainer}>
+        <TouchableOpacity style={buttonStyles.button} onPress={handleAddRadials}>
           <Text style={textStyles.text0}>Add Radials</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
+        <TouchableOpacity style={buttonStyles.button} onPress={onCancel}>
           <Text style={textStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>

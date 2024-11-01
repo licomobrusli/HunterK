@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import AppModal from '../../styles/AppModal';
-import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
 
@@ -69,7 +69,7 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
     const isSelected = selectedFile === item.name;
     return (
       <View>
-        <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={commonStyles.button}>
+        <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={buttonStyles.button}>
           <Text style={[textStyles.text0, isSelected && textStyles.greenText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>

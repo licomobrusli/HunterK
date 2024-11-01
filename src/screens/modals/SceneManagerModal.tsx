@@ -10,15 +10,16 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { commonStyles } from '../../styles/commonStyles';
-import { textStyles } from '../../styles/textStyles';
-import { containerStyles } from '../../styles/containerStyles.ts';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
 import AppModal from '../../styles/AppModal';
 import { getSceneList, exportScene, importScene } from '../../config/SceneStorage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
+import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 type SceneManagerModalProps = {
   visible: boolean;
@@ -169,11 +170,11 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       <TouchableOpacity onPress={() => handleLoadScene(item)} style={containerStyles.list}>
         <Text style={textStyles.text0}>{item}</Text>
       </TouchableOpacity>
-      <View style={commonStyles.button}>
-        <TouchableOpacity onPress={() => handleExportScene(item)} style={commonStyles.button}>
+      <View style={buttonStyles.button}>
+        <TouchableOpacity onPress={() => handleExportScene(item)} style={buttonStyles.button}>
           <Icon name="upload" size={20} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={commonStyles.button}>
+        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={buttonStyles.button}>
           <Icon name="trash-2" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -185,7 +186,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       <Text style={textStyles.boldText0}>Scene Management</Text>
 
       {/* Save Scene Section */}
-      <View style={commonStyles.stateRow}>
+      <View style={containerStyles.itemContainer}>
         <TextInput
           style={commonStyles.textInput}
           placeholder="Enter scene name"
@@ -195,7 +196,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
         />
         <TouchableOpacity
           onPress={handleSaveScene}
-          style={commonStyles.button}
+          style={buttonStyles.button}
           accessibilityLabel="Save current scene"
           accessibilityRole="button"
         >
@@ -204,7 +205,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       </View>
 
       {/* Import Button */}
-      <TouchableOpacity onPress={handleImportScene} style={commonStyles.button}>
+      <TouchableOpacity onPress={handleImportScene} style={buttonStyles.button}>
         <Icon name="download" size={24} color="#fff" />
         <Text style={textStyles.boldText0}>Import Scene</Text>
       </TouchableOpacity>

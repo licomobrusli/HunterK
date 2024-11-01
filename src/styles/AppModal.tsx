@@ -2,8 +2,8 @@ import React from 'react';
 import { View, TouchableOpacity,  Dimensions } from 'react-native';
 import RNModal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
-import { commonStyles } from '../styles/commonStyles';
 import { containerStyles } from '../styles/containerStyles.ts';
+import { buttonStyles } from './buttonStyles.ts';
 
 type AnimationInTypes =
   | 'slideInUp'
@@ -83,7 +83,7 @@ const AppModal: React.FC<AppModalProps> = ({
         {/* Header with X button */}
         <View style={containerStyles.container}>
           <View style={containerStyles.container} />
-          <TouchableOpacity onPress={onClose} style={commonStyles.button} accessibilityLabel="Close modal">
+          <TouchableOpacity onPress={onClose} style={buttonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>
         </View>

@@ -31,4 +31,8 @@ export const textStyles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'center',
   },
+  italicText: {
+    color: '#fff',
+    fontStyle: 'italic',
+  },
 });

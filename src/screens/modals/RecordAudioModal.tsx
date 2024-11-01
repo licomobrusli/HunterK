@@ -17,6 +17,7 @@ import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
 import Modal from '../../styles/AppModal';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
   visible,
@@ -177,8 +178,8 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
               />
             </View>
 
-            <View style={[containerStyles.container, commonStyles.disabledButton]}>
-              <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={commonStyles.button}>
+            <View style={[containerStyles.container, buttonStyles.disabledButton]}>
+              <TouchableOpacity onPress={!isRecording ? onStartRecord : onStopRecord} style={buttonStyles.button}>
                 <Icon name="mic" size={30} color={isRecording ? 'red' : 'white'} />
               </TouchableOpacity>
 
@@ -190,7 +191,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
                     ToastAndroid.show('No recording to play', ToastAndroid.SHORT);
                   }
                 }}
-                style={[commonStyles.button, !recordedFilePath && commonStyles.disabledButton]}
+                style={[buttonStyles.button, !recordedFilePath && buttonStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
                 <Icon
@@ -208,7 +209,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
                     ToastAndroid.show('No recording to save', ToastAndroid.SHORT);
                   }
                 }}
-                style={[commonStyles.button, !recordedFilePath && commonStyles.disabledButton]}
+                style={[buttonStyles.button, !recordedFilePath && buttonStyles.disabledButton]}
                 disabled={!recordedFilePath}
               >
                 <Icon name="save" size={30} color={!recordedFilePath ? 'grey' : 'white'} />

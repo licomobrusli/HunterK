@@ -20,6 +20,7 @@ import { sanitizeFileName } from '../../config/sanitizer';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 interface DebriefingBuilderModalProps {
   visible: boolean;
@@ -105,7 +106,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* Add Elements Button */}
         <TouchableOpacity
-          style={commonStyles.button}
+          style={buttonStyles.button}
           onPress={() => setShowElementTypeDropdown(!showElementTypeDropdown)}
         >
           <Icon name="plus" size={20} color="#fff" />
@@ -146,7 +147,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
         <View style={containerStyles.container}>
           <Text style={textStyles.text1}>Added Elements</Text>
           {elements.length === 0 ? (
-            <Text style={commonStyles.noElementsText}>No elements added yet.</Text>
+            <Text style={textStyles.italicText}>No elements added yet.</Text>
           ) : (
             elements.map((el) => (
               <View key={el.id} style={containerStyles.container}>
@@ -175,7 +176,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* Save Debriefing Button */}
         <TouchableOpacity
-          style={commonStyles.button}
+          style={buttonStyles.button}
           onPress={handleSaveDebriefing}
         >
           <Text style={textStyles.text0}>Save Debriefing</Text>
@@ -183,7 +184,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
 
         {/* Close Modal Button */}
         <TouchableOpacity
-          style={commonStyles.closeModalButton}
+          style={buttonStyles.button}
           onPress={onClose}
         >
           <Icon name="x" size={24} color="#fff" />

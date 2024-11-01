@@ -5,6 +5,7 @@ import { View, TextInput, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
+import { containerStyles } from '../styles/containerStyles.ts';
 
 type AddStateRowProps = {
   position: string;
@@ -22,7 +23,7 @@ const AddStateRow: React.FC<AddStateRowProps> = ({
   onAdd,
 }) => {
   return (
-    <View style={commonStyles.stateRow}>
+    <View style={containerStyles.itemContainer}>
       {/* Position Number Input */}
       <TextInput
         style={commonStyles.positionInput}

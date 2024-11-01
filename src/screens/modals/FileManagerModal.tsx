@@ -14,6 +14,7 @@ import Modal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
@@ -120,7 +121,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
       <View>
         <View style={containerStyles.itemContainer}>
           <TouchableOpacity
-            style={commonStyles.button}
+            style={buttonStyles.button}
             onPress={() =>
               item.isDirectory()
                 ? toggleDirectory(item.path)

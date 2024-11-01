@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
 import { IntervalContext } from '../../contexts/SceneProvider';
@@ -12,6 +11,7 @@ import AssignDebriefsModal from './AssignDebriefsModal';
 import AppModal from '../../styles/AppModal';
 import StateRow from '../../config/StateRow';
 import AddStateRow from '../../config/AddStateRow';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 type SceneBuilderModalProps = {
   visible: boolean;
@@ -226,7 +226,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           onAdd={handleAddState}
         />
 
-        <TouchableOpacity onPress={handleSave} style={commonStyles.button}>
+        <TouchableOpacity onPress={handleSave} style={buttonStyles.button}>
           <Text style={textStyles.text0}>Save Intervals</Text>
         </TouchableOpacity>
       </View>

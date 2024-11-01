@@ -18,6 +18,7 @@ import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debr
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 const { LogcatModule } = NativeModules;
 
@@ -215,8 +216,8 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
         <Text style={textStyles.boldText1}>{debriefing.name}</Text>
         {debriefing.elements?.map((element) => renderElement(element))}
 
-        <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
-          <Text style={commonStyles.button}>Submit Debrief</Text>
+        <TouchableOpacity style={buttonStyles.button} onPress={handleSubmit}>
+          <Text style={buttonStyles.button}>Submit Debrief</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

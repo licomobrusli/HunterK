@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { Text, TouchableOpacity, View, Alert, ActivityIndicator } from 'react-native';
 import AppModal from '../../styles/AppModal'; // Adjust the import path if necessary
 import RNFS from 'react-native-fs';
-import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
+import { buttonStyles } from '../../styles/buttonStyles.ts';
 
 interface DeleteCustomAudiosModalProps {
   visible: boolean;
@@ -125,10 +125,10 @@ const DeleteAudiosModal: React.FC<DeleteCustomAudiosModalProps> = ({
         <ActivityIndicator size="large" color="#FFFFFF" />
       ) : (
         <View style={containerStyles.container}>
-          <TouchableOpacity onPress={handleConfirmDelete} style={commonStyles.button}>
+          <TouchableOpacity onPress={handleConfirmDelete} style={buttonStyles.button}>
             <Text style={textStyles.text0}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={commonStyles.button}>
+          <TouchableOpacity onPress={onClose} style={buttonStyles.button}>
             <Text style={textStyles.text0}>Cancel</Text>
           </TouchableOpacity>
         </View>
