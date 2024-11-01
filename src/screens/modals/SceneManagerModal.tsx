@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
@@ -164,8 +165,8 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
 
   const renderSceneItem = ({ item }: { item: string }) => (
     <View style={commonStyles.container}>
-      <TouchableOpacity onPress={() => handleLoadScene(item)} style={commonStyles.sceneItem}>
-        <Text style={commonStyles.text0}>{item}</Text>
+      <TouchableOpacity onPress={() => handleLoadScene(item)} style={commonStyles.list}>
+        <Text style={textStyles.text0}>{item}</Text>
       </TouchableOpacity>
       <View style={commonStyles.button}>
         <TouchableOpacity onPress={() => handleExportScene(item)} style={commonStyles.button}>
@@ -180,7 +181,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <Text style={commonStyles.boldText0}>Scene Management</Text>
+      <Text style={textStyles.boldText0}>Scene Management</Text>
 
       {/* Save Scene Section */}
       <View style={commonStyles.stateRow}>
@@ -204,17 +205,17 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       {/* Import Button */}
       <TouchableOpacity onPress={handleImportScene} style={commonStyles.button}>
         <Icon name="download" size={24} color="#fff" />
-        <Text style={commonStyles.boldText0}>Import Scene</Text>
+        <Text style={textStyles.boldText0}>Import Scene</Text>
       </TouchableOpacity>
 
       {/* Load Scene Section */}
       <View style={commonStyles.container}>
-        <Text style={commonStyles.boldText1}>Saved Scenes:</Text>
+        <Text style={textStyles.boldText1}>Saved Scenes:</Text>
         <FlatList
           data={sceneList}
           keyExtractor={(item) => item}
           renderItem={renderSceneItem}
-          ListEmptyComponent={<Text style={commonStyles.text0}>No saved scenes.</Text>}
+          ListEmptyComponent={<Text style={textStyles.text0}>No saved scenes.</Text>}
           style={commonStyles.list}
         />
       </View>

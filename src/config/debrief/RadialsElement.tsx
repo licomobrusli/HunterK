@@ -5,6 +5,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 interface RadialsElementProps {
   onAdd: (element: DebriefElement) => void;
@@ -87,7 +88,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
 
   return (
     <View style={commonStyles.elementConfigContainer}>
-      <Text style={commonStyles.label}>Prompt</Text>
+      <Text style={textStyles.text0}>Prompt</Text>
       <TextInput
         style={commonStyles.textInput}
         placeholder="Enter prompt/question..."
@@ -97,7 +98,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
       />
 
       {/* Number of Radials Field */}
-      <Text style={commonStyles.label}>Number of Radials</Text>
+      <Text style={textStyles.text0}>Number of Radials</Text>
       {isEditingRadialsNumber ? (
         <TextInput
           style={commonStyles.radialsNumberInput}
@@ -117,17 +118,17 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
             setTempRadialsNumber(numberOfRadials.toString());
           }}
         >
-          <Text style={commonStyles.text0}>{numberOfRadials}</Text>
+          <Text style={textStyles.text0}>{numberOfRadials}</Text>
         </TouchableOpacity>
       )}
 
       {/* Dynamic Radial Labels with 'X' Buttons */}
       {radialLabels.map((label, index) => (
-        <View key={index} style={commonStyles.radialLabelContainer}>
-          <Text style={commonStyles.label}>Radial {index + 1} Label</Text>
+        <View key={index} style={commonStyles.container}>
+          <Text style={textStyles.text0}>Radial {index + 1} Label</Text>
           <View style={commonStyles.radialLabelInputContainer}>
             <TextInput
-              style={commonStyles.radialTextInput}
+              style={commonStyles.list}
               placeholder={`Enter label for Radial ${index + 1}`}
               placeholderTextColor="#aaa"
               value={label}
@@ -139,7 +140,7 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
             />
             <TouchableOpacity
               onPress={() => removeRadialLabel(index)}
-              style={commonStyles.deleteRadialButton}
+              style={commonStyles.button}
             >
               <Icon name="x" size={16} color="#ff4d4d" />
             </TouchableOpacity>
@@ -149,10 +150,10 @@ const RadialsElement: React.FC<RadialsElementProps> = ({ onAdd, onCancel }) => {
 
       <View style={commonStyles.buttonRow}>
         <TouchableOpacity style={commonStyles.button} onPress={handleAddRadials}>
-          <Text style={commonStyles.text0}>Add Radials</Text>
+          <Text style={textStyles.text0}>Add Radials</Text>
         </TouchableOpacity>
         <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
-          <Text style={commonStyles.text0}>Cancel</Text>
+          <Text style={textStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>

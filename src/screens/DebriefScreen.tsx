@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text } from 'react-native';
 import RNFS from 'react-native-fs';
 import { commonStyles } from '../styles/commonStyles';
+import { textStyles } from '../styles/textStyles';
 import DebriefComponent from '../config/debrief/DebriefComponent';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
@@ -93,7 +94,7 @@ const DebriefScreen: React.FC<DebriefScreenProps> = ({ navigation, route }) => {
       {currentDebriefing ? (
         <DebriefComponent debriefing={currentDebriefing} onComplete={handleDebriefComplete} />
       ) : (
-        <Text style={commonStyles.text0}>Loading debrief...</Text>
+        <Text style={textStyles.text0}>Loading debrief...</Text>
       )}
     </View>
   );

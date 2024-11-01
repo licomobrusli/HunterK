@@ -3,6 +3,7 @@
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { TouchableOpacity, View, Text, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
+import { textStyles } from '../styles/textStyles';
 import StateComponent from '../config/StateComponent';
 import { IntervalContext } from '../contexts/SceneProvider';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -297,7 +298,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <TouchableOpacity style={commonStyles.button} onPress={handleLongPress}>
-        <Text style={commonStyles.text0}>Abort</Text>
+        <Text style={textStyles.text0}>Abort</Text>
       </TouchableOpacity>
     </View>
   );

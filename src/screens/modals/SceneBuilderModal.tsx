@@ -4,6 +4,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import AssignAudiosModal from './AssignAudiosModal';
 import AssignDebriefsModal from './AssignDebriefsModal';
@@ -178,8 +179,8 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.modalContent}>
-        <Text style={commonStyles.boldText1}>Scene Builder</Text>
+      <View style={commonStyles.container}>
+        <Text style={textStyles.boldText1}>Scene Builder</Text>
         <FlatList
           data={states}
           keyExtractor={(item) => item}
@@ -214,7 +215,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
               selectedDebrief={selectedDebriefs[item.toLowerCase()] || null} // Pass selectedDebrief
             />
           )}
-          ListEmptyComponent={<Text style={commonStyles.text0}>No states available.</Text>}
+          ListEmptyComponent={<Text style={textStyles.text0}>No states available.</Text>}
         />
         <AddStateRow
           position={newStatePosition}
@@ -225,7 +226,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
         />
 
         <TouchableOpacity onPress={handleSave} style={commonStyles.button}>
-          <Text style={commonStyles.text0}>Save Intervals</Text>
+          <Text style={textStyles.text0}>Save Intervals</Text>
         </TouchableOpacity>
       </View>
       {assignAudiosModalVisible && selectedState && (

@@ -14,6 +14,7 @@ import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 import Modal from '../../styles/AppModal';
 
 const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
@@ -147,12 +148,12 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.modalContent}>
+      <View style={commonStyles.container}>
         {states && states.length > 0 ? (
           <>
-            <Text style={commonStyles.boldText1}>Record Audio</Text>
+            <Text style={textStyles.boldText1}>Record Audio</Text>
 
-            <Text style={commonStyles.label}>Select State:</Text>
+            <Text style={textStyles.text0}>Select State:</Text>
             <Picker
               selectedValue={selectedState}
               onValueChange={(itemValue) => setSelectedState(itemValue)}
@@ -165,7 +166,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
             </Picker>
 
             <View style={commonStyles.container}>
-              <Text style={commonStyles.label}>Recording Name:</Text>
+              <Text style={textStyles.text0}>Recording Name:</Text>
               <TextInput
                 style={commonStyles.textInput}
                 value={recordingName}
@@ -214,7 +215,7 @@ const RecordAudioModal: React.FC<{ visible: boolean; onClose: () => void }> = ({
             </View>
           </>
         ) : (
-          <Text style={commonStyles.text0}>No states available. Please check your scene configuration.</Text>
+          <Text style={textStyles.text0}>No states available. Please check your scene configuration.</Text>
         )}
       </View>
     </Modal>

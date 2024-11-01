@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, NativeEventEmitter, NativeModules } from 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
 import { commonStyles } from '../styles/commonStyles';
+import { textStyles } from '../styles/textStyles';
 
 // Import your native module
 const { LogcatModule } = NativeModules;
@@ -68,7 +69,7 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
     <View style={commonStyles.container}>
       <TouchableOpacity onPress={() => navigation.navigate({ name: 'Active', params: { sceneName: 'defaultScene' } })}>
         <Text
-          style={commonStyles.text0}
+          style={textStyles.boldText1}
           testID="welcomeText"
           accessibilityLabel="welcomeText"
         >

@@ -4,6 +4,7 @@ import React from 'react';
 import { TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather'; // Keep using Feather
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 interface RadioButtonProps {
   label: string;
@@ -30,9 +31,9 @@ const RadioButton: React.FC<RadioButtonProps> = ({
       name={selected ? 'check-circle' : 'circle'} // Feather icons
       size={24}
       color="#000"
-      style={commonStyles.iconButton}
+      style={commonStyles.button}
     />
-    <Text style={commonStyles.itemText}>{label}</Text>
+    <Text style={textStyles.text0}>{label}</Text>
   </TouchableOpacity>
 );
 

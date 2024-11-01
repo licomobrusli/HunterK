@@ -72,17 +72,17 @@ const AppModal: React.FC<AppModalProps> = ({
       backdropOpacity={0.7}
       backdropTransitionInTiming={500}
       supportedOrientations={['portrait', 'landscape']}
-      style={commonStyles.modalContainer}
+      style={commonStyles.container}
       customBackdrop={<View />}
       deviceHeight={Dimensions.get('window').height}
       deviceWidth={Dimensions.get('window').width}
       propagateSwipe
     >
-      <View style={commonStyles.modalContent}>
+      <View style={commonStyles.container}>
         {/* Header with X button */}
-        <View style={commonStyles.header}>
-          <View style={commonStyles.subModalContainer} />
-          <TouchableOpacity onPress={onClose} style={commonStyles.closeButton} accessibilityLabel="Close modal">
+        <View style={commonStyles.container}>
+          <View style={commonStyles.container} />
+          <TouchableOpacity onPress={onClose} style={commonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>
         </View>

@@ -1,37 +1,25 @@
 // src/styles/commonStyles.ts
 
-import { StyleSheet, Dimensions } from 'react-native';
-
-const { width, height } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 export const commonStyles = StyleSheet.create({
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  subList: {
-    paddingLeft: 20,
-  },
-  jsonViewer: {
-    padding: 20,
+  pad10: {
+    padding: 10,
   },
 
   // **Containers**
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#004225', // British Racing Green
     paddingHorizontal: 20, // Added padding for better layout
   },
-  subModalContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  itemContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    justifyContent: 'space-between',
+    padding: 10,
   },
   subModalContent: {
     width: 300,
@@ -40,47 +28,9 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 10,
-    backgroundColor: '#003015',
-  },
   list: {
     flex: 1,
     width: '100%',
-  },
-
-  // **Text Elements**
-  text1: {
-    fontSize: 24,
-    color: '#FFFFFF',
-  },
-  text0: {
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  greenText: {
-    color: 'green',
-  },
-  textA: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  boldText0: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  boldText1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
-    alignSelf: 'center',
   },
 
   // **Buttons**
@@ -97,11 +47,6 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: '#B0B0B0', // Grey color for disabled buttons
   },
 
-
-
-  headerIcon: {
-    paddingRight: 10,
-  },
   stateColumnRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -138,55 +83,9 @@ export const commonStyles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
 
-  // **Menu Items**
-  menuItem: {
-    paddingVertical: 10,
-  },
-
   // **Overlay**
   overlay: {
     ...StyleSheet.absoluteFillObject,
-  },
-
-  // **Messages**
-  messageContainer: {
-    padding: 10,
-    borderRadius: 5,
-    position: 'absolute',
-    top: 20,
-    alignSelf: 'center',
-    zIndex: 1000,
-  },
-  successMessage: {
-    backgroundColor: '#4CAF50',
-  },
-  errorMessage: {
-    backgroundColor: '#F44336',
-  },
-
-  // **Scene Items**
-  sceneItem: {
-    flex: 1,
-    padding: 10,
-  },
-  sceneTitle: {
-    fontSize: 22,
-    color: '#FFFFFF',
-    marginBottom: 10,
-    alignSelf: 'center',
-  },
-
-  // **Sections**
-  section: {
-    marginBottom: 10, // Combined style for saveSection and loadSection
-    width: '100%',
-  },
-
-  label: {
-    fontSize: 18,
-    color: '#fff',
-    textDecorationLine: 'underline', // Indicate it's clickable
-    marginBottom: 5, // Added for spacing
   },
 
   // **Messages**
@@ -221,13 +120,6 @@ export const commonStyles = StyleSheet.create({
     width: '100%',
   },
 
-  addStateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    width: '100%',
-  },
-
   positionInput: {
     width: 30,
     height: 30,
@@ -241,28 +133,7 @@ export const commonStyles = StyleSheet.create({
     color: 'white',
   },
 
-  newStateInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    color: '#1b1b1b',
-    marginRight: 10,
-  },
-
   // **Modal Styles**
-  modalContent: {
-    backgroundColor: '#004225', // British Racing Green
-    padding: 10,
-    borderRadius: 10,
-    width: (7 / 8) * width, // 7/8ths of screen width
-    minHeight: (2 / 3) * height, // Minimum 2/3rds of screen height
-    maxHeight: height * 0.9, // Allow up to 90% of screen height
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Start from the top
-  },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -303,53 +174,14 @@ export const commonStyles = StyleSheet.create({
     right: 20,
     padding: 10,
   },
-  elementItemContainer: {
-    backgroundColor: '#333',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   noElementsText: {
     color: '#fff',
     fontStyle: 'italic',
   },
-  marginTop20: {
-    marginTop: 20,
-  },
-  marginTop10: {
-    marginTop: 10,
-  },
-  marginTop5: {
-    marginTop: 5,
-  },
-  fullWidthMarginBottom20: {
-    width: '100%',
-    marginBottom: 20,
-  },
   // **Radial Label Styles**
-  radialLabelContainer: {
-    marginTop: 10,
-    width: '100%',
-  },
   radialLabelInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  radialTextInput: {
-    flex: 1,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 5,
-    color: '#fff',
-    backgroundColor: '#333',
-  },
-  deleteRadialButton: {
-    marginLeft: 10,
-    padding: 5,
   },
 
   // **Number of Radials Styles**
@@ -389,11 +221,5 @@ export const commonStyles = StyleSheet.create({
     width: 60,
     textAlign: 'center',
     color: 'white',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    alignItems: 'center',
-    paddingBottom: 20,
-    width: '100%',
   },
 });

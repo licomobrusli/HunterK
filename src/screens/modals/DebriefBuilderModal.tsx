@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { Picker } from '@react-native-picker/picker';
 import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 import PromptElement from '../../config/debrief/PromptElement';
 import RadialsElement from '../../config/debrief/RadialsElement';
 import { DebriefingsContext } from '../../config/debrief/DebriefingsContext';
@@ -87,11 +88,11 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
   return (
     <Modal visible={visible} animationType="slide" transparent={false}>
       <ScrollView contentContainerStyle={commonStyles.container}>
-        <Text style={commonStyles.boldText1}>Create New Debriefing</Text>
+        <Text style={textStyles.boldText1}>Create New Debriefing</Text>
 
         {/* Debriefing Name Input */}
         <View style={commonStyles.container}>
-          <Text style={commonStyles.label}>Debriefing Name</Text>
+          <Text style={textStyles.text0}>Debriefing Name</Text>
           <TextInput
             style={commonStyles.textInput}
             placeholder="Enter debriefing name..."
@@ -107,12 +108,12 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
           onPress={() => setShowElementTypeDropdown(!showElementTypeDropdown)}
         >
           <Icon name="plus" size={20} color="#fff" />
-          <Text style={commonStyles.boldText0}> Add Element</Text>
+          <Text style={textStyles.boldText0}> Add Element</Text>
         </TouchableOpacity>
 
         {/* Element Type Dropdown */}
         {showElementTypeDropdown && (
-          <View style={commonStyles.fullWidthMarginBottom20}>
+          <View style={commonStyles.container}>
             <Picker
               selectedValue={selectedElementType}
               onValueChange={(itemValue) => setSelectedElementType(itemValue)}
@@ -141,22 +142,22 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
         )}
 
         {/* List of Added Elements */}
-        <View style={commonStyles.fullWidthMarginBottom20}>
-          <Text style={commonStyles.text1}>Added Elements</Text>
+        <View style={commonStyles.container}>
+          <Text style={textStyles.text1}>Added Elements</Text>
           {elements.length === 0 ? (
             <Text style={commonStyles.noElementsText}>No elements added yet.</Text>
           ) : (
             elements.map((el) => (
-              <View key={el.id} style={commonStyles.elementItemContainer}>
+              <View key={el.id} style={commonStyles.container}>
                 <View>
-                  <Text style={commonStyles.boldText0}>
+                  <Text style={textStyles.boldText0}>
                     {el.type === 'prompt' ? 'Prompt' : 'Radials'}
                   </Text>
-                  <Text style={commonStyles.textA}>{el.prompt}</Text>
+                  <Text style={textStyles.textA}>{el.prompt}</Text>
                   {el.type === 'radials' && el.options && (
-                    <View style={commonStyles.marginTop5}>
+                    <View style={commonStyles.container}>
                       {el.options.map((option, idx) => (
-                        <Text key={idx} style={commonStyles.textA}>
+                        <Text key={idx} style={textStyles.textA}>
                           • {option}
                         </Text>
                       ))}
@@ -176,7 +177,7 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
           style={commonStyles.button}
           onPress={handleSaveDebriefing}
         >
-          <Text style={commonStyles.text0}>Save Debriefing</Text>
+          <Text style={textStyles.text0}>Save Debriefing</Text>
         </TouchableOpacity>
 
         {/* Close Modal Button */}

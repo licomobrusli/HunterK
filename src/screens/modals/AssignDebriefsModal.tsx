@@ -10,6 +10,7 @@ import {
 import RNFS from 'react-native-fs';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
 
@@ -68,7 +69,7 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
     return (
       <View>
         <TouchableOpacity onPress={() => handleSelectDebrief(item.name)} style={commonStyles.button}>
-          <Text style={[commonStyles.itemText, isSelected && commonStyles.selectedText]}>{item.name}</Text>
+          <Text style={[textStyles.text0, isSelected && textStyles.greenText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -76,7 +77,7 @@ const AssignDebriefsModal: React.FC<AssignDebriefsModalProps> = ({
 
   return (
     <AppModal isVisible={visible} onClose={onClose}>
-      <Text style={commonStyles.title}>Assign Debrief for {stateName}</Text>
+      <Text style={textStyles.text1}>Assign Debrief for {stateName}</Text>
       <FlatList
         data={items}
         keyExtractor={(item) => item.name}

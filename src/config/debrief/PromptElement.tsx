@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 interface PromptElementProps {
   onAdd: (element: DebriefElement) => void;
@@ -31,7 +32,7 @@ const PromptElement: React.FC<PromptElementProps> = ({ onAdd, onCancel }) => {
 
   return (
     <View style={commonStyles.elementConfigContainer}>
-      <Text style={commonStyles.label}>Prompt</Text>
+      <Text style={textStyles.text0}>Prompt</Text>
       <TextInput
         style={commonStyles.textInput}
         placeholder="Enter prompt/question..."
@@ -41,10 +42,10 @@ const PromptElement: React.FC<PromptElementProps> = ({ onAdd, onCancel }) => {
       />
       <View style={commonStyles.buttonRow}>
         <TouchableOpacity style={commonStyles.button} onPress={handleAddPrompt}>
-          <Text style={commonStyles.text0}>Add Prompt</Text>
+          <Text style={textStyles.text0}>Add Prompt</Text>
         </TouchableOpacity>
         <TouchableOpacity style={commonStyles.button} onPress={onCancel}>
-          <Text style={commonStyles.text0}>Cancel</Text>
+          <Text style={textStyles.text0}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>

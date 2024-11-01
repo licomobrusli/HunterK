@@ -30,7 +30,7 @@ const StackNavigator: React.FC = () => {
   const renderSettingsIcon = (navigation: NativeStackNavigationProp<RootStackParamList>) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('Settings')}
-      style={commonStyles.headerIcon}
+      style={commonStyles.container}
     >
       <Icon name="settings" size={24} color="#000" />
     </TouchableOpacity>

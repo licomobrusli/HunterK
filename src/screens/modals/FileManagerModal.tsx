@@ -12,6 +12,7 @@ import RNFS from 'react-native-fs';
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import Modal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
@@ -135,7 +136,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
               <Icon name={isAudioFile ? (playingFilePath === item.path ? 'pause' : 'play') : 'file'} size={20} color={isAudioFile && playingFilePath === item.path ? 'green' : 'white'} />
             )}
             <Text
-              style={playingFilePath === item.path ? [commonStyles.text0, commonStyles.greenText] : commonStyles.text0}
+              style={playingFilePath === item.path ? [textStyles.text0, textStyles.greenText] : textStyles.text0}
             >
               {item.name}
             </Text>
@@ -151,7 +152,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
             data={items[item.path]}
             keyExtractor={(subItem) => subItem.path}
             renderItem={({ item: subItem }) => renderItem({ item: subItem, path: item.path })}
-            style={commonStyles.subList}
+            style={commonStyles.pad10}
           />
         )}
       </View>
@@ -160,7 +161,7 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
 
   return (
     <Modal isVisible={visible} onClose={onClose}>
-      <View style={commonStyles.modalContent}>
+      <View style={commonStyles.container}>
         <FlatList
           data={[
             {
@@ -197,8 +198,8 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
         />
         {/* JSON Viewer Modal */}
         <Modal isVisible={!!jsonContent} onClose={() => setJsonContent(null)}>
-          <ScrollView style={commonStyles.jsonViewer}>
-            <Text style={commonStyles.text0}>{jsonContent}</Text>
+          <ScrollView style={commonStyles.pad10}>
+            <Text style={textStyles.text0}>{jsonContent}</Text>
           </ScrollView>
         </Modal>
       </View>

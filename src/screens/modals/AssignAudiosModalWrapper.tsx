@@ -13,6 +13,7 @@ import { IntervalContext } from '../../contexts/SceneProvider';
 import { PlaybackMode } from '../../types/PlaybackMode';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
+import { textStyles } from '../../styles/textStyles';
 
 const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; stateName: string }> = ({
   visible,
@@ -83,7 +84,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
     return (
       <View>
         <TouchableOpacity onPress={() => handleSelectAudio(item.name)} style={commonStyles.button}>
-          <Text style={[commonStyles.itemText, isSelected && commonStyles.selectedText]}>{item.name}</Text>
+          <Text style={[textStyles.text0, isSelected && textStyles.greenText]}>{item.name}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -91,9 +92,9 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
 
   return (
     <AppModal isVisible={visible} onClose={onClose} animationIn="fadeIn" animationOut="fadeOut">
-      <Text style={commonStyles.title}>Assign Audios for {stateName}</Text>
+      <Text style={textStyles.text1}>Assign Audios for {stateName}</Text>
 
-      <View style={commonStyles.pickerContainer}>
+      <View style={commonStyles.container}>
         <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
         <Picker
           selectedValue={playbackMode}
@@ -128,8 +129,8 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
         style={commonStyles.list}
       />
 
-      <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.saveButton}>
-        <Text style={commonStyles.saveButtonText}>Save Selection</Text>
+      <TouchableOpacity onPress={handleSaveSelection} style={commonStyles.button}>
+        <Text style={textStyles.text0}>Save Selection</Text>
       </TouchableOpacity>
     </AppModal>
   );
