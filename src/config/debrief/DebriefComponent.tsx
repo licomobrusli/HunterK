@@ -209,19 +209,28 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
   return (
     <KeyboardAvoidingView
-      style={containerStyles.container}
+      style={[containerStyles.container, { flex: 1 }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={containerStyles.container}>
+      {/* Title at the top */}
+      <View style={{ alignItems: 'center', marginTop: 20, borderColor: 'red', borderWidth: 1 }}>
         <Text style={textStyles.boldText1}>{debriefing.name}</Text>
-        {debriefing.elements?.map((element) => renderElement(element))}
+      </View>
 
-        <TouchableOpacity style={buttonStyles.button} onPress={handleSubmit}>
-          <Text style={buttonStyles.button}>Submit Debrief</Text>
-        </TouchableOpacity>
+      {/* Prompts in the middle, scrollable */}
+      <ScrollView style={{ flexGrow: 1, justifyContent: 'center', borderColor: 'red', borderWidth: 1 }}>
+        {debriefing.elements?.map((element) => renderElement(element))}
       </ScrollView>
+
+      {/* Submit button at the bottom */}
+      <View style={{ alignItems: 'center', paddingVertical: 20, borderColor: 'red', borderWidth: 1 }}>
+        <TouchableOpacity style={buttonStyles.button} onPress={handleSubmit}>
+          <Text style={textStyles.text0}>Submit Debrief</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
+
 };
 
 export default DebriefComponent;

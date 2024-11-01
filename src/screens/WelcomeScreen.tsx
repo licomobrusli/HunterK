@@ -37,14 +37,6 @@ const WelcomeScreen: React.FC<Props> = ({ navigation }) => {
         console.log('WelcomeScreen: Long press detected from peripheral device');
         navigation.navigate({ name: 'Active', params: { sceneName: 'defaultScene' } });
       }
-      // Handle other events if needed
-      // else if (eventName === 'single_press') {
-        // console.log('WelcomeScreen: Single press detected');
-        // Handle single press logic here
-      // } else if (eventName === 'double_press') {
-        // console.log('WelcomeScreen: Double press detected');
-        // Handle double press logic here
-      // }
     });
 
     // Start listening to logs

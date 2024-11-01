@@ -299,9 +299,11 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity style={buttonStyles.button} onPress={handleLongPress}>
-        <Text style={textStyles.text0}>Abort</Text>
-      </TouchableOpacity>
+      <View style={containerStyles.containerBottom}>
+        <TouchableOpacity style={buttonStyles.button} onPress={handleLongPress}>
+          <Text style={textStyles.text0}>Abort</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

@@ -11,6 +11,20 @@ export const containerStyles = StyleSheet.create({
     backgroundColor: '#004225', // British Racing Green
     paddingHorizontal: 20, // Added padding for better layout
   },
+  containerBottom: {
+    position: 'absolute',
+    bottom: 10,
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+  },
+  containerRight: {
+    position: 'absolute',
+    right: 10,
+    alignItems: 'center',
+    borderColor: '#ccc',
+    borderWidth: 1,
+  },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',

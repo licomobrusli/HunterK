@@ -5,15 +5,19 @@ import { StyleSheet } from 'react-native';
 export const buttonStyles = StyleSheet.create({
   // **Buttons**
   button: {
-    backgroundColor: '#FF6347', // Tomato color for the button background
+    backgroundColor: '#004225',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
-    flexDirection: 'row', // Align icon and text horizontally
+    flexDirection: 'row',
   },
   disabledButton: {
-    backgroundColor: '#B0B0B0', // Grey color for disabled buttons
+    backgroundColor: '#B0B0B0',
+    padding: 10,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
 });
