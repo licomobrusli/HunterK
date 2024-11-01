@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, TouchableOpacity,  Dimensions } from 'react-native';
+import { View, TouchableOpacity, Dimensions } from 'react-native';
 import RNModal from 'react-native-modal';
-import Icon from 'react-native-vector-icons/Feather'; // Import Feather icons
+import Icon from 'react-native-vector-icons/Feather';
 import { containerStyles } from '../styles/containerStyles.ts';
 import { buttonStyles } from './buttonStyles.ts';
+import { paddingStyles } from './paddingStyles.ts';
 
 type AnimationInTypes =
   | 'slideInUp'
@@ -73,22 +74,23 @@ const AppModal: React.FC<AppModalProps> = ({
       backdropOpacity={0.7}
       backdropTransitionInTiming={500}
       supportedOrientations={['portrait', 'landscape']}
-      style={containerStyles.container}
-      customBackdrop={<View />}
+      style={paddingStyles.margin0}  // Ensures the modal covers the full screen
       deviceHeight={Dimensions.get('window').height}
       deviceWidth={Dimensions.get('window').width}
       propagateSwipe
     >
-      <View style={containerStyles.container}>
+      <View style={[containerStyles.container, { flex: 1 }]}>
         {/* Header with X button */}
-        <View style={containerStyles.container}>
-          <View style={containerStyles.container} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 16 }}>
           <TouchableOpacity onPress={onClose} style={buttonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
+
         {/* Modal content */}
-        {children}
+        <View style={{ flex: 1, width: '100%' }}>
+          {children}
+        </View>
       </View>
     </RNModal>
   );

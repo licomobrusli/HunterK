@@ -55,19 +55,6 @@ export const commonStyles = StyleSheet.create({
     marginRight: 10,
   },
 
-  positionInput: {
-    width: 30,
-    height: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'white',
-    padding: 1,
-    textAlign: 'center',
-    borderRadius: 1,
-    color: 'white',
-  },
-
   // **Modal Styles**
   fixedWidthLabel: {
     width: 100, // Adjust the width as needed

@@ -3,9 +3,9 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
 import { containerStyles } from '../styles/containerStyles.ts';
+import { buttonStyles } from '../styles/buttonStyles.ts';
 
 type AddStateRowProps = {
   position: string;
@@ -26,7 +26,7 @@ const AddStateRow: React.FC<AddStateRowProps> = ({
     <View style={containerStyles.itemContainer}>
       {/* Position Number Input */}
       <TextInput
-        style={commonStyles.positionInput}
+        style={buttonStyles.iconButton}
         value={position}
         onChangeText={setPosition}
         keyboardType="numeric"

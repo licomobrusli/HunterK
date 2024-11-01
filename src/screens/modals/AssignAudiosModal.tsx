@@ -112,7 +112,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
       <View style={containerStyles.container}>
         <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
         <TextInput
-          style={commonStyles.positionInput}
+          style={buttonStyles.iconButton}
           value={repetitions}
           onChangeText={(text) => {
             if (/^\d{0,2}$/.test(text)) {

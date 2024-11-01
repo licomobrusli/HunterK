@@ -7,4 +7,7 @@ export const paddingStyles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     },
+    margin0: {
+        margin: 0,
+    },
 });

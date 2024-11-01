@@ -5,6 +5,9 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import Bin from '../assets/icons/bin.svg';
 import Debrief from '../assets/icons/debrief.svg';
+import { containerStyles } from '../styles/containerStyles';
+import { textStyles } from '../styles/textStyles';
+import { buttonStyles } from '../styles/buttonStyles.ts';
 
 type StateRowProps = {
   stateName: string;
@@ -69,9 +72,9 @@ const StateRow: React.FC<StateRowProps> = ({
   };
 
   return (
-    <View style={commonStyles.stateColumnRow}>
+    <View style={containerStyles.itemContainer}>
       <TextInput
-        style={commonStyles.positionInput}
+        style={buttonStyles.iconButton}
         value={(index + 1).toString()}
         editable={false}
         keyboardType="numeric"
@@ -95,7 +98,7 @@ const StateRow: React.FC<StateRowProps> = ({
 
       {editing ? (
         <TextInput
-          style={commonStyles.inputText}
+          style={textStyles.text0}
           value={localInterval ?? 'mm:ss'}
           onChangeText={handleChange}
           onBlur={handleBlur}
@@ -106,19 +109,19 @@ const StateRow: React.FC<StateRowProps> = ({
         />
       ) : (
         <TouchableOpacity onPress={onEditInterval} onLongPress={handleIntervalLongPress}>
-          <Text style={commonStyles.inputText}>{localInterval || 'mm:ss'}</Text>
+          <Text style={textStyles.text0}>{localInterval || 'mm:ss'}</Text>
         </TouchableOpacity>
       )}
 
       <TouchableOpacity onPress={onDelete}>
-        <View style={commonStyles.positionInput}>
+        <View style={buttonStyles.iconButton}>
           <Bin width={18} height={18} fill="#fff" stroke="#004225" />
         </View>
       </TouchableOpacity>
 
       {/* Debrief Button with color change */}
       <TouchableOpacity onPress={onAssignDebrief} delayLongPress={200}>
-        <View style={commonStyles.positionInput}>
+        <View style={buttonStyles.iconButton}>
           <Debrief
             width={18}
             height={18}

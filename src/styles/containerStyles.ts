@@ -6,11 +6,10 @@ export const containerStyles = StyleSheet.create({
   // **Containers**
   container: {
     flexGrow: 1,
+    width: '100%',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#004225', // British Racing Green
-    paddingHorizontal: 20, // Added padding for better layout
   },
   containerBottom: {
     position: 'absolute',
@@ -28,9 +27,9 @@ export const containerStyles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 10,
   },
   subModalContent: {
     width: 300,

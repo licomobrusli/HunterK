@@ -20,4 +20,16 @@ export const buttonStyles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
+  iconButton: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+    padding: 1,
+    textAlign: 'center',
+    borderRadius: 1,
+    color: 'white',
+  },
 });
