@@ -6,6 +6,7 @@ export const containerStyles = StyleSheet.create({
   // **Containers**
   container: {
     flexGrow: 1,
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#004225', // British Racing Green

@@ -1,5 +1,3 @@
-// src/components/DebriefComponent.tsx
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Text,
@@ -17,8 +15,8 @@ import RadioButton from './RadioButton'; // Reusable RadioButton component
 import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
-import { containerStyles } from '../../styles/containerStyles.ts';
 import { buttonStyles } from '../../styles/buttonStyles.ts';
+import { paddingStyles } from '../../styles/paddingStyles.ts';
 
 const { LogcatModule } = NativeModules;
 
@@ -32,7 +30,6 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
   const listenerStartTimeRef = useRef<number>(0);
 
   const handleSubmit = useCallback(() => {
-    // Validation
     let isValid = true;
     let validationMessage = '';
 
@@ -49,8 +46,6 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
         isValid = false;
         validationMessage = 'Please answer all multiple-choice questions.';
       }
-
-      // Add more validation based on element types as needed
     });
 
     if (!isValid) {
@@ -58,7 +53,6 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       return;
     }
 
-    // If validation passes
     console.log(`Submitting debriefing "${debriefing.name}" with responses:`, responses);
     Alert.alert('Success', 'Your debriefing has been submitted.');
     onComplete(responses);
@@ -122,7 +116,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     switch (element.type) {
       case DebriefElementType.Prompt:
         return (
-          <View key={element.id} style={containerStyles.container}>
+          <View key={element.id} style={paddingStyles.padV10}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             <TextInput
               style={[commonStyles.textInput, textStyles.greenText]}
@@ -142,7 +136,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       case DebriefElementType.MultipleChoice:
       case DebriefElementType.Radials:
         return (
-          <View key={element.id} style={containerStyles.container}>
+          <View key={element.id} style={paddingStyles.padV10}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             {element.options?.map((option) => (
               <RadioButton
@@ -159,7 +153,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Dropdown:
         return (
-          <View key={element.id} style={containerStyles.container}>
+          <View key={element.id} style={paddingStyles.padV10}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             <Picker
               selectedValue={responses[element.id] || ''}
@@ -176,10 +170,8 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Scale:
         return (
-          <View key={element.id} style={containerStyles.container}>
+          <View key={element.id} style={paddingStyles.padV10}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
-            {/* Implement a scale component or use a third-party library */}
-            {/* Placeholder implementation */}
             <Text>
               Scale from {element.scale?.min} to {element.scale?.max}
             </Text>
@@ -199,8 +191,6 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
           </View>
         );
 
-      // Add more cases for different element types as needed
-
       default:
         console.warn(`Unhandled element type: ${element.type}`);
         return null;
@@ -209,28 +199,24 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
   return (
     <KeyboardAvoidingView
-      style={[containerStyles.container, { flex: 1 }]}
+      style={paddingStyles.padV10}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Title at the top */}
-      <View style={{ alignItems: 'center', marginTop: 20, borderColor: 'red', borderWidth: 1 }}>
+      <View style={paddingStyles.padV10}>
         <Text style={textStyles.boldText1}>{debriefing.name}</Text>
       </View>
 
-      {/* Prompts in the middle, scrollable */}
-      <ScrollView style={{ flexGrow: 1, justifyContent: 'center', borderColor: 'red', borderWidth: 1 }}>
+      <ScrollView contentContainerStyle={paddingStyles.padV10}>
         {debriefing.elements?.map((element) => renderElement(element))}
       </ScrollView>
 
-      {/* Submit button at the bottom */}
-      <View style={{ alignItems: 'center', paddingVertical: 20, borderColor: 'red', borderWidth: 1 }}>
+      <View style={paddingStyles.padV10}>
         <TouchableOpacity style={buttonStyles.button} onPress={handleSubmit}>
           <Text style={textStyles.text0}>Submit Debrief</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
-
 };
 
 export default DebriefComponent;
