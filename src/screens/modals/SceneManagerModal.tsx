@@ -18,8 +18,11 @@ import { getSceneList, exportScene, importScene } from '../../config/SceneStorag
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
-import { containerStyles } from '../../styles/containerStyles.ts';
-import { buttonStyles } from '../../styles/buttonStyles.ts';
+import { containerStyles } from '../../styles/containerStyles';
+import { buttonStyles } from '../../styles/buttonStyles';
+import Bin from '../../assets/icons/bin.svg';
+import Download from '../../assets/icons/download.svg';
+import Upload from '../../assets/icons/upload.svg';
 
 type SceneManagerModalProps = {
   visible: boolean;
@@ -69,10 +72,8 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       return;
     }
 
-    // Check if scene already exists
     if (sceneList.includes(sanitizedSceneName)) {
       console.log(`Scene "${sanitizedSceneName}" already exists. Overwriting.`);
-      // Optionally, prompt the user before overwriting
     } else {
       console.log(`Saving new scene: "${sanitizedSceneName}".`);
     }
@@ -82,13 +83,12 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       states: states,
       intervals: intervals,
       selectedAudios: selectedAudios,
-      selectedDebriefs: selectedDebriefs, // Include selectedDebriefs here
+      selectedDebriefs: selectedDebriefs,
     };
 
     console.log('Scene to save:', sceneToSave);
 
     try {
-      // Save the scene using AsyncStorage
       await AsyncStorage.setItem(`@scene_${sanitizedSceneName}`, JSON.stringify(sceneToSave));
       console.log(`Scene "${sanitizedSceneName}" saved successfully.`);
       fetchSceneList();
@@ -140,7 +140,6 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
     }
   };
 
-  // Handle export
   const handleExportScene = async (selectedSceneName: string) => {
     try {
       console.log(`Exporting scene: ${selectedSceneName}`);
@@ -152,13 +151,12 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
     }
   };
 
-  // Handle import
   const handleImportScene = async () => {
     try {
       console.log('Importing scene...');
       await importScene();
       console.log('Scene imported successfully.');
-      fetchSceneList(); // Refresh the scene list
+      fetchSceneList();
     } catch (error) {
       console.error('Error importing scene:', error);
       Alert.alert('Import Error', 'Failed to import scene.');
@@ -166,16 +164,16 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
   };
 
   const renderSceneItem = ({ item }: { item: string }) => (
-    <View style={containerStyles.container}>
+    <View style={containerStyles.itemContainer}>
       <TouchableOpacity onPress={() => handleLoadScene(item)} style={containerStyles.list}>
         <Text style={textStyles.text0}>{item}</Text>
       </TouchableOpacity>
-      <View style={buttonStyles.button}>
-        <TouchableOpacity onPress={() => handleExportScene(item)} style={buttonStyles.button}>
-          <Icon name="upload" size={20} color="#fff" />
+      <View style={containerStyles.containerRight}>
+        <TouchableOpacity onPress={() => handleExportScene(item)} style={buttonStyles.iconButton}>
+          <Upload width={18} height={18} fill="#fff" stroke="#004225" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={buttonStyles.button}>
-          <Icon name="trash-2" size={20} color="#fff" />
+        <TouchableOpacity onPress={() => handleDeleteScene(item)} style={buttonStyles.iconButton}>
+          <Bin width={18} height={18} fill="#fff" stroke="#004225" />
         </TouchableOpacity>
       </View>
     </View>
@@ -188,7 +186,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       {/* Save Scene Section */}
       <View style={containerStyles.itemContainer}>
         <TextInput
-          style={commonStyles.textInput}
+          style={[commonStyles.textInput, containerStyles.list]}
           placeholder="Enter scene name"
           value={sceneName}
           onChangeText={setSceneName}
@@ -196,7 +194,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
         />
         <TouchableOpacity
           onPress={handleSaveScene}
-          style={buttonStyles.button}
+          style={buttonStyles.iconButton}
           accessibilityLabel="Save current scene"
           accessibilityRole="button"
         >
@@ -205,10 +203,12 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
       </View>
 
       {/* Import Button */}
-      <TouchableOpacity onPress={handleImportScene} style={buttonStyles.button}>
-        <Icon name="download" size={24} color="#fff" />
-        <Text style={textStyles.boldText0}>Import Scene</Text>
-      </TouchableOpacity>
+      <View style={containerStyles.itemContainer}>
+        <Text style={[textStyles.boldText0, containerStyles.list]}>Import Scene</Text>
+        <TouchableOpacity onPress={handleImportScene} style={buttonStyles.iconButton}>
+          <Download width={18} height={18} fill="#fff" stroke="#004225" />
+        </TouchableOpacity>
+      </View>
 
       {/* Load Scene Section */}
       <View style={containerStyles.container}>

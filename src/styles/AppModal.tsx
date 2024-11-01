@@ -79,16 +79,16 @@ const AppModal: React.FC<AppModalProps> = ({
       deviceWidth={Dimensions.get('window').width}
       propagateSwipe
     >
-      <View style={[containerStyles.container, { flex: 1 }]}>
+      <View style={[containerStyles.container, containerStyles.list]}>
         {/* Header with X button */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 16 }}>
+        <View style={containerStyles.itemContainer}>
           <TouchableOpacity onPress={onClose} style={buttonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
 
         {/* Modal content */}
-        <View style={{ flex: 1, width: '100%' }}>
+        <View style={containerStyles.list}>
           {children}
         </View>
       </View>

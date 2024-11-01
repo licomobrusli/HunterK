@@ -21,6 +21,7 @@ import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
 import { buttonStyles } from '../../styles/buttonStyles.ts';
+import Bin from '../../assets/icons/bin.svg';
 
 interface DebriefingBuilderModalProps {
   visible: boolean;
@@ -167,7 +168,9 @@ const DebriefBuilderModal: React.FC<DebriefingBuilderModalProps> = ({
                   )}
                 </View>
                 <TouchableOpacity onPress={() => handleRemoveElement(el.id)}>
-                  <Icon name="trash-2" size={20} color="#ff4d4d" />
+                  <View style={buttonStyles.iconButton}>
+                    <Bin width={18} height={18} fill="#fff" stroke="#004225" />
+                  </View>
                 </TouchableOpacity>
               </View>
             ))

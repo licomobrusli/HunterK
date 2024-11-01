@@ -10,6 +10,7 @@ export const containerStyles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     backgroundColor: '#004225', // British Racing Green
+    padding: 5,
   },
   containerBottom: {
     position: 'absolute',
@@ -18,11 +19,16 @@ export const containerStyles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
+  containerLeft: {
+    flexDirection: 'row',
+    alignContent: 'flex-start',
+    borderColor: '#fff',
+    borderWidth: 1,
+  },
   containerRight: {
-    position: 'absolute',
-    right: 10,
-    alignItems: 'center',
-    borderColor: '#ccc',
+    flexDirection: 'row',
+    alignContent: 'flex-end',
+    borderColor: '#fff',
     borderWidth: 1,
   },
   itemContainer: {
@@ -30,13 +36,6 @@ export const containerStyles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  subModalContent: {
-    width: 300,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    alignItems: 'center',
   },
   list: {
     flex: 1,

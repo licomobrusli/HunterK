@@ -15,6 +15,7 @@ import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles.ts';
 import { buttonStyles } from '../../styles/buttonStyles.ts';
+import Bin from '../../assets/icons/bin.svg';
 
 const AUDIOS_DIR = `${RNFS.DocumentDirectoryPath}/audios`;
 const DEBRIEFS_DIR = `${RNFS.DocumentDirectoryPath}/debriefs`;
@@ -145,7 +146,9 @@ const FileManager: React.FC<{ visible: boolean; onClose: () => void }> = ({
           </TouchableOpacity>
           {item.isFile() && (
             <TouchableOpacity onPress={() => deleteFile(item.path)}>
-              <Icon name="trash" size={20} color="red" />
+              <View style={buttonStyles.iconButton}>
+                <Bin width={18} height={18} fill="#fff" stroke="#004225" />
+              </View>
             </TouchableOpacity>
           )}
         </View>

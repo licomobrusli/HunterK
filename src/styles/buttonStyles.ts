@@ -32,4 +32,16 @@ export const buttonStyles = StyleSheet.create({
     borderRadius: 1,
     color: 'white',
   },
+  timeButton: {
+    width: 60,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'white',
+    padding: 1,
+    textAlign: 'center',
+    borderRadius: 1,
+    color: 'white',
+  },
 });

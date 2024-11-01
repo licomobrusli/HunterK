@@ -14,13 +14,19 @@ import { PlaybackMode } from '../../types/PlaybackMode';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
-import { containerStyles } from '../../styles/containerStyles.ts';
-import { buttonStyles } from '../../styles/buttonStyles.ts';
+import { containerStyles } from '../../styles/containerStyles';
+import { buttonStyles } from '../../styles/buttonStyles';
 
-const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; stateName: string }> = ({
+const AssignAudiosModal: React.FC<{
+  visible: boolean;
+  onClose: () => void;
+  stateName: string;
+  setAudioAssigned: (stateName: string, isAssigned: boolean) => void;
+}> = ({
   visible,
   onClose,
   stateName,
+  setAudioAssigned,
 }) => {
   const { selectedAudios, setSelectedAudiosForState } = useContext(IntervalContext);
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
@@ -75,8 +81,9 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
     setSelectedAudiosForState(stateName, {
       audios: selectedFiles,
       mode: playbackMode,
-      repetitions: parsedRepetitions, // Save parsed repetitions as number or null
+      repetitions: parsedRepetitions,
     });
+    setAudioAssigned(stateName, selectedFiles.length > 0); // Update assignment status
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
     onClose();
   };
