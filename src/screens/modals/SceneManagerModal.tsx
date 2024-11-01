@@ -9,7 +9,6 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { IntervalContext } from '../../contexts/SceneProvider';
 import { Scene } from '../../types/Scene';
 import { sanitizeFileName } from '../../config/sanitizer';
@@ -23,6 +22,7 @@ import { buttonStyles } from '../../styles/buttonStyles';
 import Bin from '../../assets/icons/bin.svg';
 import Download from '../../assets/icons/download.svg';
 import Upload from '../../assets/icons/upload.svg';
+import Save from '../../assets/icons/save.svg';
 
 type SceneManagerModalProps = {
   visible: boolean;
@@ -198,7 +198,9 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
           accessibilityLabel="Save current scene"
           accessibilityRole="button"
         >
-          <Icon name="save" size={24} color="#fff" />
+          <View style={buttonStyles.iconButton}>
+            <Save width={18} height={18} fill="#fff" stroke="#004225" />
+          </View>
         </TouchableOpacity>
       </View>
 

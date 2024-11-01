@@ -1,11 +1,11 @@
-// src/screens/modals/AddStateRow.tsx
+// src/config/debrief/AddStateRow.tsx
 
 import React from 'react';
 import { View, TextInput, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { textStyles } from '../styles/textStyles';
 import { containerStyles } from '../styles/containerStyles.ts';
 import { buttonStyles } from '../styles/buttonStyles.ts';
+import Save from '../assets/icons/save.svg';
 
 type AddStateRowProps = {
   position: string;
@@ -45,7 +45,9 @@ const AddStateRow: React.FC<AddStateRowProps> = ({
       />
       {/* Save Icon */}
       <TouchableOpacity onPress={onAdd}>
-        <Icon name="save" size={24} color="#fff" />
+        <View style={buttonStyles.iconButton}>
+          <Save width={18} height={18} fill="#fff" stroke="#004225" />
+        </View>
       </TouchableOpacity>
     </View>
   );

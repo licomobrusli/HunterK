@@ -114,9 +114,15 @@ const StateRow: React.FC<StateRowProps> = ({
           )}
         </View>
 
-        <TouchableOpacity onPress={onDelete}>
+        {/* Play icon for audio assignment with color change */}
+        <TouchableOpacity onPress={onAssignAudios}>
           <View style={buttonStyles.iconButton}>
-            <Bin width={18} height={18} fill="#fff" stroke="#004225" />
+            <Play
+              width={18}
+              height={18}
+              fill={hasAssignedAudios ? '#00ff00' : '#fff'} // Green if audios are assigned
+              stroke="#004225"
+            />
           </View>
         </TouchableOpacity>
 
@@ -131,17 +137,12 @@ const StateRow: React.FC<StateRowProps> = ({
           </View>
         </TouchableOpacity>
 
-        {/* Play icon for audio assignment with color change */}
-        <TouchableOpacity onPress={onAssignAudios}>
+        <TouchableOpacity onPress={onDelete}>
           <View style={buttonStyles.iconButton}>
-            <Play
-              width={18}
-              height={18}
-              fill={hasAssignedAudios ? '#00ff00' : '#fff'} // Green if audios are assigned
-              stroke="#004225"
-            />
+            <Bin width={18} height={18} fill="#fff" stroke="#004225" />
           </View>
         </TouchableOpacity>
+
       </View>
     </View>
   );
