@@ -142,7 +142,6 @@ const StateRow: React.FC<StateRowProps> = ({
             <Bin width={18} height={18} fill="#fff" stroke="#004225" />
           </View>
         </TouchableOpacity>
-
       </View>
     </View>
   );

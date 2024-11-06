@@ -1,3 +1,4 @@
+// Import necessary modules
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,11 +12,6 @@ import StateRow from '../../config/StateRow';
 import AddStateRow from '../../config/AddStateRow';
 import { buttonStyles } from '../../styles/buttonStyles';
 
-type SceneBuilderModalProps = {
-  visible: boolean;
-  onClose: () => void;
-};
-
 // Utility functions to handle interval conversion
 const convertMsToMinutesSeconds = (milliseconds: number) => {
   const minutes = Math.floor(milliseconds / 60000);
@@ -24,12 +20,17 @@ const convertMsToMinutesSeconds = (milliseconds: number) => {
 };
 
 const convertMinutesSecondsToMs = (time: string) => {
-  if (!time) {return NaN;}
+  if (!time) { return NaN; }
   const [minutes, seconds] = time.split(':').map(Number);
   if (isNaN(minutes) || isNaN(seconds)) {
     return NaN;
   }
   return minutes * 60000 + seconds * 1000;
+};
+
+type SceneBuilderModalProps = {
+  visible: boolean;
+  onClose: () => void;
 };
 
 const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose }) => {
@@ -38,8 +39,8 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     setIntervalForState,
     states,
     setStates,
-    setSelectedAudiosForState,
     selectedAudios,
+    setSelectedAudiosForState,
     selectedDebriefs,
     setSelectedDebriefsForState,
     setIntervals,
@@ -62,12 +63,12 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   useEffect(() => {
     let isMounted = true;
     const loadIntervals = async () => {
-      if (dataLoaded) {return;}
+      if (dataLoaded) { return; }
 
       try {
         const loadedIntervals: { [key: string]: string | null } = {};
         for (const state of states) {
-          if (!state) {continue;}
+          if (!state) { continue; }
 
           const storedInterval = await AsyncStorage.getItem(`@interval_${state.toLowerCase()}`);
           loadedIntervals[state.toLowerCase()] =
@@ -85,7 +86,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
       }
     };
 
-    if (visible && !dataLoaded) {loadIntervals();}
+    if (visible && !dataLoaded) { loadIntervals(); }
 
     return () => {
       isMounted = false;
@@ -97,15 +98,12 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     return selectedAudios[stateName.toLowerCase()]?.audios?.length > 0 || false;
   };
 
-  // Function to update audio assignment status
-  const setAudioAssigned = (stateName: string, isAssigned: boolean) => {
-    if (isAssigned) {
-      setSelectedAudiosForState(stateName, { ...selectedAudios[stateName], audios: [] });
-    } else {
-      setSelectedAudiosForState(stateName, { audios: [], mode: 'Selected', repetitions: 1 });
-    }
+  // Update selectedAudios state when audios are selected in the modal
+  const handleAudiosSelected = (stateName: string, audioData: any) => {
+    setSelectedAudiosForState(stateName, audioData);
   };
 
+  // Save intervals
   const handleSave = async () => {
     try {
       for (const state of states) {
@@ -129,13 +127,14 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
     }
   };
 
+  // Handle debrief assignment to a specific state
   const handleAssignDebrief = (debrief: string | null) => {
     if (selectedState) {
-      console.log(`Assigning debrief "${debrief}" to state "${selectedState}"`);
       setSelectedDebriefsForState(selectedState, debrief);
     }
   };
 
+  // Handle deleting a state
   const handleDeleteState = (index: number) => {
     const stateToDelete = states[index];
     Alert.alert('Delete State', `Are you sure you want to delete "${stateToDelete}"?`, [
@@ -165,7 +164,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
   };
 
   const handleAddState = () => {
-    if (!newStateName.trim() || states.includes(newStateName)) {return;}
+    if (!newStateName.trim() || states.includes(newStateName)) { return; }
 
     const insertIndex = isNaN(parseInt(newStatePosition, 10))
       ? states.length
@@ -217,9 +216,9 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
                 const intervalMs = convertMinutesSecondsToMs(
                   localIntervals[item.toLowerCase()] || ''
                 );
-                if (!isNaN(intervalMs)) {setIntervalForState(item, intervalMs);}
+                if (!isNaN(intervalMs)) { setIntervalForState(item, intervalMs); }
               }}
-              onRenameState={() => {}}
+              onRenameState={() => { }}
               selectedDebrief={selectedDebriefs[item.toLowerCase()] || null}
               hasAssignedAudios={isAudioAssigned(item)}
             />
@@ -243,7 +242,7 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
           visible={assignAudiosModalVisible}
           onClose={() => setAssignAudiosModalVisible(false)}
           stateName={selectedState}
-          setAudioAssigned={setAudioAssigned}
+          onAudiosSelected={handleAudiosSelected} // Pass the callback
         />
       )}
       {assignDebriefsModalVisible && selectedState && (

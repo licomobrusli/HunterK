@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,30 +9,30 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Picker } from '@react-native-picker/picker';
-import { IntervalContext } from '../../contexts/SceneProvider';
-import { PlaybackMode } from '../../types/PlaybackMode';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles';
 import { buttonStyles } from '../../styles/buttonStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AssignAudiosModal: React.FC<{
+type AssignAudiosModalProps = {
   visible: boolean;
   onClose: () => void;
   stateName: string;
-  setAudioAssigned: (stateName: string, isAssigned: boolean) => void;
-}> = ({
+  onAudiosSelected: (stateName: string, audioData: any) => void;
+};
+
+const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   visible,
   onClose,
   stateName,
-  setAudioAssigned,
+  onAudiosSelected,
 }) => {
-  const { selectedAudios, setSelectedAudiosForState } = useContext(IntervalContext);
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [playbackMode, setPlaybackMode] = useState<PlaybackMode>('Selected');
-  const [repetitions, setRepetitions] = useState<string>('1'); // Default to 1, or empty for infinite
+  const [playbackMode, setPlaybackMode] = useState<'Selected' | 'A-Z' | 'Random'>('Selected');
+  const [repetitions, setRepetitions] = useState<string>('1');
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
@@ -47,18 +47,22 @@ const AssignAudiosModal: React.FC<{
       const audioFiles = directoryItems.filter((item) => item.isFile() && item.name.endsWith('.mp3'));
       setItems(audioFiles);
 
-      const currentSelected = selectedAudios[stateName.toLowerCase()] || {
-        audios: [],
-        mode: 'Selected',
-        repetitions: '1',
-      };
+      const storedData = await AsyncStorage.getItem(`@selectedAudios_${stateName.toLowerCase()}`);
+      const currentSelected = storedData
+        ? JSON.parse(storedData)
+        : { audios: [], mode: 'Selected', repetitions: '1' };
+
+      // Ensure default values are set if properties are missing
+      currentSelected.mode = currentSelected.mode || 'Selected';
+      currentSelected.repetitions = currentSelected.repetitions ?? '1';
+
       setSelectedFiles(currentSelected.audios);
       setPlaybackMode(currentSelected.mode);
-      setRepetitions(currentSelected.repetitions?.toString() || '');
+      setRepetitions(currentSelected.repetitions.toString());
     } catch (error) {
       console.error('Error loading audio files:', error);
     }
-  }, [baseFolder, selectedAudios, stateName]);
+  }, [baseFolder, stateName]);
 
   useEffect(() => {
     if (visible) {
@@ -76,14 +80,22 @@ const AssignAudiosModal: React.FC<{
     });
   };
 
-  const handleSaveSelection = () => {
-    const parsedRepetitions = repetitions ? parseInt(repetitions, 10) : null;
-    setSelectedAudiosForState(stateName, {
+  const handleSaveSelection = async () => {
+    const parsedRepetitions = repetitions !== '' ? parseInt(repetitions, 10) : null;
+    const audioData = {
       audios: selectedFiles,
-      mode: playbackMode,
+      mode: playbackMode || 'Selected', // Ensure mode is set
       repetitions: parsedRepetitions,
-    });
-    setAudioAssigned(stateName, selectedFiles.length > 0); // Update assignment status
+    };
+
+    await AsyncStorage.setItem(
+      `@selectedAudios_${stateName.toLowerCase()}`,
+      JSON.stringify(audioData)
+    );
+
+    // Update parent component with new selection
+    onAudiosSelected(stateName, audioData);
+
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
     onClose();
   };
@@ -107,7 +119,7 @@ const AssignAudiosModal: React.FC<{
         <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
         <Picker
           selectedValue={playbackMode}
-          onValueChange={(itemValue) => setPlaybackMode(itemValue as PlaybackMode)}
+          onValueChange={(itemValue) => setPlaybackMode(itemValue as 'Selected' | 'A-Z' | 'Random')}
           style={commonStyles.picker}
         >
           <Picker.Item label="Selected" value="Selected" />

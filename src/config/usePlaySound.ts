@@ -14,6 +14,30 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
 
   const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
+  // Implement the stopAudioAndCleanup function
+  const stopAudioAndCleanup = async () => {
+    try {
+      // Stop audio playback
+      console.log('Stopping audio playback and clearing interval');
+      await TrackPlayer.stop();
+
+      // Clear the interval timer
+      if (intervalRef.current !== null) {
+        BackgroundTimer.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopAudioAndCleanup();
+      console.log('usePlaySound: Cleanup on unmount');
+    };
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -44,7 +68,7 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
 
       if (totalPlayCountRef.current >= maxRepetitions) {
         console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
-        onComplete(); // Trigger state transition
+        onComplete();
         return;
       }
 
@@ -82,7 +106,6 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
         await TrackPlayer.play();
         console.log(`Playing audio for state: ${stateName}`);
 
-        // Increment total play count
         totalPlayCountRef.current += 1;
         console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
       } catch (error) {
@@ -115,6 +138,7 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
       if (intervalRef.current !== null) {
         BackgroundTimer.clearInterval(intervalRef.current);
         intervalRef.current = null;
+        console.log(`Interval cleared for state: ${stateName}`);
       }
     };
   }, [stateName, interval, selectedAudios, AUDIOS_FOLDER, onComplete]);
