@@ -1,45 +1,45 @@
 import { useEffect, useContext, useRef } from 'react';
 import TrackPlayer, { Capability } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
-import BackgroundTimer from 'react-native-background-timer';
 import { IntervalContext } from '../contexts/SceneProvider';
 
 let isTrackPlayerSetup = false;
+
+// Move AUDIOS_FOLDER outside the component
+const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
 const usePlaySound = (stateName: string, interval: number, onComplete: () => void) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
   const totalPlayCountRef = useRef(0);
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
+  // Use a ref to store onComplete
+  const onCompleteRef = useRef(onComplete);
 
-  // Implement the stopAudioAndCleanup function
-  const stopAudioAndCleanup = async () => {
-    try {
-      // Stop audio playback
-      console.log('Stopping audio playback and clearing interval');
-      await TrackPlayer.stop();
-
-      // Clear the interval timer
-      if (intervalRef.current !== null) {
-        BackgroundTimer.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    } catch (error) {
-      console.error('Error during cleanup:', error);
-    }
-  };
-
+  // Update the ref if onComplete changes
   useEffect(() => {
-    return () => {
-      stopAudioAndCleanup();
-      console.log('usePlaySound: Cleanup on unmount');
-    };
-  }, []);
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     let isMounted = true;
+
+    // Define stopAudioAndCleanup inside useEffect
+    const stopAudioAndCleanup = async () => {
+      try {
+        console.log('Stopping audio playback and clearing interval');
+        await TrackPlayer.stop();
+
+        if (intervalRef.current !== null) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+          console.log(`Interval cleared for state: ${stateName}`);
+        }
+      } catch (error) {
+        console.error('Error during cleanup:', error);
+      }
+    };
 
     const setupTrackPlayer = async () => {
       if (!isTrackPlayerSetup) {
@@ -55,7 +55,9 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
     };
 
     const playSound = async () => {
-      if (!isMounted) {return;}
+      if (!isMounted) {
+        return;
+      }
 
       const stateData = selectedAudios[stateName.toLowerCase()];
       if (!stateData || stateData.audios.length === 0) {
@@ -68,7 +70,7 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
 
       if (totalPlayCountRef.current >= maxRepetitions) {
         console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
-        onComplete();
+        onCompleteRef.current(); // Use the ref here
         return;
       }
 
@@ -77,7 +79,9 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
         const randomIndex = Math.floor(Math.random() * audios.length);
         currentAudioFileName = audios[randomIndex];
       } else if (mode === 'A-Z') {
-        const sortedAudios = [...audios].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+        const sortedAudios = [...audios].sort((a, b) =>
+          a.toLowerCase().localeCompare(b.toLowerCase())
+        );
         currentAudioFileName = sortedAudios[audioIndexRef.current];
         audioIndexRef.current = (audioIndexRef.current + 1) % sortedAudios.length;
       } else if (mode === 'Selected') {
@@ -118,10 +122,10 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
       await playSound();
 
       if (intervalRef.current !== null) {
-        BackgroundTimer.clearInterval(intervalRef.current);
+        clearInterval(intervalRef.current);
       }
 
-      intervalRef.current = BackgroundTimer.setInterval(() => {
+      intervalRef.current = setInterval(() => {
         console.log(`Interval triggered for state: ${stateName}`);
         playSound();
       }, interval);
@@ -135,13 +139,10 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
 
     return () => {
       isMounted = false;
-      if (intervalRef.current !== null) {
-        BackgroundTimer.clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        console.log(`Interval cleared for state: ${stateName}`);
-      }
+      stopAudioAndCleanup();
+      console.log(`usePlaySound unmounted for state: ${stateName}`);
     };
-  }, [stateName, interval, selectedAudios, AUDIOS_FOLDER, onComplete]);
+  }, [stateName, interval, selectedAudios]);
 
   return null;
 };

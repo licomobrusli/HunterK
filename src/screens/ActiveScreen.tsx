@@ -10,7 +10,7 @@ import TrackPlayer from 'react-native-track-player';
 import { StateLog } from '../types/Journey';
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
-import { CommonActions } from '@react-navigation/native'; // Import CommonActions
+import { CommonActions } from '@react-navigation/native';
 
 const { LogcatModule } = NativeModules;
 
@@ -21,25 +21,20 @@ interface LogcatEvent {
   timestamp: number;
 }
 
+
 const ActiveScreen: React.FC<Props> = ({ navigation }) => {
   const { states, selectedDebriefs } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
 
   const listenerStartTimeRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [journeyId] = useState<string>(`journey_${Date.now()}`);
-  const [journeyStartTime] = useState<number>(Date.now());
+  const journeyId = useRef<string>(`journey_${Date.now()}`);
+  const journeyStartTime = useRef<number>(Date.now());
   const [stateLogs, setStateLogs] = useState<StateLog[]>([]);
   const currentStateStartTimeRef = useRef<number>(Date.now());
 
-  const stopAudioAndCleanup = async () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
+  const stopAudioAndCleanup = useCallback(async () => {
     try {
       await TrackPlayer.stop();
     } catch (error) {
@@ -47,9 +42,13 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     LogcatModule.stopListening()
-      .then((message: string) => console.log(`ActiveScreen: ${message}`))
-      .catch((error: any) => console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`));
-  };
+      .then((message: string) =>
+        console.log(`ActiveScreen: ${message}`)
+      )
+      .catch((error: any) =>
+        console.warn(`ActiveScreen: Error stopping logcat listener - ${error}`)
+      );
+  }, []);
 
   const findAssignedDebrief = useCallback(
     (index: number): string | null => {
@@ -105,8 +104,8 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
                     name: 'Debrief',
                     params: {
                       debriefName: debriefToShow,
-                      journeyId,
-                      journeyStartTime,
+                      journeyId: journeyId.current,
+                      journeyStartTime: journeyStartTime.current,
                       stateLogs,
                     },
                   },
@@ -114,7 +113,12 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
               })
             );
           } else {
-            navigation.replace('Welcome');
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'Welcome' }],
+              })
+            );
           }
 
           return prevIndex;
@@ -124,25 +128,21 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
         }
       });
     },
-    [
-      isNavigating,
-      states,
-      currentStateIndex,
-      navigation,
-      findAssignedDebrief,
-      journeyId,
-      journeyStartTime,
-      stateLogs,
-    ]
+    [isNavigating, states, stopAudioAndCleanup, findAssignedDebrief, navigation, stateLogs, currentStateIndex]
   );
 
   const handleLongPress = useCallback(() => {
     if (!isNavigating) {
       setIsNavigating(true);
       stopAudioAndCleanup();
-      navigation.replace('Welcome');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Welcome' }],
+        })
+      );
     }
-  }, [isNavigating, navigation]);
+  }, [isNavigating, stopAudioAndCleanup, navigation]);
 
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
@@ -166,13 +166,16 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
       .then(() => {
         listenerStartTimeRef.current = Date.now();
       })
-      .catch((error: any) => console.warn(`ActiveScreen: Error starting logcat listener - ${error}`));
+      .catch((error: any) =>
+        console.warn(`ActiveScreen: Error starting logcat listener - ${error}`)
+      );
 
     return () => {
       logcatListener.remove();
       stopAudioAndCleanup();
+      console.log('ActiveScreen unmounted');
     };
-  }, [advanceState, handleLongPress]);
+  }, [advanceState, handleLongPress, stopAudioAndCleanup]);
 
   useEffect(() => {
     const unsubscribeBlur = navigation.addListener('blur', () => {
@@ -182,7 +185,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
     return () => {
       unsubscribeBlur();
     };
-  }, [navigation]);
+  }, [navigation, stopAudioAndCleanup]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
