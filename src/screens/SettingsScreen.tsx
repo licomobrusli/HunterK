@@ -45,27 +45,27 @@ const SettingsScreen: React.FC = () => {
   return (
     <View style={containerStyles.container}>
       <TouchableOpacity onPress={openRecordAudioModal} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>Record Audios</Text>
+        <Text style={textStyles.text1}>Record Audios</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openSceneBuilderModal} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>Scene Builder</Text>
+        <Text style={textStyles.text1}>Scene Builder</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setDebriefBuilderVisible(true)} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>Debrief Builder</Text>
+        <Text style={textStyles.text1}>Debrief Builder</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openDeleteAudiosModal} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>Delete Custom Audios</Text>
+        <Text style={textStyles.text1}>Delete Custom Audios</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openFileManager} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>File Manager</Text>
+        <Text style={textStyles.text1}>File Manager</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={openSceneManager} style={containerStyles.itemContainer}>
-        <Text style={textStyles.text0}>Scene Manager</Text>
+        <Text style={textStyles.text1}>Scene Manager</Text>
       </TouchableOpacity>
 
       {/* Modals */}

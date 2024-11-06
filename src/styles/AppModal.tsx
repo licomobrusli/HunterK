@@ -81,7 +81,7 @@ const AppModal: React.FC<AppModalProps> = ({
     >
       <View style={[containerStyles.container, containerStyles.list]}>
         {/* Header with X button */}
-        <View style={containerStyles.itemContainer}>
+        <View style={containerStyles.containerRight}>
           <TouchableOpacity onPress={onClose} style={buttonStyles.button} accessibilityLabel="Close modal">
             <Icon name="x" size={24} color="#fff" />
           </TouchableOpacity>

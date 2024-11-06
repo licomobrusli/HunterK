@@ -1,10 +1,9 @@
-// src/config/debrief/AddStateRow.tsx
-
 import React from 'react';
-import { View, TextInput, TouchableOpacity } from 'react-native';
+import { View, TextInput, TouchableOpacity, Text } from 'react-native';
+import { containerStyles } from '../styles/containerStyles';
+import { buttonStyles } from '../styles/buttonStyles';
+import { commonStyles } from '../styles/commonStyles';
 import { textStyles } from '../styles/textStyles';
-import { containerStyles } from '../styles/containerStyles.ts';
-import { buttonStyles } from '../styles/buttonStyles.ts';
 import Save from '../assets/icons/save.svg';
 
 type AddStateRowProps = {
@@ -24,31 +23,50 @@ const AddStateRow: React.FC<AddStateRowProps> = ({
 }) => {
   return (
     <View style={containerStyles.itemContainer}>
-      {/* Position Number Input */}
-      <TextInput
-        style={buttonStyles.iconButton}
-        value={position}
-        onChangeText={setPosition}
-        keyboardType="numeric"
-        maxLength={2}
-        placeholder="Pos"
-      />
+      {/* Position and State Name Section */}
+      <View style={containerStyles.containerLeft}>
+        <TextInput
+          style={buttonStyles.iconButton}
+          value={position}
+          onChangeText={setPosition}
+          keyboardType="numeric"
+          maxLength={2}
+          placeholder="Pos"
+        />
 
-      {/* State Name Input */}
-      <TextInput
-        style={textStyles.text0}
-        value={stateName}
-        onChangeText={setStateName}
-        placeholder="New State Name"
-        placeholderTextColor="#aaa"
-        maxLength={20}
-      />
-      {/* Save Icon */}
-      <TouchableOpacity onPress={onAdd}>
-        <View style={buttonStyles.iconButton}>
-          <Save width={18} height={18} fill="#fff" stroke="#004225" />
+        {/* State Name Input - Fixed Width Label */}
+        <TextInput
+          style={commonStyles.fixedWidthLabel}
+          value={stateName}
+          onChangeText={setStateName}
+          placeholder="Name state ..."
+          placeholderTextColor="#aaa"
+          maxLength={20}
+        />
+      </View>
+
+      {/* Interval, Audio, and Debrief Placeholders with Borders */}
+      <View style={containerStyles.containerRight}>
+        {/* Time Field Setup */}
+        <View style={buttonStyles.timeButton}>
+          <TouchableOpacity>
+            <Text style={textStyles.text0}>mm:ss</Text>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
+
+        {/* Audio Placeholder */}
+        <View style={buttonStyles.iconButton} />
+
+        {/* Debrief Placeholder */}
+        <View style={buttonStyles.iconButton} />
+
+        {/* Save Icon (in place of the Bin icon) */}
+        <TouchableOpacity onPress={onAdd}>
+          <View style={buttonStyles.iconButton}>
+            <Save width={18} height={18} fill="#fff" stroke="#004225" />
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

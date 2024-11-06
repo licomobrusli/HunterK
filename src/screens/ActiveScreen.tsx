@@ -7,10 +7,14 @@ import { IntervalContext } from '../contexts/SceneProvider';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
 import TrackPlayer from 'react-native-track-player';
-import { StateLog } from '../types/Journey';
+import { StateLog, Journey } from '../types/Journey'; // Import Journey type here
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
 import { CommonActions } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
+
+// Import saveJourneyData if it's defined elsewhere
+// import { saveJourneyData } from '../path/to/your/saveJourneyData';
 
 const { LogcatModule } = NativeModules;
 
@@ -21,8 +25,7 @@ interface LogcatEvent {
   timestamp: number;
 }
 
-
-const ActiveScreen: React.FC<Props> = ({ navigation }) => {
+const ActiveScreen: React.FC<Props> = ({ navigation, route }) => { // Destructure route here
   const { states, selectedDebriefs } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -132,17 +135,96 @@ const ActiveScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const handleLongPress = useCallback(() => {
+    console.log('ActiveScreen: Long press detected. Triggering abort.');
     if (!isNavigating) {
       setIsNavigating(true);
       stopAudioAndCleanup();
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'Welcome' }],
-        })
-      );
+
+      const currentStateEndTime = Date.now();
+      const currentStateDuration = currentStateEndTime - currentStateStartTimeRef.current;
+      const currentStateName = states[currentStateIndex];
+
+      setStateLogs((prevLogs) => [
+        ...prevLogs,
+        {
+          stateName: currentStateName,
+          startTime: currentStateStartTimeRef.current,
+          endTime: currentStateEndTime,
+          duration: currentStateDuration,
+        },
+      ]);
+
+      const debriefToShow = findAssignedDebrief(currentStateIndex);
+
+      if (debriefToShow) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Debrief',
+                params: {
+                  debriefName: debriefToShow,
+                  journeyId: journeyId.current,
+                  journeyStartTime: journeyStartTime.current,
+                  stateLogs,
+                },
+              },
+            ],
+          })
+        );
+      } else {
+        const journeyEndTime = Date.now();
+        const journeyDuration = journeyEndTime - journeyStartTime.current;
+
+        const journeyData: Journey = {
+          id: journeyId.current,
+          sceneName: route.params?.sceneName || 'Unknown Scene',
+          startTime: journeyStartTime.current,
+          endTime: journeyEndTime,
+          duration: journeyDuration,
+          stateLogs: [...stateLogs],
+        };
+
+        // Define saveJourneyData function here
+        const saveJourneyData = async (data: Journey) => {
+          const journeyDir = `${RNFS.DocumentDirectoryPath}/journeys`;
+          const journeyPath = `${journeyDir}/${data.id}.json`;
+
+          try {
+            await RNFS.mkdir(journeyDir);
+            await RNFS.writeFile(journeyPath, JSON.stringify(data), 'utf8');
+            console.log(`Journey data saved to ${journeyPath}`);
+          } catch (error) {
+            console.error('Error saving journey data', error);
+          }
+        };
+
+        saveJourneyData(journeyData);
+
+        // Navigate back to Welcome screen to ensure cleanup
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Welcome' }],
+          })
+        );
+
+        console.log('ActiveScreen: Navigated back to Welcome screen.');
+      }
     }
-  }, [isNavigating, stopAudioAndCleanup, navigation]);
+  }, [
+    isNavigating,
+    navigation,
+    currentStateIndex,
+    findAssignedDebrief,
+    states,
+    journeyId,
+    journeyStartTime,
+    stateLogs,
+    stopAudioAndCleanup,
+    route.params?.sceneName, // Include route.params in dependencies
+  ]);
 
   useEffect(() => {
     const logcatEventEmitter = new NativeEventEmitter(LogcatModule);
