@@ -295,7 +295,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => { // Destructur
       </TouchableOpacity>
 
       <View style={containerStyles.containerBottom}>
-        <TouchableOpacity style={buttonStyles.button} onPress={handleLongPress}>
+        <TouchableOpacity style={buttonStyles.buttonWide} onPress={handleLongPress}>
           <Text style={textStyles.text0}>Abort</Text>
         </TouchableOpacity>
       </View>

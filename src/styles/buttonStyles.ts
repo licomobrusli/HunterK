@@ -12,6 +12,15 @@ export const buttonStyles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
+  buttonWide: {
+    width: '100%',
+    backgroundColor: '#004225',
+    padding: 10,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
   disabledButton: {
     backgroundColor: '#B0B0B0',
     padding: 10,

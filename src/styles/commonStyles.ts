@@ -18,9 +18,8 @@ export const commonStyles = StyleSheet.create({
     width: '100%', // Ensure full width usage
   },
   picker: {
-    marginBottom: 10,
-    height: 50,
-    width: '100%',
+    height: 30,
+    width: 100,
     color: '#fff',
     backgroundColor: '#333',
   },
@@ -48,11 +47,6 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: '#005F2E', // Dark green background for selected items
     padding: 10,
     borderRadius: 5,
-  },
-  pickerLabel: {
-    color: '#fff',
-    fontSize: 16,
-    marginRight: 10,
   },
 
   // **Modal Styles**

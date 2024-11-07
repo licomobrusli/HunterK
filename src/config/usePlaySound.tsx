@@ -1,5 +1,5 @@
 import { useEffect, useContext, useRef } from 'react';
-import TrackPlayer, { Capability } from 'react-native-track-player';
+import TrackPlayer, { Capability, Event } from 'react-native-track-player'; // Import Event
 import RNFS from 'react-native-fs';
 import { IntervalContext } from '../contexts/SceneProvider';
 
@@ -12,7 +12,6 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
   const totalPlayCountRef = useRef(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use a ref to store onComplete
   const onCompleteRef = useRef(onComplete);
@@ -28,14 +27,8 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
     // Define stopAudioAndCleanup inside useEffect
     const stopAudioAndCleanup = async () => {
       try {
-        console.log('Stopping audio playback and clearing interval');
+        console.log('Stopping audio playback');
         await TrackPlayer.stop();
-
-        if (intervalRef.current !== null) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-          console.log(`Interval cleared for state: ${stateName}`);
-        }
       } catch (error) {
         console.error('Error during cleanup:', error);
       }
@@ -70,7 +63,7 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
 
       if (totalPlayCountRef.current >= maxRepetitions) {
         console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
-        onCompleteRef.current(); // Use the ref here
+        onCompleteRef.current();
         return;
       }
 
@@ -110,8 +103,25 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
         await TrackPlayer.play();
         console.log(`Playing audio for state: ${stateName}`);
 
+        // Wait for playback to finish
+        await new Promise<void>((resolve) => {
+          const sub = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, () => {
+            console.log(`Playback ended for state: ${stateName}`);
+            sub.remove();
+            resolve();
+          });
+        });
+
         totalPlayCountRef.current += 1;
         console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
+
+        // Wait for 'interval' milliseconds
+        await new Promise<void>((resolve) => setTimeout(resolve, interval));
+
+        // Recursively call playSound
+        if (isMounted) {
+          playSound();
+        }
       } catch (error) {
         console.error('Error playing audio file:', error);
       }
@@ -120,17 +130,6 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
     const initializePlayerAndPlay = async () => {
       await setupTrackPlayer();
       await playSound();
-
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-      }
-
-      intervalRef.current = setInterval(() => {
-        console.log(`Interval triggered for state: ${stateName}`);
-        playSound();
-      }, interval);
-
-      console.log(`Interval set for state: ${stateName} with interval ${interval}ms`);
     };
 
     audioIndexRef.current = 0;

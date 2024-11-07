@@ -6,15 +6,17 @@ import {
   FlatList,
   ToastAndroid,
   TextInput,
+  StyleSheet,
+  Modal,
 } from 'react-native';
 import RNFS from 'react-native-fs';
-import { Picker } from '@react-native-picker/picker';
 import AppModal from '../../styles/AppModal';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
 import { containerStyles } from '../../styles/containerStyles';
 import { buttonStyles } from '../../styles/buttonStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Save from '../../assets/icons/save.svg';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -33,6 +35,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [playbackMode, setPlaybackMode] = useState<'Selected' | 'A-Z' | 'Random'>('Selected');
   const [repetitions, setRepetitions] = useState<string>('1');
+  const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false); // New state variable
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
@@ -44,7 +47,9 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         return;
       }
       const directoryItems = await RNFS.readDir(baseFolder);
-      const audioFiles = directoryItems.filter((item) => item.isFile() && item.name.endsWith('.mp3'));
+      const audioFiles = directoryItems.filter(
+        (item) => item.isFile() && item.name.endsWith('.mp3')
+      );
       setItems(audioFiles);
 
       const storedData = await AsyncStorage.getItem(`@selectedAudios_${stateName.toLowerCase()}`);
@@ -111,50 +116,118 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     );
   };
 
+  // Options for the custom picker
+  const playbackOptions = ['Selected', 'A-Z', 'Random'];
+
   return (
     <AppModal isVisible={visible} onClose={onClose} animationIn="fadeIn" animationOut="fadeOut">
       <Text style={textStyles.text1}>Assign Audios for {stateName}</Text>
 
-      <View style={containerStyles.container}>
-        <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
-        <Picker
-          selectedValue={playbackMode}
-          onValueChange={(itemValue) => setPlaybackMode(itemValue as 'Selected' | 'A-Z' | 'Random')}
-          style={commonStyles.picker}
+      <View style={containerStyles.itemContainer}>
+        <View style={containerStyles.containerLeft}>
+          {/* Repetitions Input */}
+          <TextInput
+            style={buttonStyles.iconButton}
+            value={repetitions}
+            onChangeText={(text) => {
+              if (/^\d{0,2}$/.test(text)) {
+                setRepetitions(text);
+              }
+            }}
+            placeholder="Reps"
+            keyboardType="numeric"
+            maxLength={2}
+          />
+
+          {/* Playback Mode Custom Picker */}
+          <TouchableOpacity
+            style={[commonStyles.fixedWidthLabel, styles.pickerButton]}
+            onPress={() => setIsPickerModalVisible(true)}
+          >
+            <Text style={textStyles.text0}>{playbackMode}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Save Selection Button */}
+        <View style={containerStyles.containerRight}>
+          <TouchableOpacity onPress={handleSaveSelection}>
+            <View style={buttonStyles.iconButton}>
+              <Save width={18} height={18} fill="#fff" stroke="#004225" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Custom Picker Modal */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={isPickerModalVisible}
+        onRequestClose={() => setIsPickerModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setIsPickerModalVisible(false)}
         >
-          <Picker.Item label="Selected" value="Selected" />
-          <Picker.Item label="A-Z" value="A-Z" />
-          <Picker.Item label="Random" value="Random" />
-        </Picker>
-      </View>
+          <View style={styles.modalContent}>
+            {playbackOptions.map((option) => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setPlaybackMode(option as 'Selected' | 'A-Z' | 'Random');
+                  setIsPickerModalVisible(false);
+                }}
+                style={styles.optionItem}
+              >
+                <Text style={styles.optionText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
-      <View style={containerStyles.container}>
-        <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
-        <TextInput
-          style={buttonStyles.iconButton}
-          value={repetitions}
-          onChangeText={(text) => {
-            if (/^\d{0,2}$/.test(text)) {
-              setRepetitions(text);
-            }
-          }}
-          placeholder="Infinite if empty"
-          keyboardType="numeric"
-        />
-      </View>
-
+      {/* Audio Files List */}
       <FlatList
         data={items}
         keyExtractor={(item) => item.name}
         renderItem={renderItem}
         style={containerStyles.list}
       />
-
-      <TouchableOpacity onPress={handleSaveSelection} style={buttonStyles.button}>
-        <Text style={textStyles.text0}>Save Selection</Text>
-      </TouchableOpacity>
     </AppModal>
   );
 };
+
+const styles = StyleSheet.create({
+  pickerButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    backgroundColor: 'rgba(128, 128, 128, 0.4)', // Semi-transparent grey
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'rgba(128, 128, 128, 0.4)', // Semi-transparent grey
+    borderRadius: 5,
+    paddingVertical: 5,
+    width: '80%',
+    alignItems: 'center',
+  },
+  optionItem: {
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  optionText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+});
 
 export default AssignAudiosModal;

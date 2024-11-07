@@ -97,7 +97,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
       <Text style={textStyles.text1}>Assign Audios for {stateName}</Text>
 
       <View style={containerStyles.container}>
-        <Text style={commonStyles.pickerLabel}>Playback Mode:</Text>
+        <Text style={textStyles.text0}>Playback Mode:</Text>
         <Picker
           selectedValue={playbackMode}
           onValueChange={(itemValue) => setPlaybackMode(itemValue as PlaybackMode)}
@@ -110,7 +110,7 @@ const AssignAudiosModal: React.FC<{ visible: boolean; onClose: () => void; state
       </View>
 
       <View style={containerStyles.container}>
-        <Text style={commonStyles.pickerLabel}>Repetitions:</Text>
+        <Text style={textStyles.text0}>Repetitions:</Text>
         <TextInput
           style={buttonStyles.iconButton}
           value={repetitions}
