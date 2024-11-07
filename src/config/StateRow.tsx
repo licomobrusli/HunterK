@@ -74,7 +74,7 @@ const StateRow: React.FC<StateRowProps> = ({
         <TextInput
           style={buttonStyles.iconButton}
           value={(index + 1).toString()}
-          editable={false}
+          editable={true}
           keyboardType="numeric"
           maxLength={2}
           placeholder="Pos"

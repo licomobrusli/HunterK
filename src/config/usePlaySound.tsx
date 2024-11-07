@@ -1,22 +1,20 @@
 import { useEffect, useContext, useRef } from 'react';
-import TrackPlayer, { Capability, Event } from 'react-native-track-player'; // Import Event
+import TrackPlayer, { Capability, Event } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
 import { IntervalContext } from '../contexts/SceneProvider';
+import BackgroundTimer from 'react-native-background-timer';
 
 let isTrackPlayerSetup = false;
-
-// Move AUDIOS_FOLDER outside the component
 const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
 const usePlaySound = (stateName: string, interval: number, onComplete: () => void) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
   const totalPlayCountRef = useRef(0);
+  const timeoutIdRef = useRef<number | null>(null);
 
-  // Use a ref to store onComplete
   const onCompleteRef = useRef(onComplete);
 
-  // Update the ref if onComplete changes
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
@@ -24,11 +22,18 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
   useEffect(() => {
     let isMounted = true;
 
-    // Define stopAudioAndCleanup inside useEffect
     const stopAudioAndCleanup = async () => {
       try {
         console.log('Stopping audio playback');
         await TrackPlayer.stop();
+
+        // Stop all background timers
+        BackgroundTimer.stop();
+
+        if (timeoutIdRef.current !== null) {
+          BackgroundTimer.clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
+        }
       } catch (error) {
         console.error('Error during cleanup:', error);
       }
@@ -115,8 +120,15 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
         totalPlayCountRef.current += 1;
         console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
 
-        // Wait for 'interval' milliseconds
-        await new Promise<void>((resolve) => setTimeout(resolve, interval));
+        // Wait for 'interval' milliseconds using BackgroundTimer
+        await new Promise<void>((resolve) => {
+          const timeoutId = BackgroundTimer.setTimeout(() => {
+            resolve();
+          }, interval);
+
+          // Store timeoutId for cleanup
+          timeoutIdRef.current = timeoutId;
+        });
 
         // Recursively call playSound
         if (isMounted) {

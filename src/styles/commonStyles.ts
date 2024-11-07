@@ -51,16 +51,18 @@ export const commonStyles = StyleSheet.create({
 
   // **Modal Styles**
   fixedWidthLabel: {
-    width: 100, // Adjust the width as needed
+    width: 180,
     height: 30,
     color: '#FFFFFF',
-    textAlign: 'left', // Align the text to the left
-    padding: 5,
+    justifyContent: 'center',
+    textAlign: 'left',
+    textAlignVertical: 'center',
+    paddingLeft: 5,
     borderRadius: 1,
     borderWidth: 1,
     borderColor: 'white',
   },
-  fullscreenTouchable: {
+    fullscreenTouchable: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
