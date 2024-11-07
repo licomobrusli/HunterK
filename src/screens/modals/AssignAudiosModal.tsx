@@ -1,3 +1,5 @@
+// src/screens/modals/AssignAudiosModal.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -16,10 +18,8 @@ import { containerStyles } from '../../styles/containerStyles';
 import { buttonStyles } from '../../styles/buttonStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Save from '../../assets/icons/save.svg';
-import Play from '../../assets/icons/play.svg';
-import Bin from '../../assets/icons/bin.svg';
 import Refresh from '../../assets/icons/refresh.svg';
-import Weight from '../../assets/icons/weight.svg';
+import AudioItemRow from '../../config/AudioItemRow';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -37,7 +37,6 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [items, setItems] = useState<RNFS.ReadDirItem[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [weightValues, setWeightValues] = useState<{ [key: string]: string }>({});
-  const [editableFields, setEditableFields] = useState<{ [key: string]: boolean }>({});
   const [playbackMode, setPlaybackMode] = useState<'Selected' | 'A-Z' | 'Random'>('Selected');
   const [repetitions, setRepetitions] = useState<string>('1');
   const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false);
@@ -124,70 +123,6 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     onClose();
   };
 
-  const renderItem = (item: RNFS.ReadDirItem) => {
-    const isSelected = selectedFiles.includes(item.name);
-    const weightValue = weightValues[item.name] || '10';
-    const isEditable = editableFields[item.name] || false;
-
-    return (
-      <TouchableOpacity
-        key={item.name}
-        style={containerStyles.itemContainer}
-        onPress={() => handleSelectAudio(item.name)}
-      >
-        {/* Using containerStyles to ensure the layout is consistent */}
-        <View style={containerStyles.itemContainer}>
-          <View style={containerStyles.containerLeft}>
-            {/* Weight Icon with Overlayed Input */}
-            <View style={buttonStyles.iconButton}>
-              <Weight width={22} height={22} fill="#fff" stroke="#004225" strokeWidth={5} />
-              <TextInput
-                style={textStyles.textAlo}
-                value={weightValue}
-                editable={isEditable}
-                onChangeText={(text) => handleWeightChange(item.name, text)}
-                onFocus={() =>
-                  setEditableFields((prev) => ({ ...prev, [item.name]: true }))
-                }
-                placeholder="10"
-                keyboardType="numeric"
-                maxLength={2}
-                onBlur={() =>
-                  setEditableFields((prev) => ({ ...prev, [item.name]: false }))
-                }
-              />
-            </View>
-
-            {/* Audio Item Name */}
-            <Text
-              style={[
-                commonStyles.fixedWidthLabel,
-                isSelected ? styles.selectedText : null,
-              ]}
-            >
-              {item.name}
-            </Text>
-          </View>
-
-          {/* Bin Icon - Keep on the Same Row */}
-          <View style={containerStyles.containerRight}>
-          <TouchableOpacity onPress={() => handleSelectAudio(item.name)}>
-              <View style={buttonStyles.iconButton}>
-                <Play width={18} height={18} fill="#fff" stroke="#004225" />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleSelectAudio(item.name)}>
-              <View style={buttonStyles.iconButton}>
-                <Bin width={18} height={18} fill="#fff" stroke="#004225" />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  // Playback options for the picker
   const playbackOptions: string[] = ['Selected', 'A-Z', 'Random'];
 
   return (
@@ -218,17 +153,26 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         </View>
 
         <View style={containerStyles.containerRight}>
-        <TouchableOpacity onPress={handleSaveSelection}>
-          <View style={buttonStyles.iconButton}>
-            <Save width={22} height={22} fill="#fff" stroke="#004225" />
-          </View>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleSaveSelection}>
+            <View style={buttonStyles.iconButton}>
+              <Save width={22} height={22} fill="#fff" stroke="#004225" />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
-      {/* Render Audio Items */}
       <View style={containerStyles.list}>
-        {items.map((item) => renderItem(item))}
+        {items.map((item) => (
+          <AudioItemRow
+            key={item.name}
+            item={item}
+            isSelected={selectedFiles.includes(item.name)}
+            weightValue={weightValues[item.name] || '10'}
+            onWeightChange={(value) => handleWeightChange(item.name, value)}
+            onSelectAudio={() => handleSelectAudio(item.name)}
+            onDeleteAudio={() => handleSelectAudio(item.name)}
+          />
+        ))}
       </View>
 
       <Modal
@@ -238,7 +182,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         onRequestClose={() => setIsPickerModalVisible(false)}
       >
         <TouchableOpacity
-          style={styles.modalOverlay}
+          style={styles.modalContent}
           activeOpacity={1}
           onPressOut={() => setIsPickerModalVisible(false)}
         >
@@ -250,9 +194,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
                   setPlaybackMode(option as 'Selected' | 'A-Z' | 'Random');
                   setIsPickerModalVisible(false);
                 }}
-                style={styles.optionItem}
               >
-                <Text style={textStyles.text0}>{option}</Text>
+                <View style={containerStyles.itemContainer}>
+                  <Text style={commonStyles.fixedWidthLabel}>{option}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -263,33 +208,11 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  pickerButton: {
-    justifyContent: 'center',
-    textAlign: 'left',
-    height: 30,
-    borderRadius: 1,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-  },
   modalContent: {
-    backgroundColor: '#333',
-    borderRadius: 1,
-    width: '80%',
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  optionItem: {
-    height: 30,
-    justifyContent: 'center',
-    textAlign: 'left',
-    marginLeft: 10,
-    width: '100%',
-  },
-  selectedText: {
-    color: 'green',
+    backgroundColor: '#004225',
+    width: 180,
+    borderColor: '#fff',
+    borderWidth: 1,
   },
 });
 

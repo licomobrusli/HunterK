@@ -30,7 +30,7 @@ export const textStyles = StyleSheet.create({
     textAlign: 'center',
     color: '#fff',
     fontSize: 8,
-    paddingTop: 0,
+    paddingTop: 6,
   },
   boldText0: {
     color: '#fff',
