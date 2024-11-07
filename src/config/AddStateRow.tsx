@@ -63,7 +63,7 @@ const AddStateRow: React.FC<AddStateRowProps> = ({
         {/* Save Icon (in place of the Bin icon) */}
         <TouchableOpacity onPress={onAdd}>
           <View style={buttonStyles.iconButton}>
-            <Save width={18} height={18} fill="#fff" stroke="#004225" />
+            <Save width={22} height={22} fill="#fff" stroke="#004225" />
           </View>
         </TouchableOpacity>
       </View>

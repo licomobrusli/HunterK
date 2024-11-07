@@ -24,6 +24,14 @@ export const textStyles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
   },
+  textAlo: {
+    position: 'absolute',
+    textAlignVertical: 'bottom',
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: 8,
+    paddingTop: 0,
+  },
   boldText0: {
     color: '#fff',
     fontSize: 16,

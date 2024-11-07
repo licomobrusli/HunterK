@@ -199,7 +199,7 @@ const SceneManagerModal: React.FC<SceneManagerModalProps> = ({ visible, onClose 
           accessibilityRole="button"
         >
           <View style={buttonStyles.iconButton}>
-            <Save width={18} height={18} fill="#fff" stroke="#004225" />
+            <Save width={22} height={22} fill="#fff" stroke="#004225" />
           </View>
         </TouchableOpacity>
       </View>

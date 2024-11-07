@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import Bin from '../assets/icons/bin.svg';
 import Debrief from '../assets/icons/debrief.svg';
-import Play from '../assets/icons/play.svg';
+import Audio from '../assets/icons/audio.svg';
 import { containerStyles } from '../styles/containerStyles';
 import { textStyles } from '../styles/textStyles';
 import { buttonStyles } from '../styles/buttonStyles.ts';
@@ -114,10 +114,10 @@ const StateRow: React.FC<StateRowProps> = ({
           )}
         </View>
 
-        {/* Play icon for audio assignment with color change */}
+        {/* Audio icon for audio assignment with color change */}
         <TouchableOpacity onPress={onAssignAudios}>
           <View style={buttonStyles.iconButton}>
-            <Play
+            <Audio
               width={18}
               height={18}
               fill={hasAssignedAudios ? '#00ff00' : '#fff'} // Green if audios are assigned
