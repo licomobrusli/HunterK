@@ -39,6 +39,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [playbackMode, setPlaybackMode] = useState<'Selected' | 'A-Z' | 'Random'>('Selected');
   const [repetitions, setRepetitions] = useState<string>('1');
   const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false);
+  const [recordingName, setRecordingName] = useState('New Recording');
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
@@ -85,6 +86,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     });
   }, [selectedFiles]);
 
+  const handleRecordingNameChange = (newName: string) => {
+    setRecordingName(newName);
+  };
+
   const handleSelectAudio = (fileName: string) => {
     setSelectedFiles((prevSelectedFiles) => {
       if (prevSelectedFiles.includes(fileName)) {
@@ -120,11 +125,6 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     onAudiosSelected(stateName, audioData);
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
     onClose();
-  };
-
-  const handleRecordingNameChange = (newName: string) => {
-    // Optional: Logic to manage recording name if needed
-    console.log('Recording name changed to:', newName);
   };
 
   const handleSaveRecording = () => {
@@ -186,7 +186,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
       {/* Add RecordItemRow here */}
       <RecordItemRow
-        recordingName="New Recording"
+        recordingName={recordingName}
         onRecordingNameChange={handleRecordingNameChange}
         onSaveRecording={handleSaveRecording}
       />
