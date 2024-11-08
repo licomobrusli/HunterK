@@ -1,7 +1,6 @@
-// src/components/AudioItemRow.tsx
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ToastAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ToastAndroid, Alert } from 'react-native';
+import RNFS from 'react-native-fs';
 import { commonStyles } from '../styles/commonStyles';
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
@@ -65,6 +64,30 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
     }
   };
 
+  const confirmDeleteAudio = () => {
+    Alert.alert(
+      'Delete Audio',
+      `Are you sure you want to delete "${item.name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'OK',
+          onPress: async () => {
+            try {
+              await RNFS.unlink(item.path);
+              ToastAndroid.show('Audio deleted successfully.', ToastAndroid.SHORT);
+              onDeleteAudio(); // Notify parent component to refresh the list
+            } catch (error) {
+              console.error('Error deleting audio:', error);
+              ToastAndroid.show('Failed to delete audio.', ToastAndroid.SHORT);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <View style={containerStyles.itemContainer}>
       <View style={containerStyles.containerLeft}>
@@ -97,7 +120,6 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
             {item.name.replace(/\.[^/.]+$/, '')} {/* Removes file extension */}
           </Text>
         </TouchableOpacity>
-
       </View>
 
       <View style={containerStyles.containerRight}>
@@ -106,7 +128,7 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
             <Play width={18} height={18} fill={isPlaying ? 'green' : '#fff'} stroke="#004225" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={onDeleteAudio}>
+        <TouchableOpacity onPress={confirmDeleteAudio}>
           <View style={buttonStyles.iconButton}>
             <Bin width={18} height={18} fill="#fff" stroke="#004225" />
           </View>

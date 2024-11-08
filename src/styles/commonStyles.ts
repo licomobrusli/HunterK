@@ -58,6 +58,8 @@ export const commonStyles = StyleSheet.create({
     textAlign: 'left',
     textAlignVertical: 'center',
     paddingLeft: 5,
+    paddingVertical: 0,
+    includeFontPadding: false,
     borderRadius: 1,
     borderWidth: 1,
     borderColor: 'white',

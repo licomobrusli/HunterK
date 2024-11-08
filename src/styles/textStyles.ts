@@ -11,6 +11,8 @@ export const textStyles = StyleSheet.create({
   text0: {
     textAlignVertical: 'center',
     textAlign: 'center',
+    paddingVertical: 0,
+    includeFontPadding: false,
     fontSize: 16,
     color: '#FFFFFF',
   },

@@ -81,6 +81,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     loadAudioFiles(); // Refresh the audio files list
   };
 
+  const handleAudioDeleted = () => {
+    loadAudioFiles(); // Refresh the audio files list when an audio is deleted
+  };
+
   const handleRecordingNameChange = (newName: string) => {
     setRecordingName(newName);
   };
@@ -169,7 +173,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
             weightValue={weightValues[item.name] || '10'}
             onWeightChange={(value) => handleWeightChange(item.name, value)}
             onSelectAudio={() => handleSelectAudio(item.name)}
-            onDeleteAudio={() => handleSelectAudio(item.name)}
+            onDeleteAudio={handleAudioDeleted} // Pass the callback to refresh the list
           />
         ))}
       </View>

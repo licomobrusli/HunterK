@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, TextInput, ToastAndroid } from 'react-native';
+import { View, TouchableOpacity, TextInput, ToastAndroid, Text } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
@@ -27,6 +27,14 @@ const RecordItemRow: React.FC<RecordItemRowProps> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordedFilePath, setRecordedFilePath] = useState<string | null>(null);
+
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [tempRecordingName, setTempRecordingName] = useState(recordingName);
+
+  const handleRenameBlur = () => {
+    setIsRenaming(false);
+    onRecordingNameChange(tempRecordingName);
+  };
 
   const onStartRecord = async () => {
     try {
@@ -71,7 +79,7 @@ const RecordItemRow: React.FC<RecordItemRowProps> = ({
       return;
     }
 
-    const sanitizedRecordingName = recordingName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sanitizedRecordingName = tempRecordingName.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
     const stateFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
     const destinationPath = `${stateFolder}/${sanitizedRecordingName}.mp3`;
 
@@ -94,30 +102,37 @@ const RecordItemRow: React.FC<RecordItemRowProps> = ({
         await RNFS.mkdir(stateFolder);
       }
 
-     // Move the recorded file to the destination path
-     await RNFS.moveFile(recordedFilePath, destinationPath);
-        setRecordedFilePath(null);
-        ToastAndroid.show('Recording saved successfully!', ToastAndroid.SHORT);
-        console.log(`Recording saved at: ${destinationPath}`);
+      // Move the recorded file to the destination path
+      await RNFS.moveFile(recordedFilePath, destinationPath);
+      setRecordedFilePath(null);
+      ToastAndroid.show('Recording saved successfully!', ToastAndroid.SHORT);
+      console.log(`Recording saved at: ${destinationPath}`);
 
-        // Call the onAudioSaved prop to refresh the audio list
-        onAudioSaved();
+      // Call the onAudioSaved prop to refresh the audio list
+      onAudioSaved();
     } catch (error) {
-        console.error('Error saving recording:', error);
-        ToastAndroid.show('Failed to save the recording.', ToastAndroid.SHORT);
+      console.error('Error saving recording:', error);
+      ToastAndroid.show('Failed to save the recording.', ToastAndroid.SHORT);
     }
-};
+  };
 
   return (
     <View style={containerStyles.itemContainer}>
       <View style={containerStyles.containerLeft}>
         <View style={buttonStyles.iconButton} />
-        <TextInput
-          style={commonStyles.fixedWidthLabel}
-          value={recordingName}
-          onChangeText={onRecordingNameChange}
-          placeholder="Recording Name"
-        />
+        {isRenaming ? (
+          <TextInput
+            style={commonStyles.fixedWidthLabel}
+            value={tempRecordingName}
+            onChangeText={setTempRecordingName}
+            onBlur={handleRenameBlur}
+            autoFocus
+          />
+        ) : (
+          <TouchableOpacity onPress={() => setIsRenaming(true)}>
+            <Text style={commonStyles.fixedWidthLabel}>{recordingName}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={containerStyles.containerRight}>
