@@ -77,14 +77,9 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     }
   }, [visible, loadAudioFiles]);
 
-  // Sort items so that selected ones appear at the top
-  useEffect(() => {
-    setItems((prevItems) => {
-      const selected = prevItems.filter((item) => selectedFiles.includes(item.name));
-      const unselected = prevItems.filter((item) => !selectedFiles.includes(item.name));
-      return [...selected, ...unselected];
-    });
-  }, [selectedFiles]);
+  const handleAudioSaved = () => {
+    loadAudioFiles(); // Refresh the audio files list
+  };
 
   const handleRecordingNameChange = (newName: string) => {
     setRecordingName(newName);
@@ -125,11 +120,6 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     onAudiosSelected(stateName, audioData);
     ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
     onClose();
-  };
-
-  const handleSaveRecording = () => {
-    // Optional: Logic to save the recording if needed
-    console.log('Recording saved');
   };
 
   const playbackOptions: string[] = ['Selected', 'A-Z', 'Random'];
@@ -186,9 +176,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
       {/* Add RecordItemRow here */}
       <RecordItemRow
+        stateName={stateName}
         recordingName={recordingName}
         onRecordingNameChange={handleRecordingNameChange}
-        onSaveRecording={handleSaveRecording}
+        onAudioSaved={handleAudioSaved} // Pass the callback to refresh the list
       />
 
       {/* Picker Modal */}
