@@ -1,5 +1,3 @@
-// src/screens/modals/AssignAudiosModal.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -20,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Save from '../../assets/icons/save.svg';
 import Refresh from '../../assets/icons/refresh.svg';
 import AudioItemRow from '../../config/AudioItemRow';
+import RecordItemRow from '../../config/RecordItemRow';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -123,6 +122,16 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
     onClose();
   };
 
+  const handleRecordingNameChange = (newName: string) => {
+    // Optional: Logic to manage recording name if needed
+    console.log('Recording name changed to:', newName);
+  };
+
+  const handleSaveRecording = () => {
+    // Optional: Logic to save the recording if needed
+    console.log('Recording saved');
+  };
+
   const playbackOptions: string[] = ['Selected', 'A-Z', 'Random'];
 
   return (
@@ -175,6 +184,14 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         ))}
       </View>
 
+      {/* Add RecordItemRow here */}
+      <RecordItemRow
+        recordingName="New Recording"
+        onRecordingNameChange={handleRecordingNameChange}
+        onSaveRecording={handleSaveRecording}
+      />
+
+      {/* Picker Modal */}
       <Modal
         transparent={true}
         animationType="fade"

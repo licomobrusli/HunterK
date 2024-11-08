@@ -1,17 +1,20 @@
 // src/components/AudioItemRow.tsx
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ToastAndroid } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
 import { textStyles } from '../styles/textStyles';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 import Weight from '../assets/icons/weight.svg';
 import Play from '../assets/icons/play.svg';
 import Bin from '../assets/icons/bin.svg';
 
+const audioRecorderPlayer = new AudioRecorderPlayer(); // Instantiate outside component
+
 type AudioItemRowProps = {
-  item: { name: string };
+  item: { name: string; path: string };
   isSelected: boolean;
   weightValue: string;
   onWeightChange: (value: string) => void;
@@ -25,8 +28,42 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
   weightValue,
   onWeightChange,
   onSelectAudio,
+  onDeleteAudio,
 }) => {
   const [isEditingWeight, setIsEditingWeight] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (isPlaying) {
+        audioRecorderPlayer.stopPlayer();
+        audioRecorderPlayer.removePlayBackListener();
+      }
+    };
+  }, [isPlaying]);
+
+  const playOrStopAudio = async () => {
+    if (isPlaying) {
+      await audioRecorderPlayer.stopPlayer();
+      audioRecorderPlayer.removePlayBackListener();
+      setIsPlaying(false);
+    } else {
+      try {
+        await audioRecorderPlayer.startPlayer(item.path);
+        audioRecorderPlayer.addPlayBackListener((e) => {
+          if (e.currentPosition >= e.duration) {
+            audioRecorderPlayer.stopPlayer();
+            audioRecorderPlayer.removePlayBackListener();
+            setIsPlaying(false);
+          }
+        });
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        ToastAndroid.show('Failed to play audio.', ToastAndroid.SHORT);
+      }
+    }
+  };
 
   return (
     <View style={containerStyles.itemContainer}>
@@ -57,18 +94,19 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
               isSelected ? textStyles.greenText : null,
             ]}
           >
-            {item.name}
+            {item.name.replace(/\.[^/.]+$/, '')} {/* Removes file extension */}
           </Text>
         </TouchableOpacity>
+
       </View>
 
       <View style={containerStyles.containerRight}>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={playOrStopAudio}>
           <View style={buttonStyles.iconButton}>
-            <Play width={18} height={18} fill="#fff" stroke="#004225" />
+            <Play width={18} height={18} fill={isPlaying ? 'green' : '#fff'} stroke="#004225" />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={onDeleteAudio}>
           <View style={buttonStyles.iconButton}>
             <Bin width={18} height={18} fill="#fff" stroke="#004225" />
           </View>
