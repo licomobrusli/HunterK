@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   ToastAndroid,
-  TextInput,
   StyleSheet,
   Modal,
 } from 'react-native';
@@ -19,6 +18,7 @@ import Save from '../../assets/icons/save.svg';
 import Refresh from '../../assets/icons/refresh.svg';
 import AudioItemRow from '../../config/AudioItemRow';
 import RecordItemRow from '../../config/RecordItemRow';
+import AutoShrinkText from '../../styles/AutoShrinkText';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -37,12 +37,13 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [weightValues, setWeightValues] = useState<{ [key: string]: string }>({});
   const [playbackMode, setPlaybackMode] = useState<'Selected' | 'A-Z' | 'Random'>('Selected');
-  const [repetitions, setRepetitions] = useState<string>('1');
+  const [repetitions, setRepetitions] = useState<string>('X');
   const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false);
   const [recordingName, setRecordingName] = useState('New Recording');
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
+  // Use useCallback to memoize loadAudioFiles
   const loadAudioFiles = useCallback(async () => {
     try {
       const exists = await RNFS.exists(baseFolder);
@@ -61,15 +62,15 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       );
       const currentSelected = storedData
         ? JSON.parse(storedData)
-        : { audios: [], mode: 'Selected', repetitions: '1' };
+        : { audios: [], mode: 'Selected', repetitions: 'X' };
 
       setSelectedFiles(currentSelected.audios);
       setPlaybackMode(currentSelected.mode);
-      setRepetitions(currentSelected.repetitions ? currentSelected.repetitions.toString() : '1');
+      setRepetitions(currentSelected.repetitions || 'X');
     } catch (error) {
       console.error('Error loading audio files:', error);
     }
-  }, [baseFolder, stateName]);
+  }, [stateName, baseFolder]);
 
   useEffect(() => {
     if (visible) {
@@ -109,11 +110,10 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   };
 
   const handleSaveSelection = async () => {
-    const parsedRepetitions = repetitions !== '' ? parseInt(repetitions, 10) : null;
     const audioData = {
       audios: selectedFiles,
       mode: playbackMode || 'Selected',
-      repetitions: parsedRepetitions,
+      repetitions: repetitions, // Store as string
     };
 
     await AsyncStorage.setItem(
@@ -128,25 +128,39 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
   const playbackOptions: string[] = ['Selected', 'A-Z', 'Random'];
 
+  // Compute reordered items here
+  const selectedItems = selectedFiles
+    .map((fileName) => items.find((item) => item.name === fileName))
+    .filter((item): item is RNFS.ReadDirItem => item !== undefined);
+
+  const unselectedItems = items.filter((item) => !selectedFiles.includes(item.name));
+
+  const reorderedItems = [...selectedItems, ...unselectedItems];
+
   return (
-    <AppModal isVisible={visible} onClose={onClose} animationIn="fadeIn" animationOut="fadeOut">
+    <AppModal
+      isVisible={visible}
+      onClose={onClose}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+    >
       <Text style={textStyles.text1}>Assign Audios for {stateName}</Text>
 
       <View style={containerStyles.itemContainer}>
         <View style={containerStyles.containerLeft}>
           <View style={buttonStyles.iconButton}>
             <Refresh width={24} height={24} fill="#fff" stroke="#004225" />
-            <TextInput
+            <AutoShrinkText
               style={textStyles.textA}
               value={repetitions}
               onChangeText={(text) => {
-                if (/^\d{0,2}$/.test(text)) {
-                  setRepetitions(text);
+                if (/^\d{0,2}$/.test(text) || text.toUpperCase() === 'X') {
+                  setRepetitions(text.toUpperCase());
                 }
               }}
               placeholder="X"
               keyboardType="numeric"
-              maxLength={1}
+              maxLength={2} // Allow for 'X' or up to two-digit numbers
             />
           </View>
 
@@ -165,7 +179,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       </View>
 
       <View style={containerStyles.list}>
-        {items.map((item) => (
+        {reorderedItems.map((item) => (
           <AudioItemRow
             key={item.name}
             item={item}
