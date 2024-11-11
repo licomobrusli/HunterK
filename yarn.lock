@@ -1656,6 +1656,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@freakycoder/react-native-bounceable@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@freakycoder/react-native-bounceable@npm:1.0.3"
+  checksum: d80e1297ddbde7348803007051e118ae1e380aeaf905785e6a73d302d45195d1efbe1293dd5ecee43157925373fa7d79a7f78fd057227fff7af38e58e91007ca
+  languageName: node
+  linkType: hard
+
 "@hapi/hoek@npm:^9.0.0, @hapi/hoek@npm:^9.3.0":
   version: 9.3.0
   resolution: "@hapi/hoek@npm:9.3.0"
@@ -5899,6 +5906,7 @@ __metadata:
     react-native: ^0.75.4
     react-native-audio-recorder-player: ^3.6.11
     react-native-background-timer: ^2.4.1
+    react-native-bouncy-checkbox: ^4.1.2
     react-native-document-picker: ^9.3.1
     react-native-draggable-flatlist: ^4.0.1
     react-native-flash-message: ^0.4.2
@@ -8740,6 +8748,15 @@ __metadata:
   peerDependencies:
     react-native: ">=0.47.0"
   checksum: 635feb23bfdc8c43b8ee85dc85a5eb83f85aa9c285ce92ac329946ac83864121ae66bfb64fefa21e2a10462d094e03c17ff87eeb5d7e6349bc8e72d941f12754
+  languageName: node
+  linkType: hard
+
+"react-native-bouncy-checkbox@npm:^4.1.2":
+  version: 4.1.2
+  resolution: "react-native-bouncy-checkbox@npm:4.1.2"
+  dependencies:
+    "@freakycoder/react-native-bounceable": ^1.0.3
+  checksum: d197e60db0ee7909f62be963b36ca5e1fd7cc164367e00a43c57d11382dba3b8d728fcb20d805a4768c168167107135ec88559bc239553926947c9386f82b71f
   languageName: node
   linkType: hard
 

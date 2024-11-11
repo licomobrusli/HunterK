@@ -1,3 +1,5 @@
+// src/components/DebriefComponent.tsx
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Text,
@@ -12,6 +14,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import RadioButton from './RadioButton'; // Reusable RadioButton component
+import RadialElement from './RadialElement'; // Updated RadialElement component
 import { Debriefing, DebriefElement, DebriefElementType } from '../../types/Debriefing';
 import { commonStyles } from '../../styles/commonStyles';
 import { textStyles } from '../../styles/textStyles';
@@ -33,15 +36,20 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
     let isValid = true;
     let validationMessage = '';
 
+    // Validation Logic
     debriefing.elements.forEach((element) => {
-      if (element.type === DebriefElementType.Text && (!responses[element.id] || responses[element.id].trim() === '')) {
+      if (
+        element.type === DebriefElementType.Text &&
+        (!responses[element.id] || responses[element.id].trim() === '')
+      ) {
         isValid = false;
         validationMessage = 'Please answer all text prompts.';
       }
 
       if (
-        (element.type === DebriefElementType.MultipleChoice || element.type === DebriefElementType.Radials) &&
-        (!responses[element.id] || responses[element.id] === null)
+        (element.type === DebriefElementType.MultipleChoice ||
+          element.type === DebriefElementType.Radials) &&
+        (!responses[element.id] || responses[element.id].length === 0)
       ) {
         isValid = false;
         validationMessage = 'Please answer all multiple-choice questions.';
@@ -53,9 +61,43 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
       return;
     }
 
-    console.log(`Submitting debriefing "${debriefing.name}" with responses:`, responses);
+    // Transform Responses to Include Prompts
+    const finalResponses = debriefing.elements.reduce((acc, element) => {
+      const response = responses[element.id];
+      if (element.type === DebriefElementType.Radials) {
+        acc[element.id] = {
+          prompt: element.prompt,
+          answers: response || [],
+        };
+      } else if (element.type === DebriefElementType.Prompt) {
+        acc[element.id] = {
+          prompt: element.prompt,
+          answer: response || '',
+        };
+      } else if (element.type === DebriefElementType.MultipleChoice) {
+        acc[element.id] = {
+          prompt: element.prompt,
+          answer: response || '',
+        };
+      } else if (element.type === DebriefElementType.Dropdown) {
+        acc[element.id] = {
+          prompt: element.prompt,
+          answer: response || '',
+        };
+      } else if (element.type === DebriefElementType.Scale) {
+        acc[element.id] = {
+          prompt: element.prompt,
+          answer: response || '',
+        };
+      }
+      // Add more conditions if you have other DebriefElementTypes
+      return acc;
+    }, {} as { [key: string]: any });
+
+    // Log and Submit the Final Responses
+    console.log(`Submitting debriefing "${debriefing.name}" with responses:`, finalResponses);
     Alert.alert('Success', 'Your debriefing has been submitted.');
-    onComplete(responses);
+    onComplete(finalResponses);
   }, [responses, debriefing.elements, debriefing.name, onComplete]);
 
   const handleLogcatEvent = useCallback(
@@ -134,7 +176,6 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
         );
 
       case DebriefElementType.MultipleChoice:
-      case DebriefElementType.Radials:
         return (
           <View key={element.id} style={paddingStyles.padV10}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
@@ -148,6 +189,17 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
                 accessibilityHint={`Select ${option}`}
               />
             ))}
+          </View>
+        );
+
+      case DebriefElementType.Radials:
+        return (
+          <View key={element.id} style={paddingStyles.padV10}>
+            <RadialElement
+              element={element}
+              responses={responses}
+              setResponses={setResponses}
+            />
           </View>
         );
 
