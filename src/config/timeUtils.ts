@@ -1,4 +1,4 @@
-// src/utils/timeUtils.ts
+// src/config/timeUtils.ts
 
 export const convertMsToMinutesSeconds = (milliseconds: number): string => {
     const minutes = Math.floor(milliseconds / 60000);

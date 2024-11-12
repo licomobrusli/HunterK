@@ -136,6 +136,9 @@ const RecordItemRow: React.FC<RecordItemRowProps> = ({
       </View>
 
       <View style={containerStyles.containerRight}>
+        <View style={buttonStyles.timeButton}>
+          {<TouchableOpacity/>}
+        </View>
         <TouchableOpacity onPress={isRecording ? onStopRecord : onStartRecord}>
           <View style={buttonStyles.iconButton}>
             <Microphone width={18} height={18} fill={isRecording ? 'red' : '#fff'} stroke="#004225" />

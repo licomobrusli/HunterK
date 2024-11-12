@@ -11,22 +11,7 @@ import AppModal from '../../styles/AppModal';
 import StateRow from '../../config/StateRow';
 import AddStateRow from '../../config/AddStateRow';
 import { buttonStyles } from '../../styles/buttonStyles';
-
-// Utility functions to handle interval conversion
-const convertMsToMinutesSeconds = (milliseconds: number) => {
-  const minutes = Math.floor(milliseconds / 60000);
-  const seconds = Math.floor((milliseconds % 60000) / 1000);
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-};
-
-const convertMinutesSecondsToMs = (time: string) => {
-  if (!time) { return NaN; }
-  const [minutes, seconds] = time.split(':').map(Number);
-  if (isNaN(minutes) || isNaN(seconds)) {
-    return NaN;
-  }
-  return minutes * 60000 + seconds * 1000;
-};
+import { convertMinutesSecondsToMs, convertMsToMinutesSeconds } from '../../config/timeUtils';
 
 type SceneBuilderModalProps = {
   visible: boolean;

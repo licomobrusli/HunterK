@@ -1,3 +1,5 @@
+// src/screens/modals/AssignAudiosModal.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -19,6 +21,7 @@ import Refresh from '../../assets/icons/refresh.svg';
 import AudioItemRow from '../../config/AudioItemRow';
 import RecordItemRow from '../../config/RecordItemRow';
 import AutoShrinkText from '../../styles/AutoShrinkText';
+import { convertMinutesSecondsToMs } from '../../config/timeUtils';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -40,6 +43,11 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [repetitions, setRepetitions] = useState<string>('X');
   const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false);
   const [recordingName, setRecordingName] = useState('New Recording');
+
+  // Define localIntervals and setLocalIntervals
+  const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string | null }>({});
+  // Define editingIntervals to track editing state per item
+  const [editingIntervals, setEditingIntervals] = useState<{ [key: string]: boolean }>({});
 
   const baseFolder = `${RNFS.DocumentDirectoryPath}/audios/${stateName.toLowerCase()}`;
 
@@ -67,6 +75,9 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       setSelectedFiles(currentSelected.audios);
       setPlaybackMode(currentSelected.mode);
       setRepetitions(currentSelected.repetitions || 'X');
+
+      // Optionally, load localIntervals from storage if needed
+      // Not shown here, assuming it's managed externally
     } catch (error) {
       console.error('Error loading audio files:', error);
     }
@@ -116,14 +127,17 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       repetitions: repetitions, // Store as string
     };
 
-    await AsyncStorage.setItem(
-      `@selectedAudios_${stateName.toLowerCase()}`,
-      JSON.stringify(audioData)
-    );
-
-    onAudiosSelected(stateName, audioData);
-    ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
-    onClose();
+    try {
+      await AsyncStorage.setItem(
+        `@selectedAudios_${stateName.toLowerCase()}`,
+        JSON.stringify(audioData)
+      );
+      onAudiosSelected(stateName, audioData);
+      ToastAndroid.show('Audios assigned successfully!', ToastAndroid.SHORT);
+      onClose();
+    } catch (error) {
+      console.error('Error saving audio selection:', error);
+    }
   };
 
   const playbackOptions: string[] = ['Selected', 'A-Z', 'Random'];
@@ -170,6 +184,9 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         </View>
 
         <View style={containerStyles.containerRight}>
+          <View style={buttonStyles.timeButton} />
+          <View style={buttonStyles.iconButton} />
+          <View style={buttonStyles.iconButton} />
           <TouchableOpacity onPress={handleSaveSelection}>
             <View style={buttonStyles.iconButton}>
               <Save width={22} height={22} fill="#fff" stroke="#004225" />
@@ -188,6 +205,23 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
             onWeightChange={(value) => handleWeightChange(item.name, value)}
             onSelectAudio={() => handleSelectAudio(item.name)}
             onDeleteAudio={handleAudioDeleted} // Pass the callback to refresh the list
+            editing={editingIntervals[item.name.toLowerCase()] || false}
+            localInterval={localIntervals[item.name.toLowerCase()] || ''}
+            setLocalIntervals={setLocalIntervals}
+            onEditInterval={() =>
+              setEditingIntervals((prev) => ({ ...prev, [item.name.toLowerCase()]: true }))
+            }
+            onSaveInterval={() => {
+              setEditingIntervals((prev) => ({ ...prev, [item.name.toLowerCase()]: false }));
+              const intervalStr = localIntervals[item.name.toLowerCase()] || '';
+              const intervalMs = convertMinutesSecondsToMs(intervalStr);
+              if (!isNaN(intervalMs)) {
+                // Implement setIntervalForState or pass a prop for setting intervals
+                // Example:
+                // setIntervalForState(item.name, intervalMs);
+                // If using context, you might need to access it here
+              }
+            }}
           />
         ))}
       </View>
@@ -208,7 +242,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         onRequestClose={() => setIsPickerModalVisible(false)}
       >
         <TouchableOpacity
-          style={styles.modalContent}
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPressOut={() => setIsPickerModalVisible(false)}
         >
@@ -234,11 +268,18 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+  },
   modalContent: {
     backgroundColor: '#004225',
     width: 180,
     borderColor: '#fff',
     borderWidth: 1,
+    borderRadius: 8,
   },
 });
 
