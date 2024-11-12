@@ -10,4 +10,15 @@ export const paddingStyles = StyleSheet.create({
     margin0: {
         margin: 0,
     },
+  padV0: {
+    alignItems: 'center',
+    padding: 0,
+    },
+    margin00: {
+        margin: 0,
+    },
+    padL16: {
+    alignItems: 'center',
+    paddingLeft: 16,
+    },
 });

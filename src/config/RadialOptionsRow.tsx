@@ -1,11 +1,11 @@
-// src/config/RadialOptionsRow.tsx
-
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { containerStyles } from '../styles/containerStyles';
-import { buttonStyles } from '../styles/buttonStyles';
 import { textStyles } from '../styles/textStyles';
+import { buttonStyles } from '../styles/buttonStyles';
+import { commonStyles } from '../styles/commonStyles';
+import { paddingStyles } from '../styles/paddingStyles';
 
 interface RadialOptionsRowProps {
   prompt: string;
@@ -27,27 +27,23 @@ const RadialOptionsRow: React.FC<RadialOptionsRowProps> = ({
         {/* Icon Button Placeholder */}
         <View style={buttonStyles.iconButton} />
         {/* Fixed Width Label with Prompt */}
-        <Text style={textStyles.text0}>{prompt}</Text>
+        <View style={commonStyles.fixedWidthLabel}>
+          <Text style={textStyles.text0}>{prompt}</Text>
+        </View>
       </View>
 
-      {/* Right Container with 5 Icon Buttons containing Bouncy Checkboxes */}
+      {/* Right Container with 5 Bouncy Checkboxes */}
       <View style={containerStyles.containerRight}>
         {labels.slice(0, 5).map((label, index) => (
-          <View key={index} style={styles.checkboxContainer}>
+          <View key={index} style={buttonStyles.iconButton}>
             <BouncyCheckbox
               isChecked={selectedOptions.includes(label)}
               onPress={() => onToggleOption(label)}
-              size={25}
-              fillColor="#004225" // Adjust to match your theme
-              unFillColor="#FFFFFF"
-              text="" // No text as labels are in the labels row
-              iconStyle={styles.iconStyle}
-              innerIconStyle={styles.innerIconStyle}
-              useBuiltInState // We'll control the state externally
+              size={20} // Adjust size if necessary
+              text=""
+              style={paddingStyles.padL16}
+              useBuiltInState={true}
               disabled={false}
-              // Accessibility Props
-              accessibilityLabel={`Select ${label}`}
-              accessibilityHint={`Toggle selection for ${label}`}
             />
           </View>
         ))}
@@ -55,17 +51,5 @@ const RadialOptionsRow: React.FC<RadialOptionsRowProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  iconStyle: {
-    borderColor: '#004225',
-  },
-  innerIconStyle: {
-    borderWidth: 2,
-  },
-  checkboxContainer: {
-    marginRight: 5,
-  },
-});
 
 export default RadialOptionsRow;

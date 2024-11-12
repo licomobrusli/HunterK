@@ -222,7 +222,7 @@ const DebriefComponent: React.FC<DebriefComponentProps> = ({ debriefing, onCompl
 
       case DebriefElementType.Scale:
         return (
-          <View key={element.id} style={paddingStyles.padV10}>
+          <View key={element.id} style={paddingStyles.padV0}>
             <Text style={textStyles.text0}>{element.prompt}</Text>
             <Text>
               Scale from {element.scale?.min} to {element.scale?.max}

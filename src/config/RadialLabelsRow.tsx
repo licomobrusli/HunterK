@@ -28,7 +28,7 @@ const RadialLabelsRow: React.FC<RadialLabelsRowProps> = ({ labels }) => {
       <View style={containerStyles.containerRight}>
         {labels.slice(0, 5).map((label, index) => (
           <View key={index} style={buttonStyles.iconButton}>
-            <Text style={textStyles.text0}>{label || `Option ${index + 1}`}</Text>
+            <Text style={textStyles.text0}>{label}</Text>
           </View>
         ))}
       </View>

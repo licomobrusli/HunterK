@@ -32,8 +32,10 @@ export const containerStyles = StyleSheet.create({
   },
   containerRight: {
     flexDirection: 'row',
-    alignContent: 'flex-end',
-    alignSelf: 'flex-end',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignContent: 'flex-start',
+    alignSelf: 'flex-start',
     borderColor: '#fff',
     borderWidth: 1,
   },

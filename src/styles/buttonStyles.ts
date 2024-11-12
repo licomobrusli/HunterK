@@ -38,11 +38,28 @@ export const buttonStyles = StyleSheet.create({
     textAlignVertical: 'center',
     alignSelf: 'center',
     borderWidth: 1,
-    borderColor: 'white',
+    borderColor: '#fff',
     padding: 1,
+    paddingHorizontal: 0,
     textAlign: 'center',
     borderRadius: 1,
-    color: 'white',
+    backgroundColor: '#004225',
+  },
+  iconButton2: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    textAlignVertical: 'center',
+    alignSelf: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
+    padding: 1,
+    paddingHorizontal: 0,
+    textAlign: 'center',
+    borderRadius: 1,
+    backgroundColor: '#004225',
   },
   timeButton: {
     width: 60,
@@ -55,5 +72,11 @@ export const buttonStyles = StyleSheet.create({
     textAlign: 'center',
     borderRadius: 1,
     color: 'white',
+  },
+  innerRadialStyle: {
+    borderWidth: 2, // Adjust border width as needed
+    borderColor: '#fff', // Matches your theme
+    margin: 0, // Remove any margins
+    padding: 0,
   },
 });

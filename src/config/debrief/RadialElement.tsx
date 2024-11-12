@@ -44,7 +44,7 @@ const RadialElement: React.FC<RadialElementProps> = ({
   };
 
   return (
-    <View style={paddingStyles.padV10}>
+    <View style={paddingStyles.padV0}>
       {/* Radial Labels Row */}
       <RadialLabelsRow labels={paddedLabels} />
 
