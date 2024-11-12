@@ -1,4 +1,5 @@
-// Import necessary modules
+// src/screens/modals/SceneBuilderModal.tsx
+
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -142,9 +143,10 @@ const SceneBuilderModal: React.FC<SceneBuilderModalProps> = ({ visible, onClose 
       return updated;
     });
     AsyncStorage.multiRemove([
-      `@interval_${deletedState}`,
-      `@selectedAudios_${deletedState}`,
-      `@selectedDebriefs_${deletedState}`,
+      `@interval_${deletedState.toLowerCase()}`,
+      `@selectedAudios_${deletedState.toLowerCase()}`,
+      `@selectedDebriefs_${deletedState.toLowerCase()}`,
+      `@audioIntervals_${deletedState.toLowerCase()}`, // Remove audioIntervals as well
     ]);
   };
 

@@ -3,6 +3,7 @@
 import { PlaybackMode } from './PlaybackMode';
 
 export interface Scene {
+  audioIntervals: { [stateName: string]: { [audioName: string]: number | null } };
   name: string;
   states: string[];
   intervals: { [key: string]: number | null };
@@ -13,5 +14,5 @@ export interface Scene {
       repetitions?: number | null;
     };
   };
-  selectedDebriefs: { [key: string]: string | null }; // Updated to include selectedDebriefs
+  selectedDebriefs: { [key: string]: string | null };
 }

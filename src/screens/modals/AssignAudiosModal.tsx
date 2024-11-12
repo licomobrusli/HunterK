@@ -1,6 +1,6 @@
 // src/screens/modals/AssignAudiosModal.tsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,8 @@ import Refresh from '../../assets/icons/refresh.svg';
 import AudioItemRow from '../../config/AudioItemRow';
 import RecordItemRow from '../../config/RecordItemRow';
 import AutoShrinkText from '../../styles/AutoShrinkText';
-import { convertMinutesSecondsToMs } from '../../config/timeUtils';
+import { convertMinutesSecondsToMs, convertMsToMinutesSeconds } from '../../config/timeUtils';
+import { IntervalContext } from '../../contexts/SceneProvider';
 
 type AssignAudiosModalProps = {
   visible: boolean;
@@ -44,6 +45,12 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
   const [isPickerModalVisible, setIsPickerModalVisible] = useState<boolean>(false);
   const [recordingName, setRecordingName] = useState('New Recording');
 
+  // Access the IntervalContext
+  const {
+    audioIntervals,
+    setAudioIntervalForAudio,
+  } = useContext(IntervalContext);
+
   // Define localIntervals and setLocalIntervals
   const [localIntervals, setLocalIntervals] = useState<{ [key: string]: string | null }>({});
   // Define editingIntervals to track editing state per item
@@ -57,6 +64,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       const exists = await RNFS.exists(baseFolder);
       if (!exists) {
         console.log('Audio folder does not exist:', baseFolder);
+        setItems([]);
         return;
       }
       const directoryItems = await RNFS.readDir(baseFolder);
@@ -76,12 +84,26 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       setPlaybackMode(currentSelected.mode);
       setRepetitions(currentSelected.repetitions || 'X');
 
-      // Optionally, load localIntervals from storage if needed
-      // Not shown here, assuming it's managed externally
+      // Initialize localIntervals based on context's audioIntervals
+      const currentAudioIntervals = audioIntervals[stateName.toLowerCase()] || {};
+      const localIntervalsLoaded: { [key: string]: string | null } = {};
+
+      for (const audioName in currentAudioIntervals) {
+        if (currentAudioIntervals.hasOwnProperty(audioName)) {
+          const intervalMs = currentAudioIntervals[audioName];
+          if (intervalMs !== null) {
+            localIntervalsLoaded[audioName] = convertMsToMinutesSeconds(intervalMs);
+          } else {
+            localIntervalsLoaded[audioName] = null;
+          }
+        }
+      }
+
+      setLocalIntervals(localIntervalsLoaded);
     } catch (error) {
       console.error('Error loading audio files:', error);
     }
-  }, [stateName, baseFolder]);
+  }, [stateName, baseFolder, audioIntervals]);
 
   useEffect(() => {
     if (visible) {
@@ -204,7 +226,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
             weightValue={weightValues[item.name] || '10'}
             onWeightChange={(value) => handleWeightChange(item.name, value)}
             onSelectAudio={() => handleSelectAudio(item.name)}
-            onDeleteAudio={handleAudioDeleted} // Pass the callback to refresh the list
+            onDeleteAudio={handleAudioDeleted}
             editing={editingIntervals[item.name.toLowerCase()] || false}
             localInterval={localIntervals[item.name.toLowerCase()] || ''}
             setLocalIntervals={setLocalIntervals}
@@ -216,10 +238,8 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
               const intervalStr = localIntervals[item.name.toLowerCase()] || '';
               const intervalMs = convertMinutesSecondsToMs(intervalStr);
               if (!isNaN(intervalMs)) {
-                // Implement setIntervalForState or pass a prop for setting intervals
-                // Example:
-                // setIntervalForState(item.name, intervalMs);
-                // If using context, you might need to access it here
+                // Update the context with the new interval
+                setAudioIntervalForAudio(stateName, item.name, intervalMs);
               }
             }}
           />
