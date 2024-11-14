@@ -1,3 +1,5 @@
+// src/screens/ActiveScreen.tsx
+
 import React, { useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { TouchableOpacity, View, Text, NativeEventEmitter, NativeModules } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
@@ -7,14 +9,11 @@ import { IntervalContext } from '../contexts/SceneProvider';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../config/StackNavigator';
 import TrackPlayer from 'react-native-track-player';
-import { StateLog, Journey } from '../types/Journey'; // Import Journey type here
+import { StateLog, Journey } from '../types/Journey';
 import { containerStyles } from '../styles/containerStyles';
 import { buttonStyles } from '../styles/buttonStyles';
 import { CommonActions } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
-
-// Import saveJourneyData if it's defined elsewhere
-// import { saveJourneyData } from '../path/to/your/saveJourneyData';
 
 const { LogcatModule } = NativeModules;
 
@@ -25,7 +24,7 @@ interface LogcatEvent {
   timestamp: number;
 }
 
-const ActiveScreen: React.FC<Props> = ({ navigation, route }) => { // Destructure route here
+const ActiveScreen: React.FC<Props> = ({ navigation, route }) => {
   const { states, selectedDebriefs } = useContext(IntervalContext);
   const [currentStateIndex, setCurrentStateIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -278,7 +277,8 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => { // Destructur
   }, [navigation]);
 
   const currentStateName = states[currentStateIndex];
-  const interval = 5000;
+  // Remove the default interval or set it to null
+  const defaultInterval: string | null = null;
 
   return (
     <View style={containerStyles.container}>
@@ -289,7 +289,7 @@ const ActiveScreen: React.FC<Props> = ({ navigation, route }) => { // Destructur
       >
         <StateComponent
           stateName={currentStateName}
-          interval={interval}
+          interval={defaultInterval} // Pass null instead of a fixed number
           onComplete={() => advanceState(1)}
         />
       </TouchableOpacity>

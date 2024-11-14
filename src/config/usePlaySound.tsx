@@ -1,3 +1,5 @@
+// src/config/usePlaySound.ts
+
 import { useEffect, useContext, useRef } from 'react';
 import TrackPlayer, { Capability, Event } from 'react-native-track-player';
 import RNFS from 'react-native-fs';
@@ -7,7 +9,13 @@ import BackgroundTimer from 'react-native-background-timer';
 let isTrackPlayerSetup = false;
 const AUDIOS_FOLDER = `${RNFS.DocumentDirectoryPath}/audios`;
 
-const usePlaySound = (stateName: string, interval: number, onComplete: () => void) => {
+type UsePlaySound = (
+  stateName: string,
+  interval: number | null, // Ensure this is number | null
+  onComplete: () => void
+) => void;
+
+const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
   const { selectedAudios } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
   const totalPlayCountRef = useRef(0);
@@ -66,7 +74,11 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
       const { audios, mode, repetitions } = stateData;
       const maxRepetitions = repetitions || Infinity;
 
-      if (totalPlayCountRef.current >= maxRepetitions) {
+      // Move the increment here
+      totalPlayCountRef.current += 1;
+      console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
+
+      if (totalPlayCountRef.current > maxRepetitions) {
         console.log(`Reached max repetitions (${maxRepetitions}) for state: ${stateName}`);
         onCompleteRef.current();
         return;
@@ -117,8 +129,15 @@ const usePlaySound = (stateName: string, interval: number, onComplete: () => voi
           });
         });
 
-        totalPlayCountRef.current += 1;
-        console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
+        // Remove the increment from here
+        // totalPlayCountRef.current += 1;
+        // console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
+
+        // If interval is null, do not set a timer or call onComplete
+        if (interval === null) {
+          console.log('Interval is null; not setting a timer to advance state.');
+          return;
+        }
 
         // Wait for 'interval' milliseconds using BackgroundTimer
         await new Promise<void>((resolve) => {
