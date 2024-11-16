@@ -86,18 +86,17 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
 
       // Initialize localIntervals based on context's audioIntervals
       const currentAudioIntervals = audioIntervals[stateName.toLowerCase()] || {};
-      const localIntervalsLoaded: { [key: string]: string | null } = {};
+      const localIntervalsLoaded: { [key: string]: string } = {};
 
-      for (const audioName in currentAudioIntervals) {
-        if (currentAudioIntervals.hasOwnProperty(audioName)) {
-          const intervalMs = currentAudioIntervals[audioName];
-          if (intervalMs !== null) {
-            localIntervalsLoaded[audioName] = convertMsToMinutesSeconds(intervalMs);
-          } else {
-            localIntervalsLoaded[audioName] = null;
-          }
+      audioFiles.forEach((item) => {
+        const audioName = item.name.toLowerCase();
+        const intervalMs = currentAudioIntervals[audioName];
+        if (intervalMs !== undefined && intervalMs !== null) {
+          localIntervalsLoaded[audioName] = convertMsToMinutesSeconds(intervalMs);
+        } else {
+          localIntervalsLoaded[audioName] = ''; // Represent null intervals as empty strings
         }
-      }
+      });
 
       setLocalIntervals(localIntervalsLoaded);
     } catch (error) {
@@ -110,6 +109,24 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
       loadAudioFiles();
     }
   }, [visible, loadAudioFiles]);
+
+  // Update localIntervals when audioIntervals or items change
+  useEffect(() => {
+    const currentAudioIntervals = audioIntervals[stateName.toLowerCase()] || {};
+    setLocalIntervals((prev) => {
+      const updatedIntervals = { ...prev };
+      items.forEach((item) => {
+        const audioName = item.name.toLowerCase();
+        const intervalMs = currentAudioIntervals[audioName];
+        if (intervalMs !== undefined && intervalMs !== null) {
+          updatedIntervals[audioName] = convertMsToMinutesSeconds(intervalMs);
+        } else {
+          updatedIntervals[audioName] = ''; // Represent null intervals as empty strings
+        }
+      });
+      return updatedIntervals;
+    });
+  }, [audioIntervals, items, stateName]);
 
   const handleAudioSaved = () => {
     loadAudioFiles(); // Refresh the audio files list
@@ -139,6 +156,23 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
         ...prev,
         [fileName]: value,
       }));
+    }
+  };
+
+  const handleSaveInterval = (audioName: string) => {
+    setEditingIntervals((prev) => ({ ...prev, [audioName.toLowerCase()]: false }));
+    const intervalStr = localIntervals[audioName.toLowerCase()];
+    if (!intervalStr) {
+      // If intervalStr is empty, set interval to null
+      setAudioIntervalForAudio(stateName, audioName, null);
+    } else {
+      const intervalMs = convertMinutesSecondsToMs(intervalStr);
+      if (!isNaN(intervalMs)) {
+        setAudioIntervalForAudio(stateName, audioName, intervalMs);
+      } else {
+        // Invalid interval, set to null
+        setAudioIntervalForAudio(stateName, audioName, null);
+      }
     }
   };
 
@@ -233,15 +267,7 @@ const AssignAudiosModal: React.FC<AssignAudiosModalProps> = ({
             onEditInterval={() =>
               setEditingIntervals((prev) => ({ ...prev, [item.name.toLowerCase()]: true }))
             }
-            onSaveInterval={() => {
-              setEditingIntervals((prev) => ({ ...prev, [item.name.toLowerCase()]: false }));
-              const intervalStr = localIntervals[item.name.toLowerCase()] || '';
-              const intervalMs = convertMinutesSecondsToMs(intervalStr);
-              if (!isNaN(intervalMs)) {
-                // Update the context with the new interval
-                setAudioIntervalForAudio(stateName, item.name, intervalMs);
-              }
-            }}
+            onSaveInterval={() => handleSaveInterval(item.name)}
           />
         ))}
       </View>

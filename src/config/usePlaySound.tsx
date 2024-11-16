@@ -16,7 +16,7 @@ type UsePlaySound = (
 ) => void;
 
 const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
-  const { selectedAudios } = useContext(IntervalContext);
+  const { selectedAudios, audioIntervals } = useContext(IntervalContext);
   const audioIndexRef = useRef(0);
   const totalPlayCountRef = useRef(0);
   const timeoutIdRef = useRef<number | null>(null);
@@ -74,7 +74,7 @@ const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
       const { audios, mode, repetitions } = stateData;
       const maxRepetitions = repetitions || Infinity;
 
-      // Move the increment here
+      // Increment the total play count
       totalPlayCountRef.current += 1;
       console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
 
@@ -99,6 +99,11 @@ const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
         audioIndexRef.current = (audioIndexRef.current + 1) % audios.length;
       } else {
         console.error(`Unknown mode: ${mode}`);
+        return;
+      }
+
+      if (!currentAudioFileName) {
+        console.error('No audio file selected to play.');
         return;
       }
 
@@ -129,21 +134,23 @@ const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
           });
         });
 
-        // Remove the increment from here
-        // totalPlayCountRef.current += 1;
-        // console.log(`Play count for state "${stateName}": ${totalPlayCountRef.current}`);
+        // Get the interval for the current audio file
+        const audioInterval = audioIntervals[stateName.toLowerCase()]?.[currentAudioFileName.toLowerCase()] ?? null;
 
-        // If interval is null, do not set a timer or call onComplete
-        if (interval === null) {
+        // Determine the interval to wait
+        const intervalToWait = (audioInterval !== null) ? audioInterval : interval;
+
+        // If intervalToWait is null, do not set a timer or call onComplete
+        if (intervalToWait === null) {
           console.log('Interval is null; not setting a timer to advance state.');
           return;
         }
 
-        // Wait for 'interval' milliseconds using BackgroundTimer
+        // Wait for 'intervalToWait' milliseconds using BackgroundTimer
         await new Promise<void>((resolve) => {
           const timeoutId = BackgroundTimer.setTimeout(() => {
             resolve();
-          }, interval);
+          }, intervalToWait);
 
           // Store timeoutId for cleanup
           timeoutIdRef.current = timeoutId;
@@ -172,7 +179,7 @@ const usePlaySound: UsePlaySound = (stateName, interval, onComplete) => {
       stopAudioAndCleanup();
       console.log(`usePlaySound unmounted for state: ${stateName}`);
     };
-  }, [stateName, interval, selectedAudios]);
+  }, [stateName, interval, selectedAudios, audioIntervals]);
 
   return null;
 };

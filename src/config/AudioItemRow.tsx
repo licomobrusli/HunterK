@@ -22,7 +22,7 @@ type AudioItemRowProps = {
   onSelectAudio: () => void;
   onDeleteAudio: () => void;
   editing: boolean;
-  localInterval: string;
+  localInterval: string | null; // Allow localInterval to be string or null
   setLocalIntervals: React.Dispatch<React.SetStateAction<{ [key: string]: string | null }>>;
   onEditInterval: () => void;
   onSaveInterval: () => void;
@@ -101,7 +101,9 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
   };
 
   const handleChange = (value: string) => {
-    if (value.length > 5) {return;}
+    if (value.length > 5) {
+      return;
+    }
 
     if (value.length === 2 && !value.includes(':')) {
       setLocalIntervals((prev) => ({
@@ -117,6 +119,7 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
     onSaveInterval();
   };
 
+  // New function to handle long press on the interval field
   const handleIntervalLongPress = () => {
     setLocalIntervals((prev) => ({ ...prev, [item.name.toLowerCase()]: null }));
   };
@@ -160,7 +163,7 @@ const AudioItemRow: React.FC<AudioItemRowProps> = ({
           {editing ? (
             <TextInput
               style={textStyles.text0}
-              value={localInterval || ''}
+              value={localInterval ?? ''}
               onChangeText={handleChange}
               onBlur={handleBlur}
               keyboardType="numeric"
